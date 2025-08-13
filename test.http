@@ -1,0 +1,59 @@
+### Employer Registration
+POST localhost:3000/api/employer/router.js
+Content-Type: application/json
+
+{
+  "name": "Sarah",
+  "email": "sarah.employer@company.com",
+  "password": "securepassword",
+  "companyName": "Innovate Solutions",
+  "companySize": "10-50 employees",
+  "industry": "IT",
+  "phone": "987-654-3210",
+  "website": "https://innovatesolutions.com",
+  "position": "HR Manager"
+}
+
+### Student Registration
+POST http://localhost:3000/api/student/router
+Content-Type: application/json
+
+{
+  "name": "Alex",
+  "email": "alex.student@example.com",
+  "password": "password123",
+  "institution": "State University",
+  "course": "Physics",
+  "yearOfStudy": "Second Year"
+}
+
+###
+### Test a successful employer registration
+###
+POST http://localhost:3000/api/employer
+Content-Type: application/json
+
+{
+  "name": "Jane Smith",
+  "email": "jane.smith@example.com",
+  "password": "MySecurePassword123!",
+  "companyName": "Innovate Co.",
+  "companySize": "51-200",
+  "industry": "Technology",
+  "phone": "555-555-5555",
+  "website": "https://www.innovate.com",
+  "position": "HR Specialist"
+}
+
+
+### Student Login
+POST http://localhost:3000/api/auth/callback/credentials
+Content-Type: application/x-www-form-urlencoded
+
+email=alex.student@example.com&password=password123
+
+### Student Login
+POST http://localhost:3000/api/auth/callback/credentials
+Content-Type: application/x-www-form-urlencoded
+
+email=alex.student@example.com&password=password123

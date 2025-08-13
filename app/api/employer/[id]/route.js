@@ -1,33 +1,31 @@
-// This API route handles fetching, updating, and deleting a single employer's profile.
-// The dynamic route `[id]` allows it to respond to requests for a specific employer.
+// This API route handles fetching, updating, and deleting a single employer.
+// It is intended for a Next.js App Router dynamic route, e.g., /api/employer/[id]/route.js
 
-import { NextResponse } from 'next/server';
-import prisma from '../../../../lib/prisma'; // Assumes a singleton prisma client
+import { PrismaClient } from "@prisma/client";
+import { NextResponse } from "next/server";
 
-/**
- * Handles GET requests to retrieve a single employer's details by their user ID.
- * @param {object} req The Next.js Request object.
- * @param {object} context The context object containing route parameters.
- */
-export async function GET(req, { params }) {
+const prisma = new PrismaClient();
+
+// ===========================================
+// EMPLOYER API HANDLERS
+// ===========================================
+
+// This GET request handler fetches a single employer by ID.
+// This is useful for fetching the data of a specific employer to display or edit.
+export async function GET(req) {
+  const { searchParams } = new URL(req.url);
+  const employerId = searchParams.get("id");
+
+  if (!employerId) {
+    return new NextResponse(
+      JSON.stringify({ message: "Employer ID is required." }),
+      { status: 400 }
+    );
+  }
+
   try {
-    const { id } = params;
-
-    // --- Validate the ID parameter ---
-    if (!id) {
-      return new NextResponse(
-        JSON.stringify({ message: "User ID is required." }),
-        { status: 400 }
-      );
-    }
-
-    // --- Fetch the user and their associated employer profile ---
     const employer = await prisma.user.findUnique({
-      where: { id },
-      // Include the employerProfile to return all relevant data
-      include: {
-        employerProfile: true,
-      },
+      where: { id: employerId, role: "EMPLOYER" },
       select: {
         id: true,
         name: true,
@@ -36,46 +34,44 @@ export async function GET(req, { params }) {
         createdAt: true,
         updatedAt: true,
         employerProfile: true,
-      }
+      },
     });
-
-    if (!employer) {
+    if (employer) {
+      return new NextResponse(JSON.stringify(employer), { status: 200 });
+    } else {
       return new NextResponse(
-        JSON.stringify({ message: "Employer not found." }),
+        JSON.stringify({ error: "Employer not found." }),
         { status: 404 }
       );
     }
-
-    return new NextResponse(JSON.stringify(employer), { status: 200 });
   } catch (error) {
-    console.error("Failed to retrieve employer details:", error);
+    console.error("Failed to fetch single employer:", error);
     return new NextResponse(
-      JSON.stringify({ message: "Internal Server Error" }),
+      JSON.stringify({ error: "An unexpected error occurred." }),
       { status: 500 }
     );
   }
 }
 
-/**
- * Handles PUT requests to update an employer's profile.
- * @param {object} req The Next.js Request object.
- * @param {object} context The context object containing route parameters.
- */
-export async function PUT(req, { params }) {
+
+// This PUT request handler updates an existing employer's profile by ID.
+// The request body should contain the fields to be updated.
+export async function PUT(req) {
+  const { searchParams } = new URL(req.url);
+  const employerId = searchParams.get("id");
+  const body = await req.json();
+
+  if (!employerId || !body) {
+    return new NextResponse(
+      JSON.stringify({ message: "Employer ID and update data are required." }),
+      { status: 400 }
+    );
+  }
+
   try {
-    const { id } = params;
-    const body = await req.json();
-
-    // --- Validate the ID parameter and request body ---
-    if (!id || !body) {
-      return new NextResponse(
-        JSON.stringify({ message: "User ID and update data are required." }),
-        { status: 400 }
-      );
-    }
-
-    // --- Check if the employer exists first ---
-    const existingEmployer = await prisma.user.findUnique({ where: { id } });
+    const existingEmployer = await prisma.user.findUnique({
+      where: { id: employerId },
+    });
     if (!existingEmployer) {
       return new NextResponse(
         JSON.stringify({ message: "Employer not found." }),
@@ -83,14 +79,12 @@ export async function PUT(req, { params }) {
       );
     }
 
-    // --- Update the user and their associated employer profile ---
+    // Update the user and their associated employer profile in a single operation.
     const updatedEmployer = await prisma.user.update({
-      where: { id },
+      where: { id: employerId },
       data: {
-        // Update user fields if they are provided in the body
         name: body.name,
         email: body.email,
-        // Password hashing would be handled in a separate route for security
         employerProfile: {
           update: {
             companyName: body.companyName,
@@ -129,27 +123,33 @@ export async function PUT(req, { params }) {
   }
 }
 
-/**
- * Handles DELETE requests to remove an employer's profile.
- * @param {object} req The Next.js Request object.
- * @param {object} context The context object containing route parameters.
- */
-export async function DELETE(req, { params }) {
-  try {
-    const { id } = params;
+// This DELETE request handler removes an employer's profile by ID.
+// This will cascade and delete the associated employerProfile as well.
+export async function DELETE(req) {
+  const { searchParams } = new URL(req.url);
+  const employerId = searchParams.get("id");
 
-    if (!id) {
+  if (!employerId) {
+    return new NextResponse(
+      JSON.stringify({ message: "Employer ID is required." }),
+      { status: 400 }
+    );
+  }
+
+  try {
+    const existingEmployer = await prisma.user.findUnique({
+      where: { id: employerId },
+    });
+    if (!existingEmployer) {
       return new NextResponse(
-        JSON.stringify({ message: "User ID is required." }),
-        { status: 400 }
+        JSON.stringify({ message: "Employer not found." }),
+        { status: 404 }
       );
     }
 
-    // --- Delete the employer profile and then the user itself ---
-    // Prisma deletes related records based on your schema's on-delete rules.
-    // If not set, you may need to delete the profile first.
+    // Delete the user record, which will also delete the associated profile.
     await prisma.user.delete({
-      where: { id },
+      where: { id: employerId },
     });
 
     return new NextResponse(

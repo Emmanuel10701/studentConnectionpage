@@ -1,12 +1,15 @@
-// This API route handles employer registration requests using Next.js 13+ App Router.
+// File: /api/employer/route.js
+// Handles employer registration (POST) and retrieval of all employers (GET)
 
-import prisma from '../../../libs/prisma'; // Import the singleton Prisma Client instance
+import prisma from '../../../libs/prisma';
 import bcrypt from "bcryptjs";
-import { NextResponse } from 'next/server'; // Use NextResponse for consistent responses
+import { NextResponse } from 'next/server';
 
+// ======================
+// POST: Register Employer
+// ======================
 export async function POST(req) {
   try {
-    // Get the request body and destructure the required fields
     const body = await req.json();
     const {
       name,
@@ -20,32 +23,32 @@ export async function POST(req) {
       position,
     } = body;
 
-    // --- Input Validation: Ensure all necessary fields are present ---
+    // Validate required fields
     if (!name || !email || !password || !companyName || !position) {
-      return new NextResponse(
-        JSON.stringify({ message: "Missing Fields" }),
+      return NextResponse.json(
+        { message: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    // --- Check for an existing user with the same email ---
+    // Check if email is already registered
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-      return new NextResponse(
-        JSON.stringify({ message: "Email already registered" }),
+      return NextResponse.json(
+        { message: "Email already registered" },
         { status: 409 }
       );
     }
 
-    // --- Password Hashing: Securely store the password ---
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // --- Database Operation: Create user and employer profile ---
+    // Create user + employer profile
     const newUser = await prisma.user.create({
       data: {
         name,
         email,
-        password: hashedPassword, // The schema field name is 'password'
+        password: hashedPassword,
         role: "EMPLOYER",
         employerProfile: {
           create: {
@@ -58,7 +61,6 @@ export async function POST(req) {
           },
         },
       },
-      // Select fields to return to the client, excluding the hashed password
       select: {
         id: true,
         name: true,
@@ -66,17 +68,43 @@ export async function POST(req) {
         role: true,
         createdAt: true,
         updatedAt: true,
-        employerProfile: true
-      }
+        employerProfile: true,
+      },
     });
 
-    // --- Success Response: Return a 201 Created status with the new user data ---
-    return new NextResponse(JSON.stringify(newUser), { status: 201 });
+    return NextResponse.json(newUser, { status: 201 });
   } catch (error) {
-    // --- Error Handling: Log and return a generic 500 error ---
     console.error("Employer registration failed:", error);
-    return new NextResponse(
-      JSON.stringify({ message: "Internal Server Error" }),
+    return NextResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
+// ======================
+// GET: All Employers
+// ======================
+export async function GET() {
+  try {
+    const employers = await prisma.user.findMany({
+      where: { role: { equals: "EMPLOYER" } },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+        employerProfile: true,
+      },
+    });
+
+    return NextResponse.json(employers, { status: 200 });
+  } catch (error) {
+    console.error("Failed to fetch employers:", error);
+    return NextResponse.json(
+      { error: "An unexpected error occurred." },
       { status: 500 }
     );
   }

@@ -1,5 +1,8 @@
 'use client'
 import { motion } from 'framer-motion';
+// --- Start of update ---
+// Import your image here. Replace './flag.png' with the correct path to your image file.
+import backgroundImage from '../../../public/leaders/KCUTSA_FLAG.png';
 
 export default function Home() {
   // Animation variants
@@ -38,41 +41,20 @@ export default function Home() {
     }
   };
 
-  const gridVariants = {
-    hidden: { opacity: 0, scale: 0.8 },
-    visible: {
-      opacity: 0.1,
-      scale: 1,
-      transition: {
-        duration: 1,
-        ease: "easeOut"
-      }
-    }
-  };
-
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Hero Background with Blue Theme */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200">
-        {/* Grid Pattern Overlay */}
-        <motion.div 
-          className="absolute inset-0 opacity-10"
-          variants={gridVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-12 gap-1 h-full">
-            {Array.from({ length: 120 }).map((_, i) => (
-              <motion.div 
-                key={i} 
-                className="bg-blue-400 rounded-sm transform hover:scale-110 transition-transform duration-300"
-                whileHover={{ scale: 1.1 }}
-                transition={{ duration: 0.2 }}
-              ></motion.div>
-            ))}
-          </div>
-        </motion.div>
+      {/* Hero Background with an imported image */}
+      {/* The grid overlay has been removed to simplify the background with the new image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-fixed"
+        style={{ 
+          backgroundImage: `url(${backgroundImage.src})`
+        }}
+      >
+        {/* Add a dark overlay to make text more readable on top of the image */}
+        <div className="absolute inset-0 bg-black/50"></div>
       </div>
+      {/* --- End of update --- */}
 
       {/* Floating Elements - The `top`, `bottom`, `left`, `right` classes are reduced to move them inwards */}
       <div className="absolute inset-0 pointer-events-none hidden md:block">
@@ -148,21 +130,21 @@ export default function Home() {
 
         {/* Bottom Right - Service Icon */}
         <motion.div 
-          className="absolute bottom-4 md:bottom-6 right-4 md:right-6 w-10 h-10 md:w-12 md:h-12 bg-blue-600 rounded-full shadow-lg flex items-center justify-center"
+          className="absolute bottom-4 md:bottom-6 right-4 md:right-6 w-10 h-10 md:w-12 md:h-12 bg-white/90 rounded-full shadow-lg flex items-center justify-center"
           variants={floatingVariants}
           initial="initial"
           animate="float"
           whileHover={{ scale: 1.1, rotate: 5 }}
           transition={{ duration: 0.3, delay: 2.5 }}
         >
-          <svg className="w-5 h-5 md:w-6 md:h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="w-5 h-5 md:w-6 md:h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
           </svg>
         </motion.div>
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 min-h-screen flex flex-col justify-center">
+      <div className="relative z-10 min-h-screen flex flex-col justify-center text-white">
         <motion.div 
           className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8"
           variants={containerVariants}
@@ -188,23 +170,23 @@ export default function Home() {
             </motion.div>
 
             <motion.h1 
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-gray-800 mb-6 sm:mb-8 leading-tight"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-6 sm:mb-8 leading-tight"
               variants={itemVariants}
             >
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-800">
+              <span className="text-white">
                 KCUTSA
               </span>
             </motion.h1>
             
             <motion.p 
-              className="text-sm sm:text-lg md:text-xl lg:text-2xl text-gray-700 max-w-3xl sm:max-w-4xl mx-auto mb-6 sm:mb-8 leading-relaxed font-medium px-2"
+              className="text-sm sm:text-lg md:text-xl lg:text-2xl text-gray-200 max-w-3xl sm:max-w-4xl mx-auto mb-6 sm:mb-8 leading-relaxed font-medium px-2"
               variants={itemVariants}
             >
               Uniting • Empowering • Leading
             </motion.p>
 
             <motion.p 
-              className="text-xs sm:text-sm md:text-base lg:text-lg text-gray-600 max-w-2xl sm:max-w-3xl mx-auto mb-8 sm:mb-12 leading-relaxed px-4"
+              className="text-xs sm:text-sm md:text-base lg:text-lg text-gray-300 max-w-2xl sm:max-w-3xl mx-auto mb-8 sm:mb-12 leading-relaxed px-4"
               variants={itemVariants}
             >
               Kirinyaga County University and Tertiary Students Association
@@ -261,10 +243,10 @@ export default function Home() {
                     <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm0 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2z" clipRule="evenodd" />
                   </svg>
                 </motion.div>
-                <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2 sm:mb-3">Vision</h3>
-                <p className="text-xs sm:text-sm text-gray-600 px-2">To be the leading student organization in youth empowerment, integrity, and leadership.</p>
-                <p className="text-xs sm:text-sm text-gray-600 px-2">We strive to create a vibrant community of students who are passionate about making a difference.</p>
-                <p className="text-xs sm:text-sm text-gray-600 px-2">Our goal is to foster a culture of excellence and service that extends beyond the university campus.</p>
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3">Vision</h3>
+                <p className="text-xs sm:text-sm text-gray-200 px-2">To be the leading student organization in youth empowerment, integrity, and leadership.</p>
+                <p className="text-xs sm:text-sm text-gray-200 px-2">We strive to create a vibrant community of students who are passionate about making a difference.</p>
+                <p className="text-xs sm:text-sm text-gray-200 px-2">Our goal is to foster a culture of excellence and service that extends beyond the university campus.</p>
               </motion.div>
 
               {/* Mission */}
@@ -282,10 +264,10 @@ export default function Home() {
                     <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                   </svg>
                 </motion.div>
-                <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2 sm:mb-3">Mission</h3>
-                <p className="text-xs sm:text-sm text-gray-600 px-2">To serve as a unifying factor for all Kirinyaga tertiary students, promoting a sense of community and shared purpose.</p>
-                <p className="text-xs sm:text-sm text-gray-600 px-2">We are committed to providing our members with opportunities for personal and professional growth.</p>
-                <p className="text-xs sm:text-sm text-gray-600 px-2">By fostering collaboration and mutual support, we aim to build a strong network of future leaders.</p>
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3">Mission</h3>
+                <p className="text-xs sm:text-sm text-gray-200 px-2">To serve as a unifying factor for all Kirinyaga tertiary students, promoting a sense of community and shared purpose.</p>
+                <p className="text-xs sm:text-sm text-gray-200 px-2">We are committed to providing our members with opportunities for personal and professional growth.</p>
+                <p className="text-xs sm:text-sm text-gray-200 px-2">By fostering collaboration and mutual support, we aim to build a strong network of future leaders.</p>
               </motion.div>
 
               {/* Values */}
@@ -303,10 +285,10 @@ export default function Home() {
                     <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
                   </svg>
                 </motion.div>
-                <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2 sm:mb-3">Values</h3>
-                <p className="text-xs sm:text-sm text-gray-600 px-2">Our core values are Empowerment, Integrity, and Leadership, which guide every action we take.</p>
-                <p className="text-xs sm:text-sm text-gray-600 px-2">We believe in empowering our members to reach their full potential and lead with integrity.</p>
-                <p className="text-xs sm:text-sm text-gray-600 px-2">These values form the foundation of our work and our commitment to serving the community.</p>
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3">Values</h3>
+                <p className="text-xs sm:text-sm text-gray-200 px-2">Our core values are Empowerment, Integrity, and Leadership, which guide every action we take.</p>
+                <p className="text-xs sm:text-sm text-gray-200 px-2">We believe in empowering our members to reach their full potential and lead with integrity.</p>
+                <p className="text-xs sm:text-sm text-gray-200 px-2">These values form the foundation of our work and our commitment to serving the community.</p>
               </motion.div>
             </div>
           </motion.div>

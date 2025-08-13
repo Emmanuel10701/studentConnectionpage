@@ -1,7 +1,7 @@
 // This API route handles adding and retrieving newsletter subscribers.
 
 import { NextResponse } from 'next/server';
-import prisma from '../../../../lib/prisma'; // Assumes a singleton prisma client
+import prisma from '../../../libs/prisma'; // Import the singleton Prisma Client instance
 
 
 export async function POST(req) {

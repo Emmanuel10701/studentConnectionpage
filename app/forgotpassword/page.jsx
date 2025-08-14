@@ -1,50 +1,63 @@
 "use client";
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
-import { Mail, ShieldQuestion, LoaderCircle, CheckCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Mail, ShieldQuestion, LoaderCircle, CheckCircle, X } from 'lucide-react';
 
-// Mock `next/router` and `react-toastify` for this environment.
 const useRouter = () => ({
-  push: (path) => console.log(`Navigating to ${path}`)
+  push: (path) => console.log(`Navigating to ${path}`),
+  back: () => console.log(`Going back`)
 });
 
-// A mock toast notification system to replace the original.
-const toast = {
-  success: (message) => console.log(`SUCCESS: ${message}`),
-  error: (message) => console.log(`ERROR: ${message}`),
-};
-const ToastContainer = () => null;
-
 const router = useRouter();
+
+const MessageBox = ({ message, type, onClose }) => {
+  const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+  const icon = type === 'success' ? (
+    <CheckCircle size={24} />
+  ) : (
+    <X size={24} />
+  );
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className={`fixed top-4 right-4 z-50 p-4 rounded-xl text-white shadow-lg flex items-center gap-3 ${bgColor}`}
+    >
+      {icon}
+      <span>{message}</span>
+      <button onClick={onClose} className="ml-auto text-white opacity-70 hover:opacity-100">
+        <X size={20} />
+      </button>
+    </motion.div>
+  );
+};
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [gmailEnabled, setGmailEnabled] = useState(false);
+  const [message, setMessage] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
-    // Mock API call since we are not running a live server.
-    console.log("Submitting forgot password request for email:", email);
-    const mockResponse = { ok: true, message: "A password reset link has been sent to your email." };
+    setMessage(null);
 
     try {
-      // In a real application, you would make a fetch call here.
-      // const response = await fetch('/api/forgot', { ... });
-      // const result = await response.json();
-      const result = mockResponse;
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      const mockResponse = { ok: true, message: "A password reset link has been sent to your email." };
 
-      if (result.ok) {
-        toast.success(result.message);
+      if (mockResponse.ok) {
+        setMessage({ type: 'success', text: mockResponse.message });
+        setEmail('');
         setGmailEnabled(true);
       } else {
-        toast.error(result.message);
+        setMessage({ type: 'error', text: mockResponse.message });
       }
     } catch (error) {
-      toast.error('Failed to send reset link');
+      setMessage({ type: 'error', text: 'Failed to send reset link' });
       console.error(error);
     } finally {
       setLoading(false);
@@ -52,11 +65,13 @@ const ForgotPasswordPage = () => {
   };
 
   const handleGmailClick = () => {
-    // Opens a mail client with a pre-filled recipient.
     window.location.href = `mailto:${email}`;
   };
 
-  // Framer-motion variants for animations
+  const handleCloseMessage = () => {
+    setMessage(null);
+  };
+
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, staggerChildren: 0.1 } }
@@ -72,7 +87,6 @@ const ForgotPasswordPage = () => {
         initial="hidden"
         animate="visible"
       >
-        {/* Dynamic decorative elements */}
         <div className="absolute top-0 left-0 w-24 h-24 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
         <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
 
@@ -141,18 +155,20 @@ const ForgotPasswordPage = () => {
         </form>
 
        <motion.div variants={itemVariants} className="mt-8 text-center text-sm text-gray-400">
-      <p>
-        Remembered your password?{' '}
-        <span
-          onClick={() => router.back()}
-          className="text-indigo-400 font-medium hover:underline cursor-pointer transition-colors duration-200"
-        >
-          Log in
-        </span>
-      </p>
-    </motion.div>
+        <p>
+          Remembered your password?{' '}
+          <span
+            onClick={() => router.back()}
+            className="text-indigo-400 font-medium hover:underline cursor-pointer transition-colors duration-200"
+          >
+            Log in
+          </span>
+        </p>
       </motion.div>
-      <ToastContainer />
+      </motion.div>
+      <AnimatePresence>
+        {message && <MessageBox message={message.text} type={message.type} onClose={handleCloseMessage} />}
+      </AnimatePresence>
     </div>
   );
 };

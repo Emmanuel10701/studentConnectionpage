@@ -97,7 +97,7 @@ const StudentLogin = () => {
           </motion.div>
 
           <motion.div variants={itemVariants} className="mb-6 text-right">
-            <a href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700 hover:underline transition-colors duration-200">
+            <a href="/forgotpassword" className="text-sm text-blue-600 hover:text-blue-700 hover:underline transition-colors duration-200">
               Forgot your password?
             </a>
           </motion.div>
@@ -143,7 +143,7 @@ const StudentLogin = () => {
           <motion.div variants={itemVariants} className="mt-6 text-center">
             <p className="text-gray-600">
               Don't have an account?{' '}
-              <a href="/register/student" className="text-blue-600 hover:text-blue-700 font-medium hover:underline transition-colors duration-200">
+              <a href="/studentRegister" className="text-blue-600 hover:text-blue-700 font-medium hover:underline transition-colors duration-200">
                 Sign Up
               </a>
             </p>

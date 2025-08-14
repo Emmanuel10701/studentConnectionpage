@@ -38,7 +38,7 @@ Content-Type: application/json
 
 {
   "name": "Jane Smith",
-  "email": "jane.smith@example.com",
+  "email": "emmanuelmakau53@gmail.com",
   "password": "MySecurePassword123!",
   "companyName": "Innovate Co.",
   "companySize": "51-200",
@@ -68,6 +68,14 @@ Content-Type: application/json
 {
   "email": "john@example.com",
   "password": "TestPass123"
+}
+
+### Employer Login
+POST http://localhost:3000/api/forgot/
+Content-Type: application/json
+
+{
+  "email": "emmanuelmakau53@gmail.com"
 }
 
 

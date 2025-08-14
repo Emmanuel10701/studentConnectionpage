@@ -94,7 +94,7 @@ const EmployerLogin = () => {
           </motion.div>
 
           <motion.div variants={itemVariants} className="mb-6 text-right">
-            <a href="/forgot-password" className="text-sm text-green-600 hover:text-green-700 hover:underline transition-colors duration-200">
+            <a href="/forgotpassword" className="text-sm text-green-600 hover:text-green-700 hover:underline transition-colors duration-200">
               Forgot your password?
             </a>
           </motion.div>
@@ -141,7 +141,7 @@ const EmployerLogin = () => {
           <motion.div variants={itemVariants} className="mt-6 text-center">
             <p className="text-gray-600">
               Don't have an account?{' '}
-              <a href="/register/employer" className="text-green-600 hover:text-green-700 font-medium hover:underline transition-colors duration-200">
+              <a href="/EmployerRegister" className="text-green-600 hover:text-green-700 font-medium hover:underline transition-colors duration-200">
                 Register as Employer
               </a>
             </p>

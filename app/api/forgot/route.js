@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
-import prisma from '../../../app/libs/prisma'; // Adjust the import according to your project structure
+import prisma from '../../../libs/prisma';
 import { v4 as uuidv4 } from 'uuid';
 
 const transporter = nodemailer.createTransport({
@@ -11,25 +11,27 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Static URL for email link
-const url = "http://localhost:3000";
-
 export async function POST(req) {
-  const { email } = await req.json();
-
   try {
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
-      return NextResponse.json({ message: 'User not found' }, { status: 400 });
+    const { email } = await req.json();
+
+    if (!email) {
+      return NextResponse.json({ message: 'Email is required' }, { status: 400 });
     }
 
-    const token = uuidv4(); // Generate a unique token
-    const resetLink = `${url}/reset?token=${token}`; // Use the static URL
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return NextResponse.json({ message: 'User not found' }, { status: 404 });
+    }
 
-    // Set expiration to 1 hour from now
-    const expires = new Date(Date.now() + 3600000); // 1 hour in milliseconds
+    // Delete any old password reset tokens for the user to ensure only the latest is valid
+    await prisma.passwordReset.deleteMany({
+      where: { userId: user.id }
+    });
 
-    // Store the token and associate it with the user in the database
+    const token = uuidv4();
+    const expires = new Date(Date.now() + 3600000); // 1 hour
+
     await prisma.passwordReset.create({
       data: {
         userId: user.id,
@@ -38,7 +40,12 @@ export async function POST(req) {
       },
     });
 
+    // Use environment variables for the application URL for better flexibility
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3000";
+    const resetLink = `${appUrl}/resetpassword?token=${token}`;
+
     await transporter.sendMail({
+      from: process.env.EMAIL_USER,
       to: email,
       subject: 'Password Reset Request',
       html: `
@@ -55,9 +62,9 @@ export async function POST(req) {
       `,
     });
 
-    return NextResponse.json({ message: 'Password reset link sent' });
+    return NextResponse.json({ message: 'Password reset link sent successfully.' });
   } catch (error) {
-    console.error(error);
+    console.error('Error in password reset API:', error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
 }

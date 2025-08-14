@@ -22,7 +22,7 @@ const EmployerLogin = () => {
   useEffect(() => {
     // If already logged in and role is EMPLOYER, redirect to dashboard
     if (status === "authenticated" && session?.user?.role === "EMPLOYER") {
-      router.push("/dashboard/employer");
+      router.push("/employerdashboard");
     }
   }, [session, status, router]);
 

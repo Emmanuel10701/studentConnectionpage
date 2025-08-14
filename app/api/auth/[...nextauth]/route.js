@@ -1,34 +1,37 @@
+// app/api/auth/[...nextauth]/route.js
+
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
+import prisma from "../../../../libs/prisma"; // adjust path
 import bcrypt from "bcryptjs";
-
-const prisma = new PrismaClient();
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),
+    // Credentials login
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        email: { label: "Email", type: "text", placeholder: "jsmith@example.com" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Email and password are required");
+        }
+
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
         });
 
-        if (!user || !user.password) return null;
+        if (!user || !user.password) {
+          throw new Error("Invalid email or password");
+        }
 
         const isValid = await bcrypt.compare(credentials.password, user.password);
-        if (!isValid) return null;
+        if (!isValid) throw new Error("Invalid email or password");
 
         return {
           id: user.id,
@@ -37,14 +40,24 @@ export const authOptions = {
           role: user.role,
         };
       },
+      // ⚠️ Disable CSRF for credentials provider (testing only)
+      csrfToken: false,
+    }),
+
+    // Google OAuth login
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
   ],
+
+  secret: process.env.NEXTAUTH_SECRET,
+
   session: {
     strategy: "jwt",
+    maxAge: 60 * 60 * 2, // 2 hours
   },
-  jwt: {
-    secret: process.env.NEXTAUTH_SECRET,
-  },
+
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -54,27 +67,21 @@ export const authOptions = {
       return token;
     },
     async session({ session, token }) {
-      if (token) {
+      if (session.user) {
         session.user.id = token.id;
         session.user.role = token.role;
       }
       return session;
     },
   },
- pages: {
-  signIn: async ({ url, req, res }) => {
-    // API requests get JSON response
-    if (req.headers['content-type'] === 'application/json') {
-      res.status(401).json({ error: "Authentication required" });
-      return;
-    }
-    return "/studentLogin"; // normal browser redirect
+
+  pages: {
+    signIn: "/login",
+    error: "/auth/error",
+    newUser: "/register",
   },
-  error: "/studentLogin",
-},
-    debug: process.env.NODE_ENV === "development",
-  secret: process.env.NEXTAUTH_SECRET, // encryption secret
-  csrf: false, // <-- CSRF disabled for testing
+
+  debug: true,
 };
 
 const handler = NextAuth(authOptions);

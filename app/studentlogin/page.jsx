@@ -21,7 +21,7 @@ const StudentLogin = () => {
 
   useEffect(() => {
     if (status === "authenticated" && session?.user?.role === "STUDENT") {
-      router.push("/dashboard/student");
+      router.push("/studentdashboard");
     }
   }, [session, status, router]);
 

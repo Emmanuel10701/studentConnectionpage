@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Navbar from "../components/Navbar/page";
+import Image from "next/image";
 import Footer from "../components/Footer/page";
 
 // Inline SVG icons
@@ -28,9 +29,9 @@ const FaSpinner = (props) => (
 
 // KCUTSA Team Members
 const teamMembers = [
-  { name: "Bilha Wachira", title: "Chairperson / President", imageUrl: "https://placehold.co/150x150/1d4ed8/ffffff?text=Bilha" },
-  { name: "Samuel Gachago", title: "Secretary General", imageUrl: "https://placehold.co/150x150/1d4ed8/ffffff?text=Samuel" },
-  { name: "Kelvin Karua", title: "Vice Chairperson", imageUrl: "https://placehold.co/150x150/1d4ed8/ffffff?text=Kelvin" },
+  { name: "Bilha Wachira", title: "Chairperson / President", imageUrl: "/leaders/BILHA WACHIRA.png" },
+  { name: "Samuel Gachago", title: "Secretary General", imageUrl: "/leaders/SAMUEL GACHAGO.png" },
+  { name: "Kelvin Karua", title: "Vice Chairperson", imageUrl: "/leaders/KELVIN KARUA.png" },
 ];
 
 // Animation variants
@@ -89,7 +90,13 @@ export default function AboutUs() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {teamMembers.map((member, idx) => (
               <motion.div key={idx} className="p-6 rounded-3xl bg-gray-900 shadow-2xl text-center" variants={itemVariants}>
-                <img src={member.imageUrl} alt={member.name} className="mx-auto rounded-full w-32 h-32 object-cover mb-4" />
+                <Image
+                  src={member.imageUrl}
+                  alt={member.name}
+                  width={128}      // corresponds to w-32
+                  height={128}     // corresponds to h-32
+                  className="mx-auto rounded-full object-cover mb-4"
+                />
                 <h3 className="text-xl font-bold text-white mb-1">{member.name}</h3>
                 <p className="text-gray-400">{member.title}</p>
               </motion.div>

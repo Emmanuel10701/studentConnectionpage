@@ -1,9 +1,9 @@
 'use client'
 import { motion } from 'framer-motion';
-// --- Start of update ---
-// Import your image here. Replace './flag.png' with the correct path to your image file.
-import backgroundImage from '../../../public/leaders/KCUTSA_FLAG.png';
+import Image  from "next/image";
+import imagePath from "../../../public/leaders/KCUTSA_FLAG.png";
 
+const backgroundImageUrl = imagePath.src;
 export default function Home() {
   // Animation variants
   const containerVariants = {
@@ -48,7 +48,7 @@ export default function Home() {
       <div 
         className="absolute inset-0 bg-cover bg-center bg-fixed"
         style={{ 
-          backgroundImage: `url(${backgroundImage.src})`
+          backgroundImage: `url(${backgroundImageUrl})`
         }}
       >
         {/* Add a dark overlay to make text more readable on top of the image */}
@@ -292,6 +292,40 @@ export default function Home() {
               </motion.div>
             </div>
           </motion.div>
+
+          {/* New YouTube Video Section */}
+          <motion.div
+            className="max-w-4xl mx-auto px-4 mt-16 sm:mt-24 lg:mt-32"
+            variants={itemVariants}
+          >
+            <motion.h2
+              className="text-3xl md:text-4xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-8"
+              variants={itemVariants}
+            >
+              Get to Know Us
+            </motion.h2>
+            <motion.div
+              className="aspect-w-16 aspect-h-9 w-full rounded-3xl overflow-hidden shadow-2xl border-4 border-blue-600/50"
+              variants={itemVariants}
+            >
+              {/* Replace the src URL with your actual YouTube video link */}
+              <iframe
+                className="w-full h-full"
+                src="https://www.youtube.com/embed/33bm9ssnuuM"
+                title="KCUTSA Introductory Video"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            </motion.div>
+            <motion.p
+              className="mt-8 text-center text-lg text-gray-300 max-w-2xl mx-auto"
+              variants={itemVariants}
+            >
+              Watch our video to learn more about our mission, our community, and the impact we're making on students in Kirinyaga County.
+            </motion.p>
+          </motion.div>
+
         </motion.div>
       </div>
     </div>

@@ -1,6 +1,26 @@
 'use client';
-import React, { useState } from 'react';
-import { Mail, Phone, Globe, Users, Edit, Save, GraduationCap, Building2, Search, Bell, Settings, XCircle, Briefcase, LayoutDashboard, Menu, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import {
+  Briefcase,
+  LayoutDashboard,
+  Menu,
+  X,
+  Users,
+  Building2,
+  Search,
+  GraduationCap,
+  Plus,
+  Trash2,
+  Eye,
+  CircleCheck,
+  Edit,
+  Save,
+  Mail,
+  Phone,
+  Globe,
+  XCircle
+} from 'lucide-react';
+import { createPortal } from 'react-dom';
 
 // Mock data for the employer's company profile
 const initialCompanyProfile = {
@@ -117,174 +137,37 @@ const mockStudents = [
   },
 ];
 
+// Mock data for job postings
+const mockJobs = [
+  {
+    id: "job-1",
+    title: "Junior Software Developer",
+    description: "Develop and maintain web applications using modern technologies.",
+    requirements: "Proficiency in React, Node.js, and a keen eye for detail. Bachelor's degree in Computer Science or related field.",
+    applicants: [mockStudents[0], mockStudents[5], mockStudents[6]],
+  },
+  {
+    id: "job-2",
+    title: "Marketing Intern",
+    description: "Assist the marketing team with content creation, social media management, and data analysis.",
+    requirements: "Strong communication skills, familiarity with digital marketing tools, and a passion for creative storytelling.",
+    applicants: [mockStudents[1], mockStudents[4]],
+  },
+  {
+    id: "job-3",
+    title: "Data Analyst",
+    description: "Analyze large datasets to provide actionable insights and support business decisions.",
+    requirements: "Experience with Python (Pandas), SQL, and data visualization tools. Strong analytical and problem-solving skills.",
+    applicants: [mockStudents[3], mockStudents[7]],
+  },
+];
 
-/**
- * This file contains commented examples for common API requests
- * in a student/employer application scenario.
- *
- * Each function demonstrates a different HTTP method:
- * - POST for creating new data (e.g., sending a new application).
- * - GET for retrieving data (e.g., getting a list of jobs or an application's details).
- * - PUT for updating existing data (e.g., editing an application's details).
- */
-
-// Define the base URL for the API. In a real application, this would be
-// configured dynamically (e.g., from an environment variable).
-const BASE_URL = 'https://api.your-application.com';
-
-// -------------------------------------------------------------------------
-// 1. POST Request: Sending a new job application (or any new resource)
-// -------------------------------------------------------------------------
-
-/**
- * Sends a new job application to the backend.
- *
- * This function uses the **POST** method to create a new resource on the server.
- * The data to be sent is included in the request body as a JSON object.
- *
- * @param {object} applicationData - An object containing the application details.
- * @param {string} applicationData.studentId - The ID of the student.
- * @param {string} applicationData.jobId - The ID of the job they are applying for.
- * @param {string} applicationData.coverLetter - The student's cover letter.
- * @returns {Promise<object>} A promise that resolves to the created application object from the server.
- */
-async function sendNewApplication(applicationData) {
-  try {
-    const response = await fetch(`${BASE_URL}/applications`, {
-      method: 'POST', // The HTTP method to create a new resource.
-      headers: {
-        'Content-Type': 'application/json', // Specifies that we are sending JSON data.
-        'Authorization': 'Bearer YOUR_AUTH_TOKEN', // A placeholder for user authentication.
-      },
-      body: JSON.stringify(applicationData), // Converts the JS object to a JSON string.
-    });
-
-    // Check if the response was successful (status code 200-299).
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-
-    // Parse the JSON response from the server.
-    const result = await response.json();
-    console.log('Successfully sent new application:', result);
-    return result;
-  } catch (error) {
-    console.error('Failed to send new application:', error);
-    // You might want to display a user-friendly error message here.
-  }
-}
-
-// -------------------------------------------------------------------------
-// 2. GET Requests: Retrieving data
-// -------------------------------------------------------------------------
-
-/**
- * Retrieves a list of all job applications for an employer.
- *
- * This function uses the **GET** method, which is the standard method for
- * requesting data from a specified resource. It typically doesn't have a body.
- *
- * @returns {Promise<Array<object>>} A promise that resolves to an array of application objects.
- */
-async function getAllApplications() {
-  try {
-    const response = await fetch(`${BASE_URL}/applications`, {
-      method: 'GET', // The HTTP method to retrieve a resource.
-      headers: {
-        'Authorization': 'Bearer YOUR_AUTH_TOKEN',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-
-    const applications = await response.json();
-    console.log('Successfully retrieved all applications:', applications);
-    return applications;
-  } catch (error) {
-    console.error('Failed to get applications:', error);
-  }
-}
-
-/**
- * Retrieves the details for a single job application by its ID.
- *
- * This also uses the **GET** method, but with a specific ID in the URL path.
- *
- * @param {string} applicationId - The unique ID of the application to retrieve.
- * @returns {Promise<object>} A promise that resolves to the specific application object.
- */
-async function getApplicationById(applicationId) {
-  try {
-    const response = await fetch(`${BASE_URL}/applications/${applicationId}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': 'Bearer YOUR_AUTH_TOKEN',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-
-    const application = await response.json();
-    console.log(`Successfully retrieved application ${applicationId}:`, application);
-    return application;
-  } catch (error) {
-    console.error(`Failed to get application ${applicationId}:`, error);
-  }
-}
-
-// -------------------------------------------------------------------------
-// 3. PUT Request: Updating an existing job application
-// -------------------------------------------------------------------------
-
-/**
- * Updates an existing job application.
- *
- * This function uses the **PUT** method to replace or update a resource.
- * The `applicationId` is used to specify which resource to update, and the
- * `updatedData` is sent in the body to replace the old data.
- *
- * Note: Some APIs use **PATCH** for partial updates, but **PUT** is commonly
- * used to replace the entire resource with the new data provided.
- *
- * @param {string} applicationId - The unique ID of the application to update.
- * @param {object} updatedData - An object with the new application data.
- * @param {string} updatedData.status - The new status of the application (e.g., 'Reviewed', 'Rejected').
- * @returns {Promise<object>} A promise that resolves to the updated application object.
- */
-async function updateApplicationStatus(applicationId, updatedData) {
-  try {
-    const response = await fetch(`${BASE_URL}/applications/${applicationId}`, {
-      method: 'PUT', // The HTTP method to update a resource.
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer YOUR_AUTH_TOKEN',
-      },
-      body: JSON.stringify(updatedData), // The data to update with.
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-
-    const result = await response.json();
-    console.log(`Successfully updated application ${applicationId}:`, result);
-    return result;
-  } catch (error) {
-    console.error(`Failed to update application ${applicationId}:`, error);
-  }
-}
-
-
-
-// Student Profile Modal component - remains unchanged
 const StudentProfileModal = ({ student, onClose }) => {
+  // Use createPortal to render the modal outside the main component's DOM hierarchy
+  // This helps with layering and z-index issues.
   if (!student) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
       <div className="relative bg-white rounded-3xl p-8 max-w-lg w-full m-auto shadow-2xl transform transition-all duration-300 scale-100">
         <button
@@ -338,18 +221,17 @@ const StudentProfileModal = ({ student, onClose }) => {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
-// Company Profile component - Extracted to a new component for clarity
+
 const CompanyProfile = ({ profile, isEditing, handleProfileChange, setIsEditing }) => {
   return (
     <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100">
       <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-        <h1 className="text-3xl font-extrabold text-gray-900">
-          About Company
-        </h1>
+        <h1 className="text-3xl font-extrabold text-gray-900">About Company</h1>
         <button
           onClick={() => setIsEditing(!isEditing)}
           className={`flex items-center gap-2 font-bold py-2 px-6 rounded-full shadow-md transform transition-all duration-300 text-sm
@@ -452,7 +334,7 @@ const CompanyProfile = ({ profile, isEditing, handleProfileChange, setIsEditing 
   );
 };
 
-// Student Search and List component - Extracted for clarity
+
 const TalentSearch = ({ searchQuery, setSearchQuery, statusFilter, setStatusFilter, filteredStudents, setSelectedStudent }) => {
   return (
     <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100">
@@ -524,149 +406,448 @@ const TalentSearch = ({ searchQuery, setSearchQuery, statusFilter, setStatusFilt
   );
 };
 
+const DeleteConfirmationModal = ({ onConfirm, onCancel, title, message }) => {
+  return createPortal(
+    <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
+      <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center">
+        <h3 className="text-xl font-bold text-gray-900 mb-4">{title}</h3>
+        <p className="text-gray-600 mb-6">{message}</p>
+        <div className="flex justify-center gap-4">
+          <button
+            onClick={onCancel}
+            className="bg-gray-200 text-gray-700 font-bold py-2 px-6 rounded-full hover:bg-gray-300 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="bg-red-600 text-white font-bold py-2 px-6 rounded-full hover:bg-red-700 transition-colors"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+};
 
-// Main App component for the employer dashboard
-export default function App() {
-  const [profile, setProfile] = useState(initialCompanyProfile);
+
+const ApplicantsModal = ({ job, applicants, onClose, setSelectedStudent }) => {
+  if (!job || !applicants) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm overflow-y-auto">
+      <div className="relative bg-white rounded-3xl p-8 max-w-3xl w-full m-auto shadow-2xl transform transition-all duration-300">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors"
+        >
+          <XCircle size={32} />
+        </button>
+        <h3 className="text-2xl font-bold text-gray-900 mb-6">Applicants for "{job.title}"</h3>
+        {applicants.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {applicants.map(student => (
+              <div
+                key={student.id}
+                className="bg-gray-50 p-4 rounded-xl flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => setSelectedStudent(student)}
+              >
+                <img src={student.imageUrl} alt={student.name} className="w-12 h-12 rounded-full border-2 border-white" />
+                <div>
+                  <p className="font-semibold text-gray-900">{student.name}</p>
+                  <p className="text-sm text-gray-500">{student.specialization} at {student.university}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-gray-500 py-8">No applicants yet. Keep an eye out!</p>
+        )}
+      </div>
+    </div>,
+    document.body
+  );
+};
+
+
+const JobPostings = ({ jobs, handlePostJob, handleDeleteJob, handleViewApplicants, selectedJobApplicants, setSelectedStudent, setSelectedJobApplicants }) => {
+  const [showForm, setShowForm] = useState(false);
+  const [newJob, setNewJob] = useState({
+    title: "",
+    description: "",
+    requirements: "",
+  });
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [jobToDelete, setJobToDelete] = useState(null);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewJob(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    if (newJob.title && newJob.description && newJob.requirements) {
+      handlePostJob(newJob);
+      setNewJob({ title: "", description: "", requirements: "" });
+      setShowForm(false);
+    }
+  };
+
+  const openDeleteModal = (jobId) => {
+    setJobToDelete(jobId);
+    setShowDeleteModal(true);
+  };
+
+  const closeDeleteModal = () => {
+    setJobToDelete(null);
+    setShowDeleteModal(false);
+  };
+
+  const confirmDelete = () => {
+    handleDeleteJob(jobToDelete);
+    closeDeleteModal();
+  };
+
+  return (
+    <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900">
+          Job Postings
+        </h2>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className={`flex items-center gap-2 font-bold py-2 px-6 rounded-full shadow-md transform transition-all duration-300 text-sm
+            ${showForm ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+        >
+          {showForm ? <><X size={18} /> Close Form</> : <><Plus size={18} /> Post a New Job</>}
+        </button>
+      </div>
+
+      {showForm && (
+        <form onSubmit={handleFormSubmit} className="bg-gray-50 p-6 rounded-2xl mb-8 border border-gray-200">
+          <h3 className="text-xl font-bold text-gray-900 mb-4">Create a New Job Listing</h3>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="title" className="block text-sm font-medium text-gray-700">Job Title</label>
+              <input
+                type="text"
+                id="title"
+                name="title"
+                value={newJob.title}
+                onChange={handleInputChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
+              <textarea
+                id="description"
+                name="description"
+                value={newJob.description}
+                onChange={handleInputChange}
+                rows="3"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2"
+                required
+              ></textarea>
+            </div>
+            <div>
+              <label htmlFor="requirements" className="block text-sm font-medium text-gray-700">Requirements</label>
+              <textarea
+                id="requirements"
+                name="requirements"
+                value={newJob.requirements}
+                onChange={handleInputChange}
+                rows="3"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2"
+                required
+              ></textarea>
+            </div>
+            <button
+              type="submit"
+              className="w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            >
+              <CircleCheck size={20} className="mr-2" /> Post Job
+            </button>
+          </div>
+        </form>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {jobs.length > 0 ? (
+          jobs.map(job => (
+            <div key={job.id} className="bg-gray-50 p-6 rounded-2xl shadow-md border-2 border-gray-100 flex flex-col justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{job.title}</h3>
+                <p className="text-sm text-gray-600 mb-4">{job.description}</p>
+                <div className="text-xs text-gray-500">
+                  <h4 className="font-semibold text-gray-700 mb-1">Requirements:</h4>
+                  <p>{job.requirements}</p>
+                </div>
+              </div>
+              <div className="mt-6 flex flex-col sm:flex-row gap-2 justify-between">
+                <button
+                  onClick={() => handleViewApplicants(job)}
+                  className="w-full sm:w-auto flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-green-600 hover:bg-green-700 transition-colors"
+                >
+                  <Eye size={16} /> View Applicants ({job.applicants.length})
+                </button>
+                <button
+                  onClick={() => openDeleteModal(job.id)}
+                  className="w-full sm:w-auto flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-red-600 bg-red-100 hover:bg-red-200 transition-colors"
+                >
+                  <Trash2 size={16} /> Delete
+                </button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="text-center text-gray-500 col-span-full py-12">You haven't posted any jobs yet.</p>
+        )}
+      </div>
+
+      {showDeleteModal && (
+        <DeleteConfirmationModal
+          onConfirm={confirmDelete}
+          onCancel={closeDeleteModal}
+          title="Delete Job Post"
+          message="Are you sure you want to delete this job post? This action cannot be undone."
+        />
+      )}
+
+      {selectedJobApplicants && (
+        <ApplicantsModal
+          job={selectedJobApplicants.job}
+          applicants={selectedJobApplicants.applicants}
+          onClose={() => setSelectedJobApplicants(null)}
+          setSelectedStudent={setSelectedStudent}
+        />
+      )}
+    </div>
+  );
+};
+
+
+const Dashboard = ({ students, jobs, totalStudents, totalAlumni, totalJobs }) => {
+  return (
+    <div className="p-8">
+      <h1 className="text-4xl font-extrabold text-gray-900 mb-8">Dashboard Overview</h1>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="bg-white p-6 rounded-3xl shadow-lg border border-gray-100 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-gray-500">Total Students</p>
+            <p className="text-4xl font-bold text-gray-900 mt-1">{totalStudents}</p>
+          </div>
+          <GraduationCap size={48} className="text-blue-500 opacity-20" />
+        </div>
+        <div className="bg-white p-6 rounded-3xl shadow-lg border border-gray-100 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-gray-500">Total Alumni</p>
+            <p className="text-4xl font-bold text-gray-900 mt-1">{totalAlumni}</p>
+          </div>
+          <Building2 size={48} className="text-green-500 opacity-20" />
+        </div>
+        <div className="bg-white p-6 rounded-3xl shadow-lg border border-gray-100 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-gray-500">Job Postings</p>
+            <p className="text-4xl font-bold text-gray-900 mt-1">{totalJobs}</p>
+          </div>
+          <Briefcase size={48} className="text-purple-500 opacity-20" />
+        </div>
+      </div>
+
+      <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Latest Students</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {students.slice(0, 4).map(student => (
+            <div key={student.id} className="flex items-center gap-4 bg-gray-50 p-4 rounded-2xl shadow-sm">
+              <img src={student.imageUrl} alt={student.name} className="w-12 h-12 rounded-full" />
+              <div>
+                <p className="font-semibold text-gray-900">{student.name}</p>
+                <p className="text-xs text-gray-500">{student.specialization}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Active Job Postings</h2>
+        <ul className="space-y-4">
+          {jobs.slice(0, 3).map(job => (
+            <li key={job.id} className="bg-gray-50 p-4 rounded-2xl shadow-sm">
+              <p className="font-semibold text-gray-900">{job.title}</p>
+              <p className="text-sm text-gray-500">{job.description.substring(0, 70)}...</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+
+const App = () => {
+  const [companyProfile, setCompanyProfile] = useState(initialCompanyProfile);
   const [isEditing, setIsEditing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [activePage, setActivePage] = useState('talentSearch'); // New state for page navigation
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State for mobile sidebar
+  const [students, setStudents] = useState(mockStudents);
+  const [jobs, setJobs] = useState(mockJobs);
+  const [selectedJobApplicants, setSelectedJobApplicants] = useState(null);
+  const [activeSection, setActiveSection] = useState("Dashboard");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Function to handle profile form changes
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
-    // Handle nested contact object
-    if (name === 'contact.email' || name === 'contact.phone') {
+    if (name.includes('.')) {
       const [parent, child] = name.split('.');
-      setProfile(prev => ({
+      setCompanyProfile(prev => ({
         ...prev,
         [parent]: {
           ...prev[parent],
-          [child]: value
-        }
+          [child]: value,
+        },
       }));
     } else {
-      setProfile(prev => ({ ...prev, [name]: value }));
+      setCompanyProfile(prev => ({ ...prev, [name]: value }));
     }
   };
 
-  // Filter students based on search query and status filter
-  const filteredStudents = mockStudents.filter(student => {
-    const matchesStatus = statusFilter === "All" || student.status === statusFilter;
-    const matchesQuery =
-      student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  const filteredStudents = students.filter(student => {
+    const matchesSearch = student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       student.specialization.toLowerCase().includes(searchQuery.toLowerCase()) ||
       student.university.toLowerCase().includes(searchQuery.toLowerCase()) ||
       student.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    return matchesStatus && matchesQuery;
+    const matchesStatus = statusFilter === "All" || student.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
   });
 
+  const handlePostJob = (newJob) => {
+    const newId = `job-${jobs.length + 1}`;
+    setJobs(prevJobs => [...prevJobs, { ...newJob, id: newId, applicants: [] }]);
+  };
+
+  const handleDeleteJob = (jobId) => {
+    setJobs(prevJobs => prevJobs.filter(job => job.id !== jobId));
+  };
+
+  const handleViewApplicants = (job) => {
+    setSelectedJobApplicants({ job, applicants: job.applicants });
+  };
+
+  const renderContent = () => {
+    switch (activeSection) {
+      case 'Dashboard':
+        return <Dashboard
+          students={students}
+          jobs={jobs}
+          totalStudents={students.length}
+          totalAlumni={students.filter(s => s.status === 'Alumni').length}
+          totalJobs={jobs.length}
+        />;
+      case 'Find Talent':
+        return <TalentSearch
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          filteredStudents={filteredStudents}
+          setSelectedStudent={setSelectedStudent}
+        />;
+      case 'Job Postings':
+        return <JobPostings
+          jobs={jobs}
+          handlePostJob={handlePostJob}
+          handleDeleteJob={handleDeleteJob}
+          handleViewApplicants={handleViewApplicants}
+          selectedJobApplicants={selectedJobApplicants}
+          setSelectedStudent={setSelectedStudent}
+          setSelectedJobApplicants={setSelectedJobApplicants}
+        />;
+      case 'Company Profile':
+        return <CompanyProfile
+          profile={companyProfile}
+          isEditing={isEditing}
+          handleProfileChange={handleProfileChange}
+          setIsEditing={setIsEditing}
+        />;
+      default:
+        return <div>Select a section from the sidebar.</div>;
+    }
+  };
+
+  const navItems = [
+    { name: 'Dashboard', icon: LayoutDashboard },
+    { name: 'Find Talent', icon: Users },
+    { name: 'Job Postings', icon: Briefcase },
+    { name: 'Company Profile', icon: Building2 },
+  ];
+
   return (
-    <div className="bg-gray-50 min-h-screen font-sans text-gray-800 flex flex-col lg:flex-row">
-      {/* Sidebar for navigation */}
-      <aside className={`fixed lg:sticky top-0 h-full w-64 bg-white p-6 shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+    <div className="min-h-screen bg-gray-100 flex font-sans antialiased text-gray-800">
+      {/* Mobile Sidebar Toggle Button */}
+      <button
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        className="md:hidden fixed top-4 left-4 z-50 text-gray-600 hover:text-gray-900 transition-colors"
+      >
+        {isSidebarOpen ? <X size={28} /> : <Menu size={28} />}
+      </button>
+
+      {/* Sidebar */}
+      <aside className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 w-64 bg-white p-6 shadow-xl z-40 transition-transform duration-300 ease-in-out`}>
         <div className="flex items-center justify-between mb-8">
-          <span className="text-2xl font-extrabold text-blue-600">FreeDash</span>
-          <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden text-gray-500 hover:text-blue-600">
+          <div className="flex items-center gap-3">
+            <img src={companyProfile.logoUrl} alt="Logo" className="h-10 w-10 rounded-full" />
+            <h2 className="text-xl font-bold text-gray-900">Admin Panel</h2>
+          </div>
+          <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-gray-400 hover:text-gray-600">
             <X size={24} />
           </button>
         </div>
-        <nav className="space-y-4">
-          <button
-            onClick={() => { setActivePage('talentSearch'); setIsSidebarOpen(false); }}
-            className={`w-full flex items-center gap-4 p-3 rounded-xl font-semibold transition-all ${activePage === 'talentSearch' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-700 hover:bg-gray-100'}`}
-          >
-            <Search size={20} /> Talent Search
-          </button>
-          <button
-            onClick={() => { setActivePage('companyProfile'); setIsSidebarOpen(false); }}
-            className={`w-full flex items-center gap-4 p-3 rounded-xl font-semibold transition-all ${activePage === 'companyProfile' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-700 hover:bg-gray-100'}`}
-          >
-            <Briefcase size={20} /> My Company
-          </button>
+
+        <nav>
+          <ul className="space-y-2">
+            {navItems.map(item => (
+              <li key={item.name}>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setActiveSection(item.name);
+                    setIsSidebarOpen(false);
+                  }}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-medium text-sm transition-all duration-200
+                    ${activeSection === item.name ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-600 hover:bg-gray-200'}`}
+                >
+                  <item.icon size={20} />
+                  <span>{item.name}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
         </nav>
       </aside>
 
-      {/* Main content area */}
-      <div className="flex-1 flex flex-col min-h-screen">
-        {/* Top Navigation Bar */}
-        <header className="bg-white p-4 md:p-6 shadow-md rounded-b-3xl sticky top-0 z-40">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            {/* Mobile menu button and Logo */}
-            <div className="flex items-center space-x-2">
-              <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden text-gray-500 hover:text-blue-600 mr-2">
-                <Menu size={24} />
-              </button>
-              <span className="text-xl md:text-2xl font-extrabold text-blue-600 lg:hidden">FreeDash</span>
-            </div>
+      {/* Main Content Area */}
+      <main className="flex-1 p-4 md:p-8 overflow-y-auto">
+        <div className="max-w-7xl mx-auto">
+          {renderContent()}
+        </div>
+      </main>
 
-            {/* Search bar and icons */}
-            <div className="flex items-center space-x-4 md:space-x-6 w-full justify-end lg:justify-between">
-              <div className="relative hidden md:block lg:w-96">
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="pl-10 pr-4 py-2 w-full rounded-full border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                />
-                <Search className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              </div>
-              <div className="flex items-center space-x-4 md:space-x-6">
-                <button className="text-gray-500 hover:text-blue-600 transition-colors duration-200">
-                  <Bell size={24} />
-                </button>
-                <button className="text-gray-500 hover:text-blue-600 transition-colors duration-200">
-                  <Settings size={24} />
-                </button>
-
-                {/* User Profile */}
-                <div className="flex items-center space-x-2">
-                  <span className="font-semibold text-sm hidden sm:block">Hello, Jane Doe</span>
-                  <img
-                    src="https://placehold.co/40x40/D1D5DB/1F2937?text=JD"
-                    alt="User Profile"
-                    className="w-10 h-10 rounded-full border-2 border-gray-200"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        <main className="flex-1 p-4 md:p-8 overflow-y-auto">
-          {/* Main content based on active page */}
-          <div className="max-w-7xl mx-auto">
-            {activePage === 'talentSearch' && (
-              <div className="grid grid-cols-1 gap-8">
-                <TalentSearch
-                  searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
-                  statusFilter={statusFilter}
-                  setStatusFilter={setStatusFilter}
-                  filteredStudents={filteredStudents}
-                  setSelectedStudent={setSelectedStudent}
-                />
-              </div>
-            )}
-            {activePage === 'companyProfile' && (
-              <div className="grid grid-cols-1 gap-8">
-                <CompanyProfile
-                  profile={profile}
-                  isEditing={isEditing}
-                  handleProfileChange={handleProfileChange}
-                  setIsEditing={setIsEditing}
-                />
-              </div>
-            )}
-          </div>
-        </main>
-      </div>
-
-      {/* Student Profile Modal */}
-      <StudentProfileModal student={selectedStudent} onClose={() => setSelectedStudent(null)} />
+      {/* Modals are rendered as portals to ensure they appear on top of everything */}
+      {selectedStudent && (
+        <StudentProfileModal student={selectedStudent} onClose={() => setSelectedStudent(null)} />
+      )}
     </div>
   );
-}
+};
+
+export default App;

@@ -42,7 +42,7 @@ export async function POST(req) {
 
     // Use environment variables for the application URL for better flexibility
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3000";
-    const resetLink = `${appUrl}/resetpassword?token=${token}`;
+    const resetLink = `${appUrl}/reset?token=${token}`;
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,

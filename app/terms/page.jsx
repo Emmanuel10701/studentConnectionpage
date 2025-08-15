@@ -162,9 +162,8 @@ export default function TermsAndConditions() {
             These Terms shall be governed by the laws of the Republic of Kenya.
           </p>
         </motion.div>
-
         {/* Final Acknowledgment and Action Button */}
-        <motion.div className="mt-10 p-6 rounded-3xl bg-slate-900 shadow-xl border-2 border-blue-600/50 flex flex-col items-center" variants={itemVariants}>
+        <motion.div className="mt-10 p-6 rounded-3xl bg-slate-900 shadow-xl border-2 border-blue-600/50 flex flex-col items-center sticky bottom-0" variants={itemVariants}>
           <p className="text-center text-lg font-semibold text-blue-400 mb-6">
             By clicking "I Agree and Continue," you acknowledge that you have read, understood, and agree to these Terms and Conditions.
           </p>

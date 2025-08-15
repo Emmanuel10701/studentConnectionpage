@@ -305,7 +305,7 @@ export default function Home() {
               Get to Know Us
             </motion.h2>
             <motion.div
-              className="aspect-w-16 aspect-h-9 w-full rounded-3xl overflow-hidden shadow-2xl border-4 border-blue-600/50"
+              className="aspect-w-24 aspect-h-15 w-full rounded-3xl overflow-hidden shadow-2xl border-4 border-blue-600/50"
               variants={itemVariants}
             >
               {/* Replace the src URL with your actual YouTube video link */}
@@ -313,7 +313,6 @@ export default function Home() {
                 className="w-full h-full"
                 src="https://www.youtube.com/embed/33bm9ssnuuM"
                 title="KCUTSA Introductory Video"
-                frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               ></iframe>

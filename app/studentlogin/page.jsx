@@ -73,25 +73,27 @@ const StudentLogin = () => {
         <motion.form className="bg-white rounded-2xl shadow-xl p-8" variants={containerVariants}
                     initial="hidden" animate="visible" onSubmit={handleSubmit}>
           <motion.div variants={itemVariants} className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-base font-medium text-gray-700 mb-2"> {/* was text-sm */}
               <FaEnvelope className="inline mr-2 text-blue-600" />Email Address
             </label>
             <input type="email" placeholder="Enter your email" value={data.email}
                    onChange={(e) => setData({ ...data, email: e.target.value })}
-                   className="w-full h-12 border border-gray-300 rounded-lg px-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" required />
+                   className="w-full h-15 border border-gray-300 rounded-lg px-5 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-lg" /* h-12→h-15 & px-4→px-5 & text-lg */
+                   required />
           </motion.div>
 
           <motion.div variants={itemVariants} className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-base font-medium text-gray-700 mb-2"> {/* was text-sm */}
               <FaLock className="inline mr-2 text-blue-600" />Password
             </label>
             <div className="relative">
               <input type={showPassword ? "text" : "password"} placeholder="Enter your password" value={data.password}
                      onChange={(e) => setData({ ...data, password: e.target.value })}
-                     className="w-full h-12 border border-gray-300 rounded-lg px-4 pr-12 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" required />
+                     className="w-full h-15 border border-gray-300 rounded-lg px-5 pr-14 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-lg" /* increased height, padding, font size */
+                     required />
               <button type="button" className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                       onClick={() => setShowPassword(!showPassword)}>
-                {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                {showPassword ? <FaEyeSlash size={25} /> : <FaEye size={25} />} {/* icon size +25% */}
               </button>
             </div>
           </motion.div>
@@ -104,13 +106,13 @@ const StudentLogin = () => {
 
           <motion.div variants={itemVariants} className="mb-6">
             <button type="submit" disabled={isSubmitting || !isValid}
-                    className={`w-full h-12 rounded-lg font-semibold text-white transition-all duration-300 ${
+                    className={`w-full h-15 rounded-lg font-semibold text-lg text-white transition-all duration-300 ${
                       isSubmitting || !isValid ? 'bg-gray-400 cursor-not-allowed' :
                       'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transform hover:scale-105'
                     }`}>
               {isSubmitting ? (
                 <div className="flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                  <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
                   Signing In...
                 </div>
               ) : (
@@ -133,15 +135,15 @@ const StudentLogin = () => {
           <motion.div variants={itemVariants} className="space-y-3">
             <button
               type="button"
-              className="w-full h-12 border border-gray-300 rounded-lg px-4 flex items-center justify-center text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+              className="w-full h-15 border border-gray-300 rounded-lg px-5 flex items-center justify-center text-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200"
               onClick={handleGoogleLogin}
             >
-              <FcGoogle className="w-5 h-5 mr-2" />Continue with Google
+              <FcGoogle className="w-6 h-6 mr-2" />Continue with Google
             </button>
           </motion.div>
 
           <motion.div variants={itemVariants} className="mt-6 text-center">
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-lg">
               Don't have an account?{' '}
               <a href="/studentRegister" className="text-blue-600 hover:text-blue-700 font-medium hover:underline transition-colors duration-200">
                 Sign Up

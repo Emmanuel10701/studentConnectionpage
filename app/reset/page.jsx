@@ -34,45 +34,51 @@ const ResetPasswordPage = () => {
 
   // Safely access token from URL
   useEffect(() => {
-    // In a real application, this would get the token from the URL query params.
-    // const urlToken = new URLSearchParams(window.location.search).get('token');
-    // Mocking a token for this example
+
     const mockToken = "12345-mock-token-abcde";
     setToken(mockToken);
   }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      // Validate passwords using Zod schema
-      const validationResult = passwordSchema.safeParse({ newPassword, confirmPassword });
-      if (!validationResult.success) {
-        toast.error(validationResult.error.errors[0].message);
-        setLoading(false);
-        return;
-      }
+  try {
+    // Validate passwords
+    const validationResult = passwordSchema.safeParse({ newPassword, confirmPassword });
 
-      // Mock API call since we are not running a live server.
-      console.log("Submitting password reset request with token:", token, "and new password:", newPassword);
-      const mockResponse = { ok: true, message: "Password reset successfully!" };
-
-      if (mockResponse.ok) {
-        toast.success(mockResponse.message);
-        router.push('/login');
-      } else {
-        // const result = await response.json();
-        const result = { message: "Failed to reset password. Token may be invalid." };
-        toast.error(result.message);
-      }
-    } catch (error) {
-      toast.error('Failed to reset password');
-      console.error(error);
-    } finally {
+    if (!validationResult.success) {
+      const firstError = validationResult.error?.errors?.[0]?.message || "Invalid input";
+      toast.error(firstError);
       setLoading(false);
+      return;
     }
-  };
+
+    // API call to reset password
+    const res = await fetch("/api/reset", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token,
+        newPassword
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      toast.success(data.message || "Password reset successfully!");
+      router.push("/login");
+    } else {
+      toast.error(data.message || "Failed to reset password. Token may be invalid.");
+    }
+  } catch (error) {
+    toast.error("Failed to reset password");
+    console.error(error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Framer-motion variants for animations
   const containerVariants = {
@@ -171,15 +177,6 @@ const ResetPasswordPage = () => {
             </button>
           </motion.div>
         </form>
-
-        <motion.div variants={itemVariants} className="mt-8 text-center text-sm text-gray-400">
-          <p>
-            Remembered your password?{' '}
-            <a href="/login" className="text-indigo-400 font-medium hover:underline transition-colors duration-200">
-              Log in
-            </a>
-          </p>
-        </motion.div>
       </motion.div>
       <ToastContainer />
     </div>

@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import Link from "next/link"; // Import the Link component
 
 // Inline SVG icons to replace react-icons/fi
 const FiMenu = (props) => (
@@ -48,10 +49,10 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="fixed top-0 w-full z-50 bg-slate-900 bg-opacity-80 backdrop-filter backdrop-blur-lg text-white shadow-xl">
+    <nav className="fixed top-0 w-full z-50 bg-[#1e2a3b] bg-opacity-80 backdrop-filter backdrop-blur-lg text-white shadow-xl">
       <div className="container mx-auto flex justify-between items-center px-4 py-3">
         {/* Logo */}
-        <a href="/" className="flex items-center space-x-2">
+        <Link href="/" className="flex items-center space-x-2">
           <img
             src="https://placehold.co/40x40/1d4ed8/ffffff?text=Logo"
             alt="Logo"
@@ -60,7 +61,7 @@ export default function Navbar() {
             className="rounded-full ring-2 ring-blue-500"
           />
           <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Community</span>
-        </a>
+        </Link>
 
         {/* Hamburger menu for mobile */}
         <button
@@ -73,21 +74,15 @@ export default function Navbar() {
 
         {/* Desktop Menu and Mobile Menu Overlay */}
         <div
-          className={`flex-col md:flex-row md:flex md:space-y-0 md:space-x-6 absolute md:static top-full left-0 w-full md:w-auto bg-slate-900 md:bg-transparent transition-all duration-300 ease-in-out ${
+          className={`flex-col md:flex-row md:flex md:space-y-0 md:space-x-6 absolute md:static top-full left-0 w-full md:w-auto bg-[#1e2a3b] md:bg-transparent transition-all duration-300 ease-in-out ${
             menuOpen ? "flex py-4" : "hidden"
           } md:flex items-center`}
           ref={dropdownRef}
         >
           {/* Main Navigation Links */}
-          <a href="/" className="block px-4 py-2 hover:text-blue-400 transition-colors duration-300" onClick={handleLinkClick}>
+          <Link href="/" className="block px-4 py-2 hover:text-blue-400 transition-colors duration-300" onClick={handleLinkClick}>
             Home
-          </a>
-          <a href="#about" className="block px-4 py-2 hover:text-blue-400 transition-colors duration-300" onClick={handleLinkClick}>
-            About
-          </a>
-          <a href="#leadership" className="block px-4 py-2 hover:text-blue-400 transition-colors duration-300" onClick={handleLinkClick}>
-            Leadership
-          </a>
+          </Link>
 
           {/* Register Dropdown */}
           <div className="relative group">
@@ -99,20 +94,12 @@ export default function Navbar() {
             </button>
             {openDropdown === "register" && (
               <div className="absolute left-0 mt-2 w-48 bg-slate-800 text-white rounded-xl shadow-lg z-50">
-                <a
-                  href="/studentRegister"
-                  className="block px-4 py-2 hover:bg-slate-700 rounded-t-xl transition-colors duration-300"
-                  onClick={handleLinkClick}
-                >
+                <Link href="/studentRegister" className="block px-4 py-2 hover:bg-slate-700 rounded-t-xl transition-colors duration-300" onClick={handleLinkClick}>
                   Student Register
-                </a>
-                <a
-                  href="/EmployerRegister"
-                  className="block px-4 py-2 hover:bg-slate-700 rounded-b-xl transition-colors duration-300"
-                  onClick={handleLinkClick}
-                >
+                </Link>
+                <Link href="/EmployerRegister" className="block px-4 py-2 hover:bg-slate-700 rounded-b-xl transition-colors duration-300" onClick={handleLinkClick}>
                   Employer Register
-                </a>
+                </Link>
               </div>
             )}
           </div>
@@ -127,33 +114,25 @@ export default function Navbar() {
             </button>
             {openDropdown === "login" && (
               <div className="absolute left-0 mt-2 w-48 bg-slate-800 text-white rounded-xl shadow-lg z-50">
-                <a
-                  href="/studentlogin"
-                  className="block px-4 py-2 hover:bg-slate-700 rounded-t-xl transition-colors duration-300"
-                  onClick={handleLinkClick}
-                >
+                <Link href="/studentlogin" className="block px-4 py-2 hover:bg-slate-700 rounded-t-xl transition-colors duration-300" onClick={handleLinkClick}>
                   Student Login
-                </a>
-                <a
-                  href="/Employerlogin"
-                  className="block px-4 py-2 hover:bg-slate-700 rounded-b-xl transition-colors duration-300"
-                  onClick={handleLinkClick}
-                >
+                </Link>
+                <Link href="/Employerlogin" className="block px-4 py-2 hover:bg-slate-700 rounded-b-xl transition-colors duration-300" onClick={handleLinkClick}>
                   Employer Login
-                </a>
+                </Link>
               </div>
             )}
           </div>
 
-          {/* About Us Button */}
-          <a href="/contact" passHref>
+          {/* Contact Us Button */}
+          <Link href="/contact" passHref>
             <button 
               className="mt-4 md:mt-0 px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-full shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105"
               onClick={handleLinkClick}
             >
               Contact Us
             </button>
-          </a>
+          </Link>
         </div>
       </div>
     </nav>

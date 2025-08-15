@@ -34,8 +34,9 @@ const MessageBox = ({ message, type, onClose }) => {
   );
 };
 
+
 const ForgotPasswordPage = () => {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [gmailEnabled, setGmailEnabled] = useState(false);
   const [message, setMessage] = useState(null);
@@ -46,24 +47,29 @@ const ForgotPasswordPage = () => {
     setMessage(null);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      const mockResponse = { ok: true, message: "A password reset link has been sent to your email." };
+      const res = await fetch("/api/forgot", {
+        // 👈 Make sure this matches your API folder name
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
 
-      if (mockResponse.ok) {
-        setMessage({ type: 'success', text: mockResponse.message });
-        setEmail('');
+      const data = await res.json();
+
+      if (res.ok) {
+        setMessage({ type: "success", text: data.message });
+        setEmail("");
         setGmailEnabled(true);
       } else {
-        setMessage({ type: 'error', text: mockResponse.message });
+        setMessage({ type: "error", text: data.message });
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Failed to send reset link' });
+      setMessage({ type: "error", text: "Failed to send reset link" });
       console.error(error);
     } finally {
       setLoading(false);
     }
   };
-
   const handleGmailClick = () => {
     window.location.href = `mailto:${email}`;
   };

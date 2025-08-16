@@ -4,7 +4,7 @@ Content-Type: application/json
 
 {
   "name": "Sarah",
-  "email": "sarah.employer@company.com",
+  "email": "sarah.empoyer@company.com",
   "password": "securepassword",
   "companyName": "Innovate Solutions",
   "companySize": "10-50 employees",
@@ -14,6 +14,31 @@ Content-Type: application/json
   "position": "HR Manager"
 }
 
+{
+  "name": "TechNova",
+  "industry": "Software",
+  "description": "Innovative tech solutions",
+  "foundedDate": "2020-01-01",
+  "companySize": "50-100",
+  "email": "info@technova.com",
+  "phone": "+254712345678",
+  "website": "https://technova.com",
+  "street": "Innovation Ave",
+  "city": "Nairobi",
+  "county": "Nairobi",
+  "country": "Kenya",
+  "postalCode": "00100",
+  "businessRegistrationNumber": "BR123456",
+  "kraPin": "A123456789B",
+  "businessPermitNumber": "BP987654",
+  "licenseExpiryDate": "2026-01-01",
+  "vatNumber": "VAT123456",
+  "legalName": "TechNova Ltd",
+  "linkedin": "https://linkedin.com/company/technova",
+  "twitter": "https://twitter.com/technova",
+  "facebook": "https://facebook.com/technova",
+  "instagram": "https://instagram.com/technova"
+}
 
 
 
@@ -23,7 +48,7 @@ Content-Type: application/json
 
 {
   "name": "Alex",
-  "email": "alex.student@example.com",
+  "email": "alex.studnt@example.com",
   "password": "password123",
   "institution": "State University",
   "course": "Physics",

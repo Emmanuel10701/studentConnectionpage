@@ -135,7 +135,7 @@ const StudentLogin = () => {
           <motion.div variants={itemVariants} className="space-y-3">
             <button
               type="button"
-              className="w-full h-15 border border-gray-300 rounded-lg px-5 flex items-center justify-center text-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+              className="w-full h-15 border border-gray-300 rounded-lg px-5 cursor-pointer flex items-center justify-center text-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200"
               onClick={handleGoogleLogin}
             >
               <FcGoogle className="w-6 h-6 mr-2" />Continue with Google

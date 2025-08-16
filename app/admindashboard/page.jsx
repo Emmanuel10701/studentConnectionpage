@@ -1,3 +1,4 @@
+"use client"
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { 
@@ -9,7 +10,7 @@ import {
   Link, 
   Trash2, 
   XCircle, 
-  ChevronRight, 
+  Menu, 
   User, 
   Settings, 
   LogOut, 
@@ -28,7 +29,7 @@ const initialUsers = [
 
 const initialNews = [
   { id: 1, type: 'news', title: 'New Job Board Features Released', description: 'We are excited to announce the launch of new features for our job board, including advanced filtering and personalized recommendations...', date: '2024-08-14' },
-  { id: 2, type: 'video', title: 'Interview with a Top Recruiter', description: 'Watch our exclusive interview with Sarah Chen, a leading recruiter, as she shares tips on building a standout resume and acing interviews.', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', date: '2024-08-12' },
+  { id: 2, type: 'video', title: 'Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)', description: 'Watch our exclusive interview with Sarah Chen, a leading recruiter, as she shares tips on building a standout resume and acing interviews.', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', date: '2024-08-12' },
   { id: 3, type: 'news', title: 'Upcoming Career Fair Event', description: 'Our annual virtual career fair is scheduled for September 25th. Register now to connect with top employers from around the globe.', date: '2024-08-10' },
 ];
 
@@ -325,7 +326,6 @@ const AddContentForm = ({ onAdd, onClose }) => {
   );
 };
 
-
 const NewsAndContentManagement = ({ newsItems, setNewsItems }) => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
@@ -542,19 +542,22 @@ export default function CareerConnectApp() {
         }
       `}</style>
       
-      {/* Sidebar - Mobile Toggle */}
+      {/* Sidebar - Mobile Toggle (Updated) */}
       <div className="p-4 md:hidden flex justify-between items-center bg-white shadow-sm sticky top-0 z-20">
-        <div className="flex items-center space-x-2">
-          <LayoutDashboard className="text-blue-600" size={24} />
+        <button 
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+          className="text-gray-600 hover:text-blue-600 p-2 rounded-full hover:bg-gray-100 transition-colors"
+        >
+          <Menu size={24} />
+        </button>
+        <div className="flex-1 text-center">
           <span className="text-xl font-extrabold text-blue-600">Admin Portal</span>
         </div>
-        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-gray-600 hover:text-blue-600 p-2 rounded-full hover:bg-gray-100 transition-colors">
-          <ChevronRight size={24} />
-        </button>
+        <div className="w-8"></div> {/* Spacer to balance the flex layout */}
       </div>
 
       {/* Sidebar - Desktop & Mobile View */}
-      <aside className={`${isSidebarOpen ? 'block fixed inset-0 z-30' : 'hidden'} md:block md:relative w-64 bg-white p-6 shadow-xl md:rounded-r-3xl h-screen overflow-y-auto transform md:translate-x-0 transition-transform duration-300 ease-in-out`}>
+      <aside className={`md:block fixed inset-0 z-30 md:relative md:flex-shrink-0 w-[280px] bg-white p-6 shadow-xl md:rounded-r-3xl h-screen overflow-y-auto ${isSidebarOpen ? 'block' : 'hidden'}`}>
         <div className="flex items-center space-x-2 mb-8">
           <LayoutDashboard className="text-blue-600" size={32} />
           <span className="text-2xl font-extrabold text-blue-600">
@@ -567,7 +570,9 @@ export default function CareerConnectApp() {
         <nav>
           <ul className="space-y-2">
             {navigationItems.map(item => (
-              <li key={item.id}>
+              <li 
+                key={item.id}
+              >
                 <a 
                   href="#"
                   onClick={() => { setView(item.id); setIsSidebarOpen(false); }}
@@ -582,7 +587,7 @@ export default function CareerConnectApp() {
           </ul>
         </nav>
         <div className="md:hidden mt-8 text-center text-sm text-gray-400">
-          <p>© 2024 Admin Portal</p>
+          <p>© 2025 Admin Portal</p>
         </div>
       </aside>
 
@@ -606,10 +611,7 @@ export default function CareerConnectApp() {
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 z-10 transition-opacity duration-200 animate-fade-in-down">
                   <div className="py-2">
                     <a href="#" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
-                      <User size={16} className="mr-2" /> Profile
-                    </a>
-                    <a href="#" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
-                      <Settings size={16} className="mr-2" /> Settings
+                      <User size={16} className="mr-2" /> Profile & settings
                     </a>
                     <div className="border-t border-gray-100 my-2"></div>
                     <a href="#" className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">

@@ -1,13 +1,8 @@
+'use client';
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
-import { Button } from './components/ui/button';
-import { Input } from './components/ui/input';
-import { Label } from './components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/ui/select';
-import { Textarea } from './components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card';
-import { Separator } from './components/ui/separator';
-import { Avatar, AvatarFallback } from './components/ui/avatar';
 import { toast, Toaster } from 'react-hot-toast';
 import { Loader2, User, FileText, Upload, ChevronLeft, CheckCircle, PlusCircle, MinusCircle, Briefcase, GraduationCap, Trophy, MapPin } from 'lucide-react';
 import { format } from 'date-fns';

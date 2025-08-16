@@ -6,12 +6,23 @@ import { motion, AnimatePresence } from "framer-motion";
 // This is a simulated backend API for the purpose of this demo.
 // In a real Next.js application, this would be a separate API route.
 let _newsData = [
-  { id: 1, title: "Career Fair Announcement", description: "The annual KCSO career fair will be held on December 15th. Mark your calendars!", read: false },
-  { id: 2, title: "New Mentorship Program", description: "Our new mentorship program is now live. Sign up to connect with industry professionals.", read: false },
-  { id: 3, title: "Tech Workshop Series", description: "Join our free workshop series on data science and machine learning, starting next week.", read: false },
-  { id: 4, title: "Volunteer Opportunity", description: "We are seeking volunteers for our upcoming community outreach event. Your help makes a difference!", read: false },
-  { id: 5, title: "Scholarship Application Window", description: "The application period for the 2024 KCSO scholarship is now open. Apply by Nov 30th.", read: false }
+    { id: 1, title: "Career Fair Announcement", description: "The annual KCSO career fair will be held on December 15th. Mark your calendars!", read: false },
+    { id: 2, title: "New Mentorship Program", description: "Our new mentorship program is now live. Sign up to connect with industry professionals.", read: false },
+    { id: 3, title: "Tech Workshop Series", description: "Join our free workshop series on data science and machine learning, starting next week.", read: false },
+    { id: 4, title: "Volunteer Opportunity", description: "We are seeking volunteers for our upcoming community outreach event. Your help makes a difference!", read: false },
+    { id: 5, title: "Scholarship Application Window", description: "The application period for the 2024 KCSO scholarship is now open. Apply by Nov 30th.", read: false },
+    { id: 6, title: "System Maintenance Scheduled", description: "Please be advised that our systems will be down for scheduled maintenance this Saturday from 2 AM to 4 AM.", read: false },
+    { id: 7, title: "New Partnership with TechCorp", description: "We are excited to announce a new partnership that will bring more job opportunities to our platform.", read: false },
+    { id: 8, title: "Holiday Office Closure", description: "Our offices will be closed on December 24th and 25th for the holidays.", read: false },
+    { id: 9, title: "Cybersecurity Awareness Training", description: "Mandatory cybersecurity training for all employees is due by the end of the month.", read: false },
+    { id: 10, title: "Updated Health & Safety Guidelines", description: "Please review the updated health and safety protocols available on the company intranet.", read: false },
+    { id: 11, title: "Annual Performance Reviews", description: "Performance review season is upon us. Please schedule a meeting with your manager.", read: false },
+    { id: 12, title: "Q4 Financial Results", description: "The Q4 financial results have been published and are available for review.", read: false },
+    { id: 13, "title": "Welcome New Hires!", "description": "Let's give a warm welcome to the new members who joined our team this month.", read: false },
+    { id: 14, title: "Innovation Challenge Kick-off", description: "The annual innovation challenge starts next Monday. Get your ideas ready!", read: false },
+    { id: 15, title: "Employee Satisfaction Survey", description: "Please take a few minutes to complete the annual employee satisfaction survey. Your feedback is valuable.", read: false }
 ];
+
 
 // Inline SVG icons to replace react-icons/fi
 const FiMenu = (props) => (
@@ -26,9 +37,11 @@ const FiChevronDown = (props) => (
   <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
 );
 
-const FiBell = (props) => (
-  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+// Replaced FiBell with FiNewspaper
+const FiNewspaper = (props) => (
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h4M4 9h16M4 15h16M10 3v18"/></svg>
 );
+
 
 // Modern Navbar component with a sleek, responsive design and dynamic dropdowns.
 export default function Navbar() {
@@ -45,8 +58,8 @@ export default function Navbar() {
   // Computed value for unread news count
   const unreadCount = newsItems.filter(item => !item.read).length;
 
-  // Function to toggle the sidebar and mark all notifications as read
-  const toggleSidebar = () => {
+  // Function to toggle the sidebar and mark all news items as read
+  const toggleNewsSidebar = () => {
     setIsSidebarOpen(prevState => !prevState);
     if (!isSidebarOpen) {
       // Mark all news as read and "persist" the change to our mock database.
@@ -67,11 +80,11 @@ export default function Navbar() {
         setOpenDropdown(null);
         setMenuOpen(false); // Added to close the mobile menu
       }
-      // Close the sidebar if a click is outside the sidebar container and not on the notification button
+      // Close the sidebar if a click is outside the sidebar container and not on the news button
       if (
         sidebarRef.current &&
         !sidebarRef.current.contains(event.target) &&
-        !event.target.closest("#notification-button")
+        !event.target.closest("#news-button")
       ) {
         setIsSidebarOpen(false);
       }
@@ -108,17 +121,17 @@ export default function Navbar() {
           <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Community</span>
         </a>
 
-        {/* Hamburger and Notifications for mobile */}
+        {/* Hamburger and News for mobile */}
         <div className="flex items-center space-x-4 md:hidden">
-          {/* Notifications button for mobile */}
+          {/* News button for mobile */}
           <div className="relative">
             <button
-              id="notification-button"
-              onClick={toggleSidebar}
+              id="news-button"
+              onClick={toggleNewsSidebar}
               className="relative p-2 rounded-full text-white hover:text-blue-400 transition-colors duration-300"
-              aria-label="Notifications"
+              aria-label="News"
             >
-              <FiBell className="w-6 h-6" />
+              <FiNewspaper className="w-6 h-6" />
               {unreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 flex items-center justify-center h-5 w-5 rounded-full bg-red-600 text-xs font-bold text-white">
                   {unreadCount}
@@ -185,22 +198,25 @@ export default function Navbar() {
                     <a href="/studentlogin" className="block px-4 py-2 hover:bg-slate-700 rounded-t-xl transition-colors duration-300" onClick={handleLinkClick}>
                       Student Login
                     </a>
-                    <a href="/Employerlogin" className="block px-4 py-2 hover:bg-slate-700 rounded-b-xl transition-colors duration-300" onClick={handleLinkClick}>
+                    <a href="/Employerlogin" className="block px-4 py-2 hover:bg-slate-700 transition-colors duration-300" onClick={handleLinkClick}>
                       Employer Login
+                    </a>
+                    <a href="/adminlogin" className="block px-4 py-2 hover:bg-slate-700 rounded-b-xl transition-colors duration-300" onClick={handleLinkClick}>
+                      Admin Login
                     </a>
                   </div>
                 )}
               </div>
               
-              {/* Notifications button for desktop */}
+              {/* News button for desktop */}
               <div className="relative hidden md:block">
                 <button
-                  id="notification-button"
-                  onClick={toggleSidebar}
+                  id="news-button"
+                  onClick={toggleNewsSidebar}
                   className="relative px-4 py-2 hover:text-blue-400 transition-colors duration-300"
-                  aria-label="Notifications"
+                  aria-label="News"
                 >
-                  <FiBell className="w-6 h-6" />
+                  <FiNewspaper className="w-6 h-6" />
                   {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 flex items-center justify-center h-5 w-5 rounded-full bg-red-600 text-xs font-bold text-white">
                       {unreadCount}
@@ -230,27 +246,29 @@ export default function Navbar() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="fixed top-0 right-0 h-screen w-full md:w-80 bg-slate-900 shadow-2xl z-40 overflow-y-auto p-6"
+            className="fixed top-0 right-0 h-screen w-full md:w-80 bg-[#172234] shadow-2xl z-40 p-6"
             ref={sidebarRef}
           >
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Notifications</h2>
-              <button onClick={toggleSidebar} aria-label="Close notifications" className="text-white hover:text-blue-400 transition-colors duration-300">
+              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Latest News</h2>
+              <button onClick={toggleNewsSidebar} aria-label="Close news" className="text-white hover:text-blue-400 transition-colors duration-300">
                 <FiX className="w-6 h-6" />
               </button>
             </div>
-            <ul className="space-y-4">
-              {newsItems.length > 0 ? (
-                newsItems.map((item) => (
-                  <li key={item.id} className="bg-slate-800 p-4 rounded-xl shadow-md border border-slate-700">
-                    <h3 className="text-lg font-semibold text-white">{item.title}</h3>
-                    <p className="text-sm text-gray-400 mt-1">{item.description}</p>
-                  </li>
-                ))
-              ) : (
-                <li className="text-center text-gray-500 mt-10">You're all caught up! No new notifications.</li>
-              )}
-            </ul>
+            <div className="h-[calc(100%-4rem)] overflow-y-auto">
+                <ul className="space-y-4">
+                {newsItems.length > 0 ? (
+                    newsItems.map((item) => (
+                    <li key={item.id} className="bg-blue-900/50 p-4 rounded-xl shadow-md border border-blue-800">
+                        <h3 className="text-lg font-semibold text-white">{item.title}</h3>
+                        <p className="text-sm text-gray-400 mt-1">{item.description}</p>
+                    </li>
+                    ))
+                ) : (
+                    <li className="text-center text-gray-500 mt-10">You're all caught up! No new news.</li>
+                )}
+                </ul>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

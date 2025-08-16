@@ -251,7 +251,7 @@ const App = () => {
                 </div>
               </div>
             </div>
-    
+
             {/* Stats Grid - Fully Responsive */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {/* Total Students Card */}
@@ -263,7 +263,7 @@ const App = () => {
                 </div>
                 <GraduationCap size={120} className="absolute -bottom-8 -right-8 text-blue-200 opacity-50 z-0" />
               </div>
-    
+
               {/* Total Alumni Card */}
               <div className="relative overflow-hidden bg-white p-6 md:p-8 rounded-3xl shadow-lg border border-gray-100 flex flex-col justify-between h-48">
                 <div className="z-10">
@@ -273,7 +273,7 @@ const App = () => {
                 </div>
                 <Users size={120} className="absolute -bottom-8 -right-8 text-green-200 opacity-50 z-0" />
               </div>
-    
+
               {/* Job Postings Card */}
               <div className="relative overflow-hidden bg-white p-6 md:p-8 rounded-3xl shadow-lg border border-gray-100 flex flex-col justify-between h-48">
                 <div className="z-10">
@@ -284,7 +284,7 @@ const App = () => {
                 <Briefcase size={120} className="absolute -bottom-8 -right-8 text-purple-200 opacity-50 z-0" />
               </div>
             </div>
-    
+
             {/* Latest Students Section */}
             <div className="bg-white p-6 md:p-8 rounded-3xl shadow-lg border border-gray-100 mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Latest Students</h2>
@@ -300,7 +300,7 @@ const App = () => {
                 ))}
               </div>
             </div>
-    
+
             {/* Active Job Postings Section */}
             <div className="bg-white p-6 md:p-8 rounded-3xl shadow-lg border border-gray-100">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Active Job Postings</h2>
@@ -341,7 +341,7 @@ const App = () => {
                   </div>
                 </div>
               </div>
-      
+
               {/* Stats Grid - Fully Responsive */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 {/* Total Students Card */}
@@ -353,7 +353,7 @@ const App = () => {
                   </div>
                   <GraduationCap size={120} className="absolute -bottom-8 -right-8 text-blue-200 opacity-50 z-0" />
                 </div>
-      
+
                 {/* Total Alumni Card */}
                 <div className="relative overflow-hidden bg-white p-6 md:p-8 rounded-3xl shadow-lg border border-gray-100 flex flex-col justify-between h-48">
                   <div className="z-10">
@@ -363,7 +363,7 @@ const App = () => {
                   </div>
                   <Users size={120} className="absolute -bottom-8 -right-8 text-green-200 opacity-50 z-0" />
                 </div>
-      
+
                 {/* Job Postings Card */}
                 <div className="relative overflow-hidden bg-white p-6 md:p-8 rounded-3xl shadow-lg border border-gray-100 flex flex-col justify-between h-48">
                   <div className="z-10">
@@ -374,7 +374,7 @@ const App = () => {
                   <Briefcase size={120} className="absolute -bottom-8 -right-8 text-purple-200 opacity-50 z-0" />
                 </div>
               </div>
-      
+
               {/* Latest Students Section */}
               <div className="bg-white p-6 md:p-8 rounded-3xl shadow-lg border border-gray-100 mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">Latest Students</h2>
@@ -390,7 +390,7 @@ const App = () => {
                   ))}
                 </div>
               </div>
-      
+
               {/* Active Job Postings Section */}
               <div className="bg-white p-6 md:p-8 rounded-3xl shadow-lg border border-gray-100">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">Active Job Postings</h2>
@@ -419,11 +419,11 @@ const App = () => {
         {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
-      {/* Sidebar */}
+      {/* Sidebar - Now fixed for all screen sizes */}
       <aside
-        className={`fixed inset-y-0 left-0 w-[24vw] bg-gray-900 text-gray-300 p-6 flex flex-col transition-transform duration-300 transform ${
+        className={`fixed inset-y-0 left-0 w-full sm:w-[60vw] md:w-[60vw] lg:w-[24vw] bg-gray-900 text-gray-300 p-6 flex flex-col transition-transform duration-300 transform ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } lg:relative lg:translate-x-0 lg:flex-shrink-0 z-40`}
+        } lg:translate-x-0 lg:flex-shrink-0 z-40`}
       >
         {/* Sidebar Header */}
         <div className="flex items-center justify-between lg:justify-center mb-10">
@@ -447,9 +447,10 @@ const App = () => {
               setActiveSection('Dashboard');
               setIsSidebarOpen(false);
             }}
+            // Added conditional classes to center items on small screens and left-align on large screens.
             className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors duration-200 ${
               activeSection === 'Dashboard' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-gray-700 hover:text-white'
-            }`}
+            } justify-center lg:justify-start`}
           >
             <LayoutDashboard size={20} />
             <span className="font-medium">Dashboard</span>
@@ -461,9 +462,10 @@ const App = () => {
               setActiveSection('CompanyProfile');
               setIsSidebarOpen(false);
             }}
+            // Added conditional classes to center items on small screens and left-align on large screens.
             className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors duration-200 ${
               activeSection === 'CompanyProfile' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-gray-700 hover:text-white'
-            }`}
+            } justify-center lg:justify-start`}
           >
             <Building2 size={20} />
             <span className="font-medium">Company Profile</span>
@@ -475,9 +477,10 @@ const App = () => {
               setActiveSection('TalentSearch');
               setIsSidebarOpen(false);
             }}
+            // Added conditional classes to center items on small screens and left-align on large screens.
             className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors duration-200 ${
               activeSection === 'TalentSearch' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-gray-700 hover:text-white'
-            }`}
+            } justify-center lg:justify-start`}
           >
             <Search size={20} />
             <span className="font-medium">Talent Search</span>
@@ -489,9 +492,10 @@ const App = () => {
               setActiveSection('JobPostings');
               setIsSidebarOpen(false);
             }}
+            // Added conditional classes to center items on small screens and left-align on large screens.
             className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors duration-200 ${
               activeSection === 'JobPostings' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-gray-700 hover:text-white'
-            }`}
+            } justify-center lg:justify-start`}
           >
             <Briefcase size={20} />
             <span className="font-medium">Job Postings</span>
@@ -499,9 +503,9 @@ const App = () => {
         </nav>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-y-auto p-4 md:p-8 mt-16 lg:mt-0">
-        <div className="w-full h-full">
+      {/* Main Content - Now has a left margin to account for the fixed sidebar on large screens */}
+      <main className="flex-1 overflow-y-auto p-4 md:p-8 mt-16 lg:mt-0 lg:ml-[24vw] flex justify-center">
+        <div className="w-full max-w-7xl h-full">
           {renderContent()}
         </div>
       </main>

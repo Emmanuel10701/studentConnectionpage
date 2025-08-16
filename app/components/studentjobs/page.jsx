@@ -1,3 +1,4 @@
+'use client';
 import React, { useState, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Briefcase, Search, Mail, ArrowLeft, X, User, CheckCircle } from 'lucide-react';

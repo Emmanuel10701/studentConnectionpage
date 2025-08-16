@@ -130,7 +130,7 @@ const EmployerLogin = () => {
           <motion.div variants={itemVariants} className="space-y-3">
             <button
               type="button"
-              className="w-full h-12 border border-gray-300 rounded-lg px-4 flex items-center justify-center text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+              className="w-full h-12 border border-gray-300 rounded-lg px-4 cursor-pointer flex items-center justify-center text-gray-700 hover:bg-gray-50 transition-colors duration-200"
               onClick={() => signIn("google")}
             >
               <FcGoogle className="w-5 h-5 mr-2" />

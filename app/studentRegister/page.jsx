@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaGraduationCap } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
-import { IoLocationSharp } from 'react-icons/io5'; // New icon for location
+import { IoLocationSharp } from 'react-icons/io5';
 
 const StudentRegister = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -17,8 +17,9 @@ const StudentRegister = () => {
     institution: "",
     course: "",
     yearOfStudy: "",
-    constituency: "", // New state for constituency
-    ward: "" // New state for ward
+    educationLevel: "", // New state for education level
+    constituency: "",
+    ward: ""
   });
   const [agree, setAgree] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,7 +35,7 @@ const StudentRegister = () => {
   };
 
   useEffect(() => {
-    const { name, email, password, confirmPassword, institution, course, yearOfStudy, constituency, ward } = data;
+    const { name, email, password, confirmPassword, institution, course, yearOfStudy, educationLevel, constituency, ward } = data;
     setIsValid(
       name.trim() !== "" &&
       email.trim() !== "" &&
@@ -43,6 +44,7 @@ const StudentRegister = () => {
       institution.trim() !== "" &&
       course.trim() !== "" &&
       yearOfStudy.trim() !== "" &&
+      educationLevel.trim() !== "" && // Validation for education level
       constituency.trim() !== "" &&
       ward.trim() !== "" &&
       agree
@@ -64,6 +66,7 @@ const StudentRegister = () => {
         institution: data.institution,
         course: data.course,
         yearOfStudy: data.yearOfStudy,
+        educationLevel: data.educationLevel, // Sending education level
         constituency: data.constituency,
         ward: data.ward,
       }),
@@ -87,17 +90,14 @@ const StudentRegister = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-indigo-100 flex items-center justify-center p-4">
-      {/* Increased max-width for the frame */}
       <div className="w-full max-w-3xl">
         <motion.div className="text-center mb-10" variants={itemVariants}>
           <div className="flex items-center justify-center space-x-4 mb-4">
             <div className="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center">
               <FaGraduationCap className="text-white text-2xl" />
             </div>
-            {/* Increased font size */}
             <h1 className="text-4xl font-bold text-gray-800">KCUTSA</h1>
           </div>
-          {/* Increased font size */}
           <h2 className="text-3xl font-bold text-gray-800 mb-2">Student Registration</h2>
           <p className="text-lg text-gray-600">Join our community of empowered students</p>
         </motion.div>
@@ -106,51 +106,61 @@ const StudentRegister = () => {
           initial="hidden" animate="visible" onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <motion.div variants={itemVariants}>
-              {/* Increased font size for label */}
               <label className="block text-base font-medium text-gray-700 mb-2">
                 <FaUser className="inline mr-2 text-blue-600" />Full Name
               </label>
-              {/* Increased input height and font size */}
               <input type="text" placeholder="Enter your full name" value={data.name}
                 onChange={(e) => setData({ ...data, name: e.target.value })}
                 className="w-full h-14 text-base border border-gray-300 rounded-lg px-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" required />
             </motion.div>
 
             <motion.div variants={itemVariants}>
-              {/* Increased font size for label */}
               <label className="block text-base font-medium text-gray-700 mb-2">
                 <FaEnvelope className="inline mr-2 text-blue-600" />Email Address
               </label>
-              {/* Increased input height and font size */}
               <input type="email" placeholder="Enter your email" value={data.email}
                 onChange={(e) => setData({ ...data, email: e.target.value })}
                 className="w-full h-14 text-base border border-gray-300 rounded-lg px-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" required />
             </motion.div>
 
             <motion.div variants={itemVariants}>
-              {/* Increased font size for label */}
               <label className="block text-base font-medium text-gray-700 mb-2">
                 <FaGraduationCap className="inline mr-2 text-blue-600" />Institution
               </label>
-              {/* Increased input height and font size */}
               <input type="text" placeholder="Your university/college" value={data.institution}
                 onChange={(e) => setData({ ...data, institution: e.target.value })}
                 className="w-full h-14 text-base border border-gray-300 rounded-lg px-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" required />
             </motion.div>
 
             <motion.div variants={itemVariants}>
-              {/* Increased font size for label */}
               <label className="block text-base font-medium text-gray-700 mb-2">Course of Study</label>
-              {/* Increased input height and font size */}
               <input type="text" placeholder="e.g., Computer Science" value={data.course}
                 onChange={(e) => setData({ ...data, course: e.target.value })}
                 className="w-full h-14 text-base border border-gray-300 rounded-lg px-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" required />
             </motion.div>
 
+            {/* New Education Level dropdown */}
             <motion.div variants={itemVariants}>
-              {/* Increased font size for label */}
+                <label className="block text-base font-medium text-gray-700 mb-2">
+                    <FaGraduationCap className="inline mr-2 text-blue-600" />Education Level
+                </label>
+                <select 
+                    value={data.educationLevel} 
+                    onChange={(e) => setData({ ...data, educationLevel: e.target.value })}
+                    className="w-full h-14 text-base border border-gray-300 rounded-lg px-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                    required
+                >
+                    <option value="">Select level</option>
+                    <option value="certificate">Certificate</option>
+                    <option value="diploma">Diploma</option>
+                    <option value="undergraduate">bachelor's degree</option>
+                    <option value="undergraduate">Master's degree</option>
+                    <option value="phd">PhD</option>
+                </select>
+            </motion.div>
+
+            <motion.div variants={itemVariants}>
               <label className="block text-base font-medium text-gray-700 mb-2">Year of Study</label>
-              {/* Increased input height and font size */}
               <select value={data.yearOfStudy} onChange={(e) => setData({ ...data, yearOfStudy: e.target.value })}
                 className="w-full h-14 text-base border border-gray-300 rounded-lg px-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" required>
                 <option value="">Select year</option>
@@ -164,13 +174,10 @@ const StudentRegister = () => {
               </select>
             </motion.div>
 
-            {/* New constituency field */}
             <motion.div variants={itemVariants}>
-              {/* Increased font size for label */}
               <label className="block text-base font-medium text-gray-700 mb-2">
                 <IoLocationSharp className="inline mr-2 text-blue-600" />Constituency
               </label>
-              {/* Increased input height and font size */}
               <select
                 value={data.constituency}
                 onChange={(e) => setData({ ...data, constituency: e.target.value, ward: "" })}
@@ -186,14 +193,11 @@ const StudentRegister = () => {
               </select>
             </motion.div>
 
-            {/* New ward field, conditionally rendered */}
             {data.constituency && (
               <motion.div variants={itemVariants}>
-                {/* Increased font size for label */}
                 <label className="block text-base font-medium text-gray-700 mb-2">
                   <IoLocationSharp className="inline mr-2 text-blue-600" />Ward
                 </label>
-                {/* Increased input height and font size */}
                 <select
                   value={data.ward}
                   onChange={(e) => setData({ ...data, ward: e.target.value })}
@@ -211,12 +215,10 @@ const StudentRegister = () => {
             )}
 
             <motion.div variants={itemVariants}>
-              {/* Increased font size for label */}
               <label className="block text-base font-medium text-gray-700 mb-2">
                 <FaLock className="inline mr-2 text-blue-600" />Password
               </label>
               <div className="relative">
-                {/* Increased input height and font size */}
                 <input type={showPassword ? "text" : "password"} placeholder="Create a password" value={data.password}
                   onChange={(e) => setData({ ...data, password: e.target.value })}
                   className="w-full h-14 text-base border border-gray-300 rounded-lg px-4 pr-12 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" required />
@@ -228,12 +230,10 @@ const StudentRegister = () => {
             </motion.div>
 
             <motion.div variants={itemVariants}>
-              {/* Increased font size for label */}
               <label className="block text-base font-medium text-gray-700 mb-2">
                 <FaLock className="inline mr-2 text-blue-600" />Confirm Password
               </label>
               <div className="relative">
-                {/* Increased input height and font size */}
                 <input type={showConfirmPassword ? "text" : "password"} placeholder="Confirm your password" value={data.confirmPassword}
                   onChange={(e) => setData({ ...data, confirmPassword: e.target.value })}
                   className="w-full h-14 text-base border border-gray-300 rounded-lg px-4 pr-12 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" required />
@@ -245,7 +245,6 @@ const StudentRegister = () => {
             </motion.div>
           </div>
 
-          {/* Terms and Conditions Checkbox */}
           <motion.div variants={itemVariants} className="mt-6 flex items-center">
             <input
               type="checkbox"
@@ -255,14 +254,12 @@ const StudentRegister = () => {
               className="mr-2 w-5 h-5"
               required
             />
-            {/* Increased font size for label */}
             <label htmlFor="agree" className="text-base text-gray-700">
               I agree to all the <a href="/terms" className="text-blue-600 hover:text-blue-700 underline" target="_blank">terms and conditions</a>
             </label>
           </motion.div>
 
           <motion.div variants={itemVariants} className="mt-8">
-            {/* Increased button height and font size */}
             <button type="submit" disabled={isSubmitting || !isValid}
               className={`w-full h-14 rounded-lg text-lg font-semibold text-white transition-all duration-300 ${
                 isSubmitting || !isValid ? 'bg-gray-400 cursor-not-allowed' :
@@ -270,7 +267,6 @@ const StudentRegister = () => {
               }`}>
               {isSubmitting ? (
                 <div className="flex items-center justify-center">
-                  {/* Increased spinner size */}
                   <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
                   Creating Account...
                 </div>
@@ -293,4 +289,3 @@ const StudentRegister = () => {
 };
 
 export default StudentRegister;
-

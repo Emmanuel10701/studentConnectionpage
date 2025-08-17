@@ -1,6 +1,6 @@
-import prisma from '../../../libs/prisma';
+import prisma from "../../../libs/prisma";
 
-// CREATE Company
+// CREATE Company (POST)
 export async function POST(request) {
   try {
     const body = await request.json();
@@ -60,10 +60,10 @@ export async function POST(request) {
       },
     });
 
-    return new Response(JSON.stringify({ success: true, company: newCompany }), { status: 201 });
+    return new Response(JSON.stringify(newCompany), { status: 201 });
   } catch (error) {
-    console.error('❌ Failed to create company:', error);
-    return new Response(JSON.stringify({ success: false, message: 'Internal Server Error', error }), { status: 500 });
+    console.error("Error creating company:", error);
+    return new Response(JSON.stringify({ message: "Internal Server Error" }), { status: 500 });
   }
 }
 
@@ -71,9 +71,9 @@ export async function POST(request) {
 export async function GET() {
   try {
     const companies = await prisma.company.findMany();
-    return new Response(JSON.stringify({ success: true, companies }), { status: 200 });
+    return new Response(JSON.stringify(companies), { status: 200 });
   } catch (error) {
-    console.error('❌ Failed to fetch companies:', error);
-    return new Response(JSON.stringify({ success: false, message: 'Internal Server Error' }), { status: 500 });
+    console.error("Error fetching companies:", error);
+    return new Response(JSON.stringify({ message: "Internal Server Error" }), { status: 500 });
   }
 }

@@ -1,9 +1,6 @@
 // File: /api/employer/route.js
-// Handles employer registration (POST) and retrieval of all employers (GET)
-
 import prisma from '../../../libs/prisma';
 import bcrypt from "bcryptjs";
-import { NextResponse } from 'next/server';
 
 // ======================
 // POST: Register Employer
@@ -23,28 +20,17 @@ export async function POST(req) {
       position,
     } = body;
 
-    // Validate required fields
-    if (!name || !email || !password || !companyName || !position) {
-      return NextResponse.json(
-        { message: "Missing required fields" },
-        { status: 400 }
-      );
-    }
-
     // Check if email is already registered
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-      return NextResponse.json(
-        { message: "Email already registered" },
-        { status: 409 }
-      );
+      return new Response(JSON.stringify({ error: "Email already registered" }), { status: 400 });
     }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create user + employer profile
-    const newUser = await prisma.user.create({
+    const employer = await prisma.user.create({
       data: {
         name,
         email,
@@ -61,24 +47,14 @@ export async function POST(req) {
           },
         },
       },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
+      include: {
         employerProfile: true,
       },
     });
 
-    return NextResponse.json(newUser, { status: 201 });
+    return new Response(JSON.stringify(employer), { status: 201 });
   } catch (error) {
-    console.error("Employer registration failed:", error);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 }
 
@@ -88,24 +64,14 @@ export async function POST(req) {
 export async function GET() {
   try {
     const employers = await prisma.user.findMany({
-      where: { role: { equals: "EMPLOYER" } },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
+      where: { role: "EMPLOYER" },
+      include: {
         employerProfile: true,
       },
     });
 
-    return NextResponse.json(employers, { status: 200 });
+    return new Response(JSON.stringify(employers), { status: 200 });
   } catch (error) {
-    console.error("Failed to fetch employers:", error);
-    return NextResponse.json(
-      { error: "An unexpected error occurred." },
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 }

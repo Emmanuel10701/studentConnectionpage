@@ -1,5 +1,6 @@
 // prisma/schema.prisma
 
+// ================== DATASOURCE & CLIENT ==================
 datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
@@ -9,15 +10,14 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// ================== MODELS ==================
-
-model Subscriber {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  email     String   @unique
-  createdAt DateTime @default(now())
+// ================== ENUMS ==================
+enum Role {
+  STUDENT
+  EMPLOYER
+  ADMIN
 }
 
-// ------------------ USER ------------------
+// ================== USER & AUTH ==================
 model User {
   id              String           @id @default(auto()) @map("_id") @db.ObjectId
   name            String?
@@ -26,24 +26,19 @@ model User {
   emailVerified   DateTime?
   image           String?
   role            Role             @default(STUDENT)
+
+  // Relations
   employerProfile EmployerProfile?
   studentProfile  StudentProfile?
   newsletters     Newsletter[]
   accounts        Account[]
   sessions        Session[]
+  passwordResets  PasswordReset[]
 
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
-  passwordResets  passwordReset[]
 }
 
-enum Role {
-  STUDENT
-  EMPLOYER
-  ADMIN
-}
-
-// ------------------ ACCOUNT ------------------
 model Account {
   id                String  @id @default(auto()) @map("_id") @db.ObjectId
   userId            String  @db.ObjectId
@@ -62,19 +57,16 @@ model Account {
   @@unique([provider, providerAccountId])
 }
 
-// ------------------ SESSION ------------------
 model Session {
   id           String   @id @default(auto()) @map("_id") @db.ObjectId
   sessionToken String   @unique
   userId       String   @db.ObjectId
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id])
-
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
 
-// ------------------ VERIFICATION TOKEN ------------------
 model VerificationToken {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
   identifier String
@@ -84,7 +76,22 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// ------------------ NEWSLETTER ------------------
+model PasswordReset {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  token     String   @unique
+  createdAt DateTime @default(now())
+  expires   DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ================== SUBSCRIBERS & NEWSLETTERS ==================
+model Subscriber {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
 model Newsletter {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
   subject    String
@@ -95,85 +102,155 @@ model Newsletter {
   recipients String[]
 }
 
-// ------------------ COMPANY ------------------
-model Company {
+// ================== STUDENT MODELS ==================
+
+// Minimal student info (on registration)
+model StudentProfile {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String   @unique @db.ObjectId
+  user         User     @relation(fields: [userId], references: [id])
+  institution  String
+  course       String
+  yearOfStudy  Int
+  constituency String
+  ward         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+
+// file: /prisma/schema.prisma
+
+
+model StudentEntireProfile {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  userId         String         @unique
+  name           String
+  bio            String?
+  summary        String?
+  resumePath     String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  // One-to-one relationship with Address
+  address        Address?       @relation(fields: [addressId], references: [id])
+  addressId      String?        @unique @db.ObjectId
+
+  // One-to-many relationships (multiple items in an array)
+  education      Education[]
+  experience     Experience[]
+  achievements   Achievement[]
+  certifications Certification[]
+}
+
+model Address {
+  id               String                 @id @default(auto()) @map("_id") @db.ObjectId
+  county           String
+  subCounty        String
+  ward             String?
+  details          String?
+  studentProfile   StudentEntireProfile?
+}
+
+model Education {
+  id                String                 @id @default(auto()) @map("_id") @db.ObjectId
+  school            String
+  degree            String
+  fieldOfStudy      String?
+  graduationYear    Int?
+  studentProfileId  String                 @db.ObjectId
+  studentProfile    StudentEntireProfile   @relation(fields: [studentProfileId], references: [id])
+}
+
+model Experience {
+  id                String                 @id @default(auto()) @map("_id") @db.ObjectId
+  title             String
+  company           String
+  startDate         DateTime
+  endDate           DateTime
+  description       String?
+  studentProfileId  String                 @db.ObjectId
+  studentProfile    StudentEntireProfile   @relation(fields: [studentProfileId], references: [id])
+}
+
+model Achievement {
+  id                String                 @id @default(auto()) @map("_id") @db.ObjectId
+  name              String
+  studentProfileId  String                 @db.ObjectId
+  studentProfile    StudentEntireProfile   @relation(fields: [studentProfileId], references: [id])
+}
+
+model Certification {
+  id                String                 @id @default(auto()) @map("_id") @db.ObjectId
+  name              String
+  issuingBody       String?
+  studentProfileId  String                 @db.ObjectId
+  studentProfile    StudentEntireProfile   @relation(fields: [studentProfileId], references: [id])
+}
+// Extended student info (resume/CV builder)
+
+
+model EmployerProfile {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  industry    String
-  description String
-  foundedDate DateTime
-  companySize String
-  logoUrl     String
-
-  // Contact info
-  email       String
-  phone       String
+  userId      String   @unique @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id])
+  companyName String
+  companySize String?
+  industry    String?
+  phone       String?
   website     String?
+  position    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
 
-  // Address
-  street      String
-  city        String
-  county      String
-  country     String
-  postalCode  String
 
-  // Legal info
+model Company {
+  id                         String            @id @default(auto()) @map("_id") @db.ObjectId
+  name                       String
+  industry                   String
+  description                String
+  foundedDate                DateTime
+  companySize                String
+  logoUrl                    String
+  email                      String
+  phone                      String
+  website                    String?
+  street                     String
+  city                       String
+  county                     String
+  country                    String
+  postalCode                 String
   businessRegistrationNumber String
   kraPin                     String
   businessPermitNumber       String
   licenseExpiryDate          DateTime
   vatNumber                  String
   legalName                  String
+  linkedin                   String?
+  twitter                    String?
+  facebook                   String?
+  instagram                  String?
 
-  // Socials
-  linkedin   String?
-  twitter    String?
-  facebook   String?
-  instagram  String?
-
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  // Relations
-  employers  EmployerProfile[]
+  // employers                   EmployerProfile[]
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
 }
 
-// ------------------ EMPLOYER PROFILE ------------------
-model EmployerProfile {
+// ================== ADMIN MODELS ==================
+model Admin {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  user        User     @relation(fields: [userId], references: [id])
-  userId      String   @unique @db.ObjectId
-
-  company     Company  @relation(fields: [companyId], references: [id])
-  companyId   String   @db.ObjectId
-
-  position    String
-
+  name        String
+  email       String   @unique
+  role        String
+  status      String
+  department  String
+  title       String
+  accessLevel String
+  phoneNumber String
+  street      String
+  city        String
+  postalCode  String
+  country     String
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-// ------------------ STUDENT PROFILE ------------------
-model StudentProfile {
-  id           String @id @default(auto()) @map("_id") @db.ObjectId
-  user         User   @relation(fields: [userId], references: [id])
-  userId       String @unique @db.ObjectId
-  institution  String
-  course       String
-  yearOfStudy  Int
-  constituency String
-  ward         String
-
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-}
-
-// ------------------ PASSWORD RESET ------------------
-model passwordReset {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String   @db.ObjectId
-  token     String   @unique
-  createdAt DateTime @default(now())
-  expires   DateTime
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

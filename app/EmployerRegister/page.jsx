@@ -257,7 +257,7 @@ const EmployerRegister = () => {
           <motion.div variants={itemVariants} className="mt-6 text-center">
             <p className="text-gray-600">
               Already have an account?{' '}
-              <a href="/login/employer" className="text-green-600 hover:text-green-700 font-medium hover:underline transition-colors duration-200">
+              <a href="/Employerlogin" className="text-green-600 hover:text-green-700 font-medium hover:underline transition-colors duration-200">
                 Sign In
               </a>
             </p>

@@ -277,7 +277,7 @@ const StudentRegister = () => {
           <motion.div variants={itemVariants} className="mt-8 text-center">
             <p className="text-base text-gray-600">
               Already have an account?{' '}
-              <a href="/login/student" className="text-blue-600 hover:text-blue-700 font-medium hover:underline transition-colors duration-200">
+              <a href="/studentlogin" className="text-blue-600 hover:text-blue-700 font-medium hover:underline transition-colors duration-200">
                 Sign In
               </a>
             </p>

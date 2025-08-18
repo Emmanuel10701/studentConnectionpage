@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 export async function PUT(req, { params }) {
   try {
-    const { id } = params;
+  const { id } = await params; // ✅ must await
     const body = await req.json();
     const updated = await prisma.video.update({ where: { id }, data: body });
     return NextResponse.json(updated);
@@ -14,7 +14,7 @@ export async function PUT(req, { params }) {
 
 export async function DELETE(req, { params }) {
   try {
-    const { id } = params;
+  const { id } = await params; // ✅ must await
     await prisma.video.delete({ where: { id } });
     return NextResponse.json({ message: 'Deleted successfully' });
   } catch (err) {
@@ -23,7 +23,7 @@ export async function DELETE(req, { params }) {
 }
 export async function GET(req, { params }) {
   try {
-    const { id } = params;
+  const { id } = await params; // ✅ must await
     const video = await prisma.video.findUnique({ where: { id } });
     return NextResponse.json(video);
   } catch (err) {

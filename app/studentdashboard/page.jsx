@@ -19,6 +19,9 @@ import {
   Clock,
   BriefcaseBusiness,
 } from 'lucide-react';
+import Profile from "../components/studentprofile/page.jsx"; // Import the Profile component
+import Jobistings from "../components/studentjobs/page.jsx"; // Import the Profile component
+import EventsandNews from "../components/EventsandNews/page.jsx"
 
 // Sidebar component, including navigation links
 const Sidebar = ({ isSidebarOpen, toggleSidebar, setPage }) => {
@@ -66,11 +69,11 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, setPage }) => {
           <li className="mb-4">
             <a
               href="#"
-              onClick={() => setPage('applied')}
+              onClick={() => setPage('events')}
               className="flex items-center p-3 rounded-lg hover:bg-gray-800 transition-colors"
             >
               <Send size={20} className="mr-3 text-indigo-300" />
-              Applied Jobs
+Events
             </a>
           </li>
           <li className="mb-4">
@@ -89,7 +92,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, setPage }) => {
       {/* Footer */}
       <div className="mt-auto pt-6 border-t border-gray-700">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-400">© 2024 JobApp</span>
+          <span className="text-sm text-gray-400">© 2024 Jobs For You</span>
         </div>
       </div>
     </div>
@@ -103,7 +106,7 @@ const Header = ({ toggleSidebar }) => {
       <button onClick={toggleSidebar} className="p-2 rounded-full hover:bg-gray-100" aria-label="Open sidebar">
         <Menu size={24} />
       </button>
-      <h1 className="text-xl font-bold text-gray-800">JobApp</h1>
+      <h1 className="text-xl font-bold text-gray-800">Jobs For You</h1>
     </header>
   );
 };
@@ -330,11 +333,11 @@ const App = () => {
       case 'home':
         return <HomeDashboard />;
       case 'jobs':
-        return <EmptyContent title="Job Listings" />;
-      case 'applied':
-        return <EmptyContent title="Applied Jobs" />;
+        return <Jobistings title="Job Listings" />;
+      case 'events':
+        return <EventsandNews title="Events and News" />;
       case 'profile':
-        return <EmptyContent title="My Profile" />;
+        return <Profile title="My Profile" />;
       default:
         return <HomeDashboard />;
     }

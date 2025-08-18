@@ -18,6 +18,8 @@ import {
   MapPin,
   Clock
 } from 'lucide-react';
+import ProfileSettings from '../components/adminprofile/page.jsx';
+import Usermanagement from "../components/admintab/page.jsx"
 
 // --- Mock Data ---
 const initialUsers = [
@@ -32,13 +34,35 @@ const initialNews = [
   { id: 2, type: 'video', title: 'Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)', description: 'Watch our exclusive interview with Sarah Chen, a leading recruiter, as she shares tips on building a standout resume and acing interviews.', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', date: '2024-08-12' },
   { id: 3, type: 'news', title: 'Upcoming Career Fair Event', description: 'Our annual virtual career fair is scheduled for September 25th. Register now to connect with top employers from around the globe.', date: '2024-08-10' },
 ];
-
 const initialEvents = [
-  { id: 1, title: 'Web Development Workshop', date: '2024-09-15', time: '10:00 AM', location: 'Online' },
-  { id: 2, title: 'Resume Review Clinic', date: '2024-09-20', time: '02:00 PM', location: 'Office 3B' },
-  { id: 3, title: 'Networking Session', date: '2024-09-28', time: '06:30 PM', location: 'Virtual Lounge' },
+  {
+    id: 1,
+    title: "Web Development Workshop",
+    date: "2024-09-15",
+    time: "10:00 AM",
+    location: "Online",
+    description: "Learn modern web development tools and practices.",
+    target: "All",
+  },
+  {
+    id: 2,
+    title: "Resume Review Clinic",
+    date: "2024-09-20",
+    time: "02:00 PM",
+    location: "Office 3B",
+    description: "One-on-one resume review session with experts.",
+    target: "Job Seekers",
+  },
+  {
+    id: 3,
+    title: "Networking Session",
+    date: "2024-09-28",
+    time: "06:30 PM",
+    location: "Virtual Lounge",
+    description: "Meet employers and other professionals in your field.",
+    target: "Employers",
+  },
 ];
-
 const dashboardMetrics = [
   { id: 1, title: 'Total Users', value: '4,200', icon: Users, color: 'bg-blue-100 text-blue-600' },
   { id: 2, title: 'New Signups', value: '350', icon: Plus, color: 'bg-green-100 text-green-600' },
@@ -88,58 +112,109 @@ const AddEventForm = ({ onAdd, onClose }) => {
     onClose();
   };
 
-  return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">Event Title</label>
-        <input 
-          type="text" 
-          id="title" 
-          {...register("title", { required: "Title is required" })} 
-          className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="e.g. Annual Career Fair"
-        />
-        {errors.title && <p className="mt-1 text-sm text-red-500">{errors.title.message}</p>}
-      </div>
-      <div>
-        <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-        <input 
-          type="date" 
-          id="date" 
-          {...register("date", { required: "Date is required" })} 
-          className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        {errors.date && <p className="mt-1 text-sm text-red-500">{errors.date.message}</p>}
-      </div>
-      <div>
-        <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-1">Time</label>
-        <input 
-          type="time" 
-          id="time" 
-          {...register("time", { required: "Time is required" })} 
-          className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        {errors.time && <p className="mt-1 text-sm text-red-500">{errors.time.message}</p>}
-      </div>
-      <div>
-        <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-        <input 
-          type="text" 
-          id="location" 
-          {...register("location", { required: "Location is required" })} 
-          className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="e.g. Online or 123 Main St"
-        />
-        {errors.location && <p className="mt-1 text-sm text-red-500">{errors.location.message}</p>}
-      </div>
-      <button 
-        type="submit" 
-        className="w-full bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+return (
+  <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    {/* Event Title */}
+    <div>
+      <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+        Event Title
+      </label>
+      <input 
+        type="text" 
+        id="title" 
+        {...register("title", { required: "Title is required" })} 
+        className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+        placeholder="e.g. Annual Career Fair"
+      />
+      {errors.title && <p className="mt-1 text-sm text-red-500">{errors.title.message}</p>}
+    </div>
+
+    {/* Date */}
+    <div>
+      <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
+        Date
+      </label>
+      <input 
+        type="date" 
+        id="date" 
+        {...register("date", { required: "Date is required" })} 
+        className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      {errors.date && <p className="mt-1 text-sm text-red-500">{errors.date.message}</p>}
+    </div>
+
+    {/* Time */}
+    <div>
+      <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-1">
+        Time
+      </label>
+      <input 
+        type="time" 
+        id="time" 
+        {...register("time", { required: "Time is required" })} 
+        className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      {errors.time && <p className="mt-1 text-sm text-red-500">{errors.time.message}</p>}
+    </div>
+
+    {/* Location */}
+    <div>
+      <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
+        Location
+      </label>
+      <input 
+        type="text" 
+        id="location" 
+        {...register("location", { required: "Location is required" })} 
+        className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+        placeholder="e.g. Online or 123 Main St"
+      />
+      {errors.location && <p className="mt-1 text-sm text-red-500">{errors.location.message}</p>}
+    </div>
+
+    {/* Event Description */}
+    <div>
+      <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+        Event Description
+      </label>
+      <textarea
+        id="description"
+        {...register("description", { required: "Description is required" })}
+        className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+        placeholder="Brief details about the event..."
+        rows={4}
+      />
+      {errors.description && <p className="mt-1 text-sm text-red-500">{errors.description.message}</p>}
+    </div>
+
+    {/* Event Target */}
+    <div>
+      <label htmlFor="target" className="block text-sm font-medium text-gray-700 mb-1">
+        Event Target
+      </label>
+      <select
+        id="target"
+        {...register("target", { required: "Please select an event target" })}
+        className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
-        <Plus size={18} /> Publish Event
-      </button>
-    </form>
-  );
+        <option value="">-- Select Target --</option>
+        <option value="all">All</option>
+        <option value="employers">Employers</option>
+        <option value="jobseekers">Job Seekers</option>
+      </select>
+      {errors.target && <p className="mt-1 text-sm text-red-500">{errors.target.message}</p>}
+    </div>
+
+    {/* Submit Button */}
+    <button 
+      type="submit" 
+      className="w-full bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+    >
+      <Plus size={18} /> Publish Event
+    </button>
+  </form>
+);
+
 };
 
 const EventsCalendar = ({ events, setEvents }) => {
@@ -155,6 +230,7 @@ const EventsCalendar = ({ events, setEvents }) => {
 
   return (
     <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 h-full flex flex-col">
+      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-xl md:text-2xl font-bold text-gray-900">Upcoming Events</h3>
         <button
@@ -165,6 +241,7 @@ const EventsCalendar = ({ events, setEvents }) => {
         </button>
       </div>
 
+      {/* Events List */}
       <div className="flex-grow overflow-y-auto">
         <div className="space-y-4">
           {events.length > 0 ? (
@@ -173,9 +250,12 @@ const EventsCalendar = ({ events, setEvents }) => {
                 key={event.id} 
                 className="bg-gray-50 p-4 rounded-2xl flex items-start space-x-4 border border-gray-100 hover:shadow-md transition-shadow"
               >
+                {/* Icon */}
                 <div className="flex-shrink-0 p-3 rounded-full bg-purple-100 text-purple-600 mt-1">
                   <Calendar size={20} />
                 </div>
+
+                {/* Event Details */}
                 <div className="flex-grow">
                   <h4 className="text-lg font-bold text-gray-900">{event.title}</h4>
                   <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
@@ -187,17 +267,32 @@ const EventsCalendar = ({ events, setEvents }) => {
                   <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
                     <MapPin size={14} /> {event.location}
                   </p>
+
+                  {/* NEW: Description */}
+                  <p className="text-sm text-gray-700 mt-2">
+                    {event.description || "No description provided."}
+                  </p>
+
+                  {/* NEW: Target Audience */}
+                  <p className="text-xs font-medium mt-2 px-2 py-1 inline-block rounded-full 
+                                bg-blue-100 text-blue-700">
+                    🎯 Target: {event.target || "All"}
+                  </p>
                 </div>
+
+                {/* Delete Button */}
                 <div className="flex-shrink-0">
                   <button 
-                    onClick={() => handleDeleteEvent(event.id)}
+                onClick={() => confirmDelete(event)}
                     className="text-red-600 hover:text-red-800 transition-colors p-2 rounded-full hover:bg-red-100"
                     title="Delete"
                   >
                     <Trash2 size={20} />
                   </button>
+
                 </div>
               </div>
+              
             ))
           ) : (
             <div className="text-center p-8 text-gray-500">
@@ -206,12 +301,19 @@ const EventsCalendar = ({ events, setEvents }) => {
           )}
         </div>
       </div>
+  
+
+      {/* Modal */}
       <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Add New Event">
-        <AddEventForm onAdd={handleAddEvent} onClose={() => setIsAddModalOpen(false)} />
+        <AddEventForm 
+          onAdd={handleAddEvent} 
+          onClose={() => setIsAddModalOpen(false)} 
+        />
       </Modal>
     </div>
   );
 };
+
 
 // --- Existing Components from User's Code ---
 const AddContentForm = ({ onAdd, onClose }) => {
@@ -318,7 +420,7 @@ const AddContentForm = ({ onAdd, onClose }) => {
       )}
       <button 
         type="submit" 
-        className="w-full bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+        className="w-[20%] bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
       >
         <Plus size={18} /> Publish Content
       </button>
@@ -467,6 +569,7 @@ export default function CareerConnectApp() {
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'user-management', label: 'User Management', icon: Users },
     { id: 'news-content', label: 'News & Content', icon: Newspaper },
+    { id: 'profile-settings', label: 'Profile & Settings', icon: Settings },
     { id: 'events-calendar', label: 'Events Calendar', icon: Calendar },
   ];
 
@@ -477,13 +580,10 @@ export default function CareerConnectApp() {
       case 'user-management':
         return (
           <>
-            <header className="flex justify-between items-center mb-8">
-              <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900">User Management</h1>
-            </header>
+
             <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">User Accounts</h3>
               <div className="text-center p-8 text-gray-500">
-                This feature has been disabled.
+                <Usermanagement users={users} setUsers={setUsers} />
               </div>
             </div>
           </>
@@ -506,6 +606,15 @@ export default function CareerConnectApp() {
             <EventsCalendar events={events} setEvents={setEvents} />
           </>
         );
+      case 'profile-settings':
+        return (
+          <>
+            <header className="flex justify-between items-center mb-8">
+              <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900">Profile and Settings</h1>
+            </header>
+            <ProfileSettings />
+          </>
+        );
       default:
         return <DashboardOverview newsItems={newsItems} />;
     }
@@ -524,7 +633,7 @@ export default function CareerConnectApp() {
   }, [isUserMenuOpen]);
 
   return (
-    <div className="bg-gray-50 min-h-screen font-sans text-gray-800 flex flex-col md:flex-row">
+    <div className="bg-gray-50 font-sans text-gray-800 flex min-h-screen">
       <style>{`
         @keyframes fade-in {
           from { opacity: 0; transform: translateY(10px); }
@@ -543,90 +652,106 @@ export default function CareerConnectApp() {
       `}</style>
       
       {/* Sidebar - Mobile Toggle (Updated) */}
-      <div className="p-4 md:hidden flex justify-between items-center bg-white shadow-sm sticky top-0 z-20">
+      <div className="p-4 md:hidden flex justify-between items-center bg-transparent  curser-pointer fixed   top-0 z-20">
         <button 
           onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
-          className="text-gray-600 hover:text-blue-600 p-2 rounded-full hover:bg-gray-100 transition-colors"
+          className="text-gray-600 hover:text-blue-600 p-2 rounded-full hover:bg-gray-300 transition-colors"
         >
           <Menu size={24} />
         </button>
         <div className="flex-1 text-center">
-          <span className="text-xl font-extrabold text-blue-600">Admin Portal</span>
         </div>
         <div className="w-8"></div> {/* Spacer to balance the flex layout */}
       </div>
 
-      {/* Sidebar - Desktop & Mobile View */}
-      <aside className={`md:block fixed inset-0 z-30 md:relative md:flex-shrink-0 w-[280px] bg-white p-6 shadow-xl md:rounded-r-3xl h-screen overflow-y-auto ${isSidebarOpen ? 'block' : 'hidden'}`}>
-        <div className="flex items-center space-x-2 mb-8">
-          <LayoutDashboard className="text-blue-600" size={32} />
-          <span className="text-2xl font-extrabold text-blue-600">
-            Admin Portal
-          </span>
-          <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-gray-500 hover:text-gray-900 ml-auto transition-colors p-2 rounded-full hover:bg-gray-100">
-            <XCircle size={24} />
-          </button>
-        </div>
-        <nav>
-          <ul className="space-y-2">
-            {navigationItems.map(item => (
-              <li 
-                key={item.id}
-              >
-                <a 
-                  href="#"
-                  onClick={() => { setView(item.id); setIsSidebarOpen(false); }}
-                  className={`flex items-center p-3 rounded-xl font-semibold transition-colors
-                    ${view === item.id ? 'text-white bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg' : 'text-gray-600 hover:bg-gray-100'}`}
-                >
-                  <item.icon className="mr-3" size={20} />
-                  {item.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <div className="md:hidden mt-8 text-center text-sm text-gray-400">
-          <p>© 2025 Admin Portal</p>
-        </div>
-      </aside>
+{/* Sidebar - Desktop & Mobile View */}
+<aside
+  className={`md:block fixed inset-0 z-30 md:flex-shrink-0 
+  w-[280px] bg-white p-6 shadow-xl md:rounded-r-3xl h-screen 
+  flex flex-col justify-between 
+  ${isSidebarOpen ? "block" : "hidden"}`}
+>
+  {/* Top Section */}
+  <div>
+    <div className="flex items-center space-x-2 mb-8">
+      <LayoutDashboard className="text-blue-600" size={32} />
+      <span className="text-2xl font-extrabold text-blue-600 ">
+        Admin Portal
+      </span>
+      <button
+        onClick={() => setIsSidebarOpen(false)}
+        className="md:hidden text-gray-500 hover:text-gray-900 ml-auto transition-colors p-2 rounded-full hover:bg-gray-100"
+      >
+        <XCircle size={24} />
+      </button>
+    </div>
 
-      {/* Main Content Area */}
-      <main className="flex-1 p-4 md:p-8 overflow-y-auto">
-        <header className="flex justify-end items-center mb-8 bg-white p-4 rounded-3xl shadow-sm border border-gray-100 sticky top-0 z-10">
-          <div className="flex items-center space-x-4">
-            <div className="relative user-menu-container">
-              <button 
-                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="flex items-center space-x-2 focus:outline-none p-1 rounded-full hover:bg-gray-100 transition-colors"
-              >
-                <img
-                  src="https://placehold.co/40x40/D1D5DB/1F2937?text=AD"
-                  alt="Profile"
-                  className="w-10 h-10 rounded-full border-2 border-gray-200"
-                />
-                <span className="font-semibold text-sm hidden md:block">Admin User</span>
-              </button>
-              {isUserMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 z-10 transition-opacity duration-200 animate-fade-in-down">
-                  <div className="py-2">
-                    <a href="#" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
-                      <User size={16} className="mr-2" /> Profile & settings
-                    </a>
-                    <div className="border-t border-gray-100 my-2"></div>
-                    <a href="#" className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
-                      <LogOut size={16} className="mr-2" /> Logout
-                    </a>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
-        <div className="max-w-7xl mx-auto">
-          {renderContent()}
-        </div>
-      </main>
+    {/* Navigation */}
+    <nav>
+      <ul className="space-y-2">
+        {navigationItems.map((item) => (
+          <li key={item.id}>
+            <a
+              href="#"
+              onClick={() => {
+                setView(item.id);
+                setIsSidebarOpen(false);
+              }}
+              className={`flex items-center p-3 rounded-xl font-semibold transition-colors
+                ${
+                  view === item.id
+                    ? "text-white bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+            >
+              <item.icon className="mr-3" size={20} />
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+
+  {/* Bottom Section - Admin Portal Info */}
+  <div className="mt-[98%]  border-t border-gray-100">
+    <p className="text-sm font-semibold text-gray-600">© 2025 Admin Portal</p>
+    <span className="block text-xs text-gray-400 mt-1">@Admin Portal</span>
+  </div>
+</aside>
+
+{/* Main Content Area */}
+<main className="flex-1 p-4 md:p-8 md:ml-[280px] bg-gradient-to-br from-gray-50 via-white to-gray-100">
+  <header className="flex justify-end items-center mb-8 sticky top-0 z-0">
+    <div className="flex items-center space-x-5 bg-white/70 backdrop-blur-xl px-6 py-3 rounded-2xl shadow-lg border border-gray-200 transition-all duration-300 hover:shadow-md">
+      
+      {/* Logout button */}
+      <button
+        className="flex items-center px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-xl shadow-sm transition-all duration-200"
+      >
+        <LogOut size={18} className="mr-2" /> Logout
+      </button>
+
+      {/* Profile Avatar */}
+      <div className="flex items-center space-x-2">
+        <img
+          src="https://placehold.co/40x40/D1D5DB/1F2937?text=AD"
+          alt="Profile"
+          className="w-11 h-11 rounded-full border-2 border-gray-300 shadow-sm"
+        />
+        <span className="font-semibold text-sm hidden md:block text-gray-800 tracking-wide">
+          Admin User
+        </span>
+      </div>
+    </div>
+  </header>
+
+  {/* Main content wrapper */}
+  <div className="max-w-7xl mx-auto transition-all duration-300">
+    {renderContent()}
+  </div>
+</main>
+
     </div>
   );
 }

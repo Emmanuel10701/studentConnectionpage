@@ -21,15 +21,24 @@ import {
   XCircle,
   BarChart2,
   Folder,
-  Settings
+  Settings,
+  MapPin,
+  Calendar,
+  DollarSign,
+  Laptop,
+  ThumbsUp,
+  Award,
+  LogOut
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
+import JobPostings from '../components/jobslistings/page.jsx';
+import  CompanyProfile from "../components/companyprofile/page.jsx";
+import  TalentSearch from "../components/Talentserch/page.jsx";
+import Employerevents from '../components/EmployerEvent/page.jsx';
 
 // NOTE: These are placeholder components for the purpose of this example.
 // The dashboard content has been fully implemented below.
-const CompanyProfile = ({ profile, isEditing, handleProfileChange, setIsEditing }) => <div className="p-8 text-gray-800">Company Profile Content Goes Here</div>;
-const TalentSearch = ({ searchQuery, setSearchQuery, statusFilter, setStatusFilter, filteredStudents, setSelectedStudent }) => <div className="p-8 text-gray-800">Talent Search Content Goes Here</div>;
-const JobPostings = ({ jobs, handlePostJob, handleDeleteJob, handleViewApplicants, selectedJobApplicants, setSelectedStudent, setSelectedJobApplicants }) => <div className="p-8 text-gray-800">Job Postings Content Goes Here</div>;
+
 
 // Mock data for the employer's company profile
 const initialCompanyProfile = {
@@ -146,30 +155,46 @@ const mockStudents = [
   },
 ];
 
-// Mock data for job postings
+// Mock data for job postings with more details
 const mockJobs = [
   {
     id: "job-1",
     title: "Junior Software Developer",
-    description: "Develop and maintain web applications using modern technologies.",
+    location: "Nairobi, Kenya",
+    jobType: "Full-Time",
+    experience: "Entry Level",
+    salary: "$50,000 - $60,000",
+    benefits: ["Health Insurance", "Paid Time Off", "Professional Development"],
+    description: "Develop and maintain web applications using modern technologies. Collaborate with senior developers and product managers to build scalable and user-friendly solutions.",
     requirements: "Proficiency in React, Node.js, and a keen eye for detail. Bachelor's degree in Computer Science or related field.",
     applicants: [mockStudents[0], mockStudents[5], mockStudents[6]],
   },
   {
     id: "job-2",
     title: "Marketing Intern",
-    description: "Assist the marketing team with content creation, social media management, and data analysis.",
+    location: "Remote",
+    jobType: "Internship",
+    experience: "Student",
+    salary: "$15/hour",
+    benefits: ["Flexible Schedule", "Mentorship Program"],
+    description: "Assist the marketing team with content creation, social media management, and data analysis. This is a great opportunity to gain hands-on experience in a fast-paced environment.",
     requirements: "Strong communication skills, familiarity with digital marketing tools, and a passion for creative storytelling.",
     applicants: [mockStudents[1], mockStudents[4]],
   },
   {
     id: "job-3",
     title: "Data Analyst",
-    description: "Analyze large datasets to provide actionable insights and support business decisions.",
+    location: "On-site",
+    jobType: "Full-Time",
+    experience: "1-3 Years",
+    salary: "$70,000 - $85,000",
+    benefits: ["401(k) Match", "Dental/Vision Insurance", "Gym Membership"],
+    description: "Analyze large datasets to provide actionable insights and support business decisions. You will work closely with various departments to understand their data needs.",
     requirements: "Experience with Python (Pandas), SQL, and data visualization tools. Strong analytical and problem-solving skills.",
     applicants: [mockStudents[3], mockStudents[7]],
   },
 ];
+
 
 const App = () => {
   const [companyProfile, setCompanyProfile] = useState(initialCompanyProfile);
@@ -321,6 +346,8 @@ const App = () => {
         return <TalentSearch searchQuery={searchQuery} setSearchQuery={setSearchQuery} statusFilter={statusFilter} setStatusFilter={setStatusFilter} filteredStudents={filteredStudents} setSelectedStudent={setSelectedStudent} />;
       case 'JobPostings':
         return <JobPostings jobs={jobs} handlePostJob={handlePostJob} handleDeleteJob={handleDeleteJob} handleViewApplicants={handleViewApplicants} selectedJobApplicants={selectedJobApplicants} setSelectedStudent={setSelectedStudent} setSelectedJobApplicants={setSelectedJobApplicants} />;
+        case 'News and Events':
+        return <Employerevents />;
       default:
         return (
             <div className="w-full">
@@ -420,10 +447,13 @@ const App = () => {
       </button>
 
       {/* Sidebar - Now fixed for all screen sizes */}
+      
+
+    
       <aside
-        className={`fixed inset-y-0 left-0 w-full sm:w-[60vw] md:w-[60vw] lg:w-[24vw] bg-gray-900 text-gray-300 p-6 flex flex-col transition-transform duration-300 transform ${
+        className={`fixed inset-y-0 left-0 w-full sm:w-[60vw] md:w-[60vw] lg:w-[24vw] xl:w-[20vw] bg-gray-900 text-gray-300 p-6 flex flex-col transition-transform duration-300 transform ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } lg:translate-x-0 lg:flex-shrink-0 z-40`}
+        } lg:translate-x-0 lg:flex-shrink-0 z-40 bg-gradient-to-b from-gray-900 to-slate-950`}
       >
         {/* Sidebar Header */}
         <div className="flex items-center justify-between lg:justify-center mb-10">
@@ -433,13 +463,14 @@ const App = () => {
           </div>
           <button
             onClick={() => setIsSidebarOpen(false)}
-            className="text-gray-400 lg:hidden hover:text-white"
+            className="text-gray-400 lg:hidden hover:text-white p-2 rounded-lg transition-colors duration-200"
+            aria-label="Close sidebar"
           >
             <X size={24} />
           </button>
         </div>
 
-        {/* Navigation Menu */}
+        {/* Navigation Menu - Adjusted spacing for a more modern feel */}
         <nav className="flex-1 space-y-2">
           {/* Dashboard Link */}
           <a
@@ -447,10 +478,12 @@ const App = () => {
               setActiveSection('Dashboard');
               setIsSidebarOpen(false);
             }}
-            // Added conditional classes to center items on small screens and left-align on large screens.
-            className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors duration-200 ${
-              activeSection === 'Dashboard' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-gray-700 hover:text-white'
+            className={`flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all duration-200 ${
+              activeSection === 'Dashboard'
+                ? 'bg-blue-600 text-white shadow-lg border-l-4 border-blue-400'
+                : 'hover:bg-gray-700 hover:text-white'
             } justify-center lg:justify-start`}
+            aria-label="Navigate to Dashboard"
           >
             <LayoutDashboard size={20} />
             <span className="font-medium">Dashboard</span>
@@ -462,10 +495,12 @@ const App = () => {
               setActiveSection('CompanyProfile');
               setIsSidebarOpen(false);
             }}
-            // Added conditional classes to center items on small screens and left-align on large screens.
-            className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors duration-200 ${
-              activeSection === 'CompanyProfile' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-gray-700 hover:text-white'
+            className={`flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all duration-200 ${
+              activeSection === 'CompanyProfile'
+                ? 'bg-blue-600 text-white shadow-lg border-l-4 border-blue-400'
+                : 'hover:bg-gray-700 hover:text-white'
             } justify-center lg:justify-start`}
+            aria-label="Navigate to Company Profile"
           >
             <Building2 size={20} />
             <span className="font-medium">Company Profile</span>
@@ -477,10 +512,12 @@ const App = () => {
               setActiveSection('TalentSearch');
               setIsSidebarOpen(false);
             }}
-            // Added conditional classes to center items on small screens and left-align on large screens.
-            className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors duration-200 ${
-              activeSection === 'TalentSearch' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-gray-700 hover:text-white'
+            className={`flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all duration-200 ${
+              activeSection === 'TalentSearch'
+                ? 'bg-blue-600 text-white shadow-lg border-l-4 border-blue-400'
+                : 'hover:bg-gray-700 hover:text-white'
             } justify-center lg:justify-start`}
+            aria-label="Navigate to Talent Search"
           >
             <Search size={20} />
             <span className="font-medium">Talent Search</span>
@@ -492,16 +529,54 @@ const App = () => {
               setActiveSection('JobPostings');
               setIsSidebarOpen(false);
             }}
-            // Added conditional classes to center items on small screens and left-align on large screens.
-            className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors duration-200 ${
-              activeSection === 'JobPostings' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-gray-700 hover:text-white'
+            className={`flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all duration-200 ${
+              activeSection === 'JobPostings'
+                ? 'bg-blue-600 text-white shadow-lg border-l-4 border-blue-400'
+                : 'hover:bg-gray-700 hover:text-white'
             } justify-center lg:justify-start`}
+            aria-label="Navigate to Job Postings"
           >
             <Briefcase size={20} />
             <span className="font-medium">Job Postings</span>
           </a>
+          
+          {/* Job Postings Link */}
+          <a
+            onClick={() => {
+              setActiveSection('News and Events');
+              setIsSidebarOpen(false);
+            }}
+            className={`flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all duration-200 ${
+              activeSection === 'News and Events'
+                ? 'bg-blue-600 text-white shadow-lg border-l-4 border-blue-400'
+                : 'hover:bg-gray-700 hover:text-white'
+            } justify-center lg:justify-start`}
+            aria-label="Navigate to Job Postings"
+          >
+            <Calendar size={20} />
+            <span className="font-medium">News and Events</span>
+          </a>
         </nav>
+
+        {/* Separator */}
+        <div className="border-t border-gray-700 my-6"></div>
+
+        {/* User and Settings Section - Now only contains Log Out */}
+        <div className="mt-auto space-y-2">
+          <a
+            onClick={() => {
+              // Handle logout logic here
+              setIsSidebarOpen(false);
+            }}
+            className="flex items-center gap-4 p-4 rounded-xl cursor-pointer text-gray-400 hover:bg-gray-700 hover:text-white transition-all duration-200 justify-center lg:justify-start"
+            aria-label="Log Out"
+          >
+            <LogOut size={20} />
+            <span className="font-medium">Log Out</span>
+          </a>
+        </div>
       </aside>
+
 
       {/* Main Content - Now has a left margin to account for the fixed sidebar on large screens */}
       <main className="flex-1 overflow-y-auto p-4 md:p-8 mt-16 lg:mt-0 lg:ml-[24vw] flex justify-center">

@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET(req, { params }) {
   try {
-    const { id } = params;
+  const { id } = await params; // ✅ must await
     const event = await prisma.event.findUnique({ where: { id } });
     return NextResponse.json(event);
   } catch (err) {
@@ -13,7 +13,7 @@ export async function GET(req, { params }) {
 
 export async function PUT(req, { params }) {
   try {
-    const { id } = params;
+  const { id } = await params; // ✅ must await
     const body = await req.json();
     const updated = await prisma.event.update({
       where: { id },
@@ -27,7 +27,7 @@ export async function PUT(req, { params }) {
 
 export async function DELETE(req, { params }) {
   try {
-    const { id } = params;
+  const { id } = await params; // ✅ must await
     await prisma.event.delete({ where: { id } });
     return NextResponse.json({ message: 'Deleted successfully' });
   } catch (err) {

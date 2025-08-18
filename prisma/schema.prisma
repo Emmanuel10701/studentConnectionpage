@@ -34,6 +34,7 @@ model User {
   accounts        Account[]
   sessions        Session[]
   passwordResets  PasswordReset[]
+  jobApplications JobApplication[]   // <-- add this to link to JobApplication
 
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
@@ -202,6 +203,8 @@ model EmployerProfile {
   position    String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+    jobs        Job[]    // <-- add this to link all jobs posted by this employer
+
 }
 
 
@@ -278,4 +281,37 @@ model Event {
   time     String
   location String
   createdAt DateTime @default(now())
+}
+
+
+
+model Job {
+  id           String           @id @default(auto()) @map("_id") @db.ObjectId
+  employerId   String?          @db.ObjectId        // <-- make optional
+  employer     EmployerProfile? @relation(fields: [employerId], references: [id])
+  title        String
+  description  String
+  location     String
+  officeType   String?   // "Remote" | "Hybrid" | "On-site"
+  salary       String?
+  type         String    // "Full-Time", "Part-Time", "Internship"
+  qualifications String?
+  skills       String?
+  benefits     String?
+  applications JobApplication[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model JobApplication {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  jobId     String   @db.ObjectId
+  job       Job      @relation(fields: [jobId], references: [id])
+  studentId String   @db.ObjectId
+  student   User     @relation(fields: [studentId], references: [id])
+  coverLetter String?
+  resumePath  String?
+  status    String   @default("APPLIED") // "APPLIED" | "REVIEWED" | "REJECTED" | "HIRED"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

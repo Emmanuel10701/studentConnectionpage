@@ -254,3 +254,28 @@ model Admin {
   country     String
   createdAt   DateTime @default(now())
 }
+
+
+model News {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+  date        DateTime @default(now())
+}
+
+model Video {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+  url         String
+  createdAt   DateTime @default(now())
+}
+
+model Event {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  title    String
+  date     DateTime
+  time     String
+  location String
+  createdAt DateTime @default(now())
+}

@@ -36,7 +36,6 @@ model User {
   accounts        Account[]
   sessions        Session[]
   passwordResets  PasswordReset[]
-  jobApplications JobApplication[]   // <-- add this to link to JobApplication
 
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
@@ -146,6 +145,7 @@ model StudentEntireProfile {
   experience     Experience[]
   achievements   Achievement[]
   certifications Certification[]
+  jobs           JobApplication[] // <-- Add this line for job applications
 }
 
 model Address {
@@ -308,16 +308,14 @@ model Job {
   updatedAt     DateTime         @updatedAt
 }
 
-
 model JobApplication {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  jobId     String   @db.ObjectId
-  job       Job      @relation(fields: [jobId], references: [id])
-  studentId String   @db.ObjectId
-  student   User     @relation(fields: [studentId], references: [id])
+  id        String               @id @default(auto()) @map("_id") @db.ObjectId
+  jobId     String               @db.ObjectId
+  job       Job                  @relation(fields: [jobId], references: [id])
+  studentId String?              @db.ObjectId   // <-- optional
+  student   StudentEntireProfile? @relation(fields: [studentId], references: [id])
   coverLetter String?
-  resumePath  String?
-  status    String   @default("APPLIED") // "APPLIED" | "REVIEWED" | "REJECTED" | "HIRED"
+  status    String   @default("APPLIED")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

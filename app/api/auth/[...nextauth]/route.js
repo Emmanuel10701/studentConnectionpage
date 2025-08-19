@@ -1,10 +1,8 @@
-// app/api/auth/[...nextauth]/route.js
-
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import prisma from "../../../../libs/prisma"; // adjust path
+import prisma from "../../../../libs/prisma";
 import bcrypt from "bcryptjs";
 
 export const authOptions = {
@@ -14,7 +12,7 @@ export const authOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "text", placeholder: "jsmith@example.com" },
+        email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
@@ -40,8 +38,6 @@ export const authOptions = {
           role: user.role,
         };
       },
-      // ⚠️ Disable CSRF for credentials provider (testing only)
-      csrfToken: false,
     }),
 
     // Google OAuth login
@@ -52,11 +48,8 @@ export const authOptions = {
   ],
 
   secret: process.env.NEXTAUTH_SECRET,
-
-  session: {
-    strategy: "jwt",
-    maxAge: 60 * 60 * 2, // 2 hours
-  },
+  session: { strategy: "jwt", maxAge: 2 * 60 * 60 },
+  pages: { signIn: "/login", error: "/auth/error", newUser: "/register" },
 
   callbacks: {
     async jwt({ token, user }) {
@@ -73,12 +66,9 @@ export const authOptions = {
       }
       return session;
     },
-  },
-
-  pages: {
-    signIn: "/login",
-    error: "/auth/error",
-    newUser: "/register",
+    async redirect({ url, baseUrl }) {
+      return baseUrl; // stops automatic redirects
+    },
   },
 
   debug: true,

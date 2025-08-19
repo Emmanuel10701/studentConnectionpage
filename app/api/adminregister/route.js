@@ -1,79 +1,79 @@
-import prisma from "../../../libs/prisma";
+import prisma from '../../../libs/prisma';
+import bcrypt from 'bcryptjs';
 
-// CREATE Company (POST)
-export async function POST(request) {
+export async function POST(req) {
   try {
-    const body = await request.json();
+    const body = await req.json();
     const {
       name,
-      industry,
-      description,
-      foundedDate,
-      companySize,
-      logoUrl,
       email,
-      phone,
-      website,
+      password,
+      status,
+      department,
+      title,
+      accessLevel,
+      phoneNumber,
       street,
       city,
-      county,
-      country,
       postalCode,
-      businessRegistrationNumber,
-      kraPin,
-      businessPermitNumber,
-      licenseExpiryDate,
-      vatNumber,
-      legalName,
-      linkedin,
-      twitter,
-      facebook,
-      instagram,
+      country,
     } = body;
 
-    const newCompany = await prisma.company.create({
+    // Check if email exists in User
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      return new Response(JSON.stringify({ error: 'Email already exists' }), { status: 400 });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create User
+    const user = await prisma.user.create({
       data: {
         name,
-        industry,
-        description,
-        foundedDate: foundedDate ? new Date(foundedDate) : null,
-        companySize,
-        logoUrl,
         email,
-        phone,
-        website,
-        street,
-        city,
-        county,
-        country,
-        postalCode,
-        businessRegistrationNumber,
-        kraPin,
-        businessPermitNumber,
-        licenseExpiryDate: licenseExpiryDate ? new Date(licenseExpiryDate) : null,
-        vatNumber,
-        legalName,
-        linkedin,
-        twitter,
-        facebook,
-        instagram,
+        password: hashedPassword,
+        role: "ADMIN",
       },
     });
 
-    return new Response(JSON.stringify(newCompany), { status: 201 });
+    // Create Admin profile linked to user
+    const admin = await prisma.admin.create({
+      data: {
+        name,
+        userId: user.id,
+        email,
+        role: "ADMIN",
+        status,
+        department,
+        title,
+        accessLevel,
+        phoneNumber,
+        street,
+        city,
+        postalCode,
+        country,
+      },
+    });
+
+    return new Response(JSON.stringify({ user, admin }), { status: 201 });
   } catch (error) {
-    console.error("Error creating company:", error);
-    return new Response(JSON.stringify({ message: "Internal Server Error" }), { status: 500 });
+    console.error('POST Admin Error:', error);
+    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 }
 
-// GET ALL Companies
+// ---------------- GET: Fetch All Admins ----------------
 export async function GET() {
   try {
-    const companies = await prisma.company.findMany();
-    return new Response(JSON.stringify(companies), { status: 200 });
+    const admins = await prisma.admin.findMany();
+    return new Response(JSON.stringify(admins), { status: 200 });
   } catch (error) {
-    console.error("Error fetching companies:", error);
-    return new Response(JSON.stringify({ message: "Internal Server Error" }), { status: 500 });
+    console.error('GET Admins Error:', error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { status: 500 }
+    );
   }
 }

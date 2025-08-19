@@ -3,7 +3,7 @@ import fs from "fs/promises";
 import path from "path";
 import { NextResponse } from "next/server";
 
-// Helper: Save resume
+// Helper: Save resume file
 async function saveResumeFile(file) {
   if (!file) return null;
   const buffer = Buffer.from(await file.arrayBuffer());
@@ -18,11 +18,11 @@ async function saveResumeFile(file) {
 }
 
 // ---------------- GET: Single Student Profile ----------------
-export async function GET(req, context) {
+export async function GET(req, { params }) {
   try {
-    const id = context.params.id; // correct usage
+    const { id } = await params;
     const profile = await prisma.studentEntireProfile.findUnique({
-      where: { id }, // keep as string if Prisma schema uses String for ID
+      where: { id },
       include: {
         address: true,
         education: true,
@@ -31,37 +31,35 @@ export async function GET(req, context) {
         certifications: true,
       },
     });
-
-    if (!profile) {
-      return NextResponse.json({ message: "Profile not found" }, { status: 404 });
-    }
-
-    return NextResponse.json(profile, { status: 200 });
+    return NextResponse.json(profile || null, { status: 200 });
   } catch (err) {
     console.error("GET_SINGLE Error:", err);
-    return NextResponse.json(
-      { message: "Internal Server Error", error: err.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 
 // ---------------- PUT: Update Student Profile ----------------
 export async function PUT(req, context) {
   try {
-    const id = context.params.id;
+    const { id } = await context.params; // ✅ await params
     const formData = await req.formData();
 
     const resumeFile = formData.get("resume");
     const resumePath = resumeFile ? await saveResumeFile(resumeFile) : undefined;
 
+    const name = formData.get("name");
+    const bio = formData.get("bio") || null;
+    const summary = formData.get("summary") || null;
+    const skills = formData.get("skills") ? JSON.parse(formData.get("skills")) : undefined;
+
     const updatedProfile = await prisma.studentEntireProfile.update({
-      where: { id }, // string id
+      where: { id },
       data: {
-        name: formData.get("name"),
-        bio: formData.get("bio"),
-        summary: formData.get("summary"),
+        name,
+        bio,
+        summary,
         resumePath,
+        skills, // <-- update skills
         address: formData.get("address")
           ? { deleteMany: {}, create: JSON.parse(formData.get("address")) }
           : undefined,
@@ -105,28 +103,23 @@ export async function PUT(req, context) {
 }
 
 // ---------------- DELETE: Remove Student Profile ----------------
-export async function DELETE(req, context) {
+export async function DELETE(req, { params }) {
   try {
-    const id = context.params.id;
+    const { id } = await params;
 
-    // Delete all related children first
-    await prisma.address.deleteMany({ where: { studentEntireProfileId: id } });
-    await prisma.education.deleteMany({ where: { studentEntireProfileId: id } });
-    await prisma.experience.deleteMany({ where: { studentEntireProfileId: id } });
-    await prisma.achievements.deleteMany({ where: { studentEntireProfileId: id } });
-    await prisma.certifications.deleteMany({ where: { studentEntireProfileId: id } });
+    // Delete nested relations first
+    await prisma.address.deleteMany({ where: { studentProfileId: id } });
+    await prisma.education.deleteMany({ where: { studentProfileId: id } });
+    await prisma.experience.deleteMany({ where: { studentProfileId: id } });
+    await prisma.achievement.deleteMany({ where: { studentProfileId: id } });
+    await prisma.certification.deleteMany({ where: { studentProfileId: id } });
 
-    // Now delete the parent profile
-    await prisma.studentEntireProfile.delete({
-      where: { id },
-    });
+    // Delete the main profile
+    await prisma.studentEntireProfile.delete({ where: { id } });
 
-    return NextResponse.json({ message: "Profile deleted successfully" }, { status: 200 });
+    return NextResponse.json({ message: "Deleted successfully" }, { status: 200 });
   } catch (err) {
     console.error("DELETE Error:", err);
-    return NextResponse.json(
-      { message: "Internal Server Error", error: err.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

@@ -33,6 +33,7 @@ export async function POST(req) {
     const name = formData.get("name");
     const bio = formData.get("bio");
     const summary = formData.get("summary");
+    const skills = formData.get("skills"); // <-- new
     const resumeFile = formData.get("resume"); // Optional
     const address = formData.get("address");
     const education = formData.get("education");
@@ -51,6 +52,7 @@ export async function POST(req) {
         bio,
         summary,
         resumePath,
+        skills: skills ? JSON.parse(skills) : [], // <-- store as array
         address: address ? { create: JSON.parse(address) } : undefined,
         education: education ? { create: JSON.parse(education) } : undefined,
         experience: experience

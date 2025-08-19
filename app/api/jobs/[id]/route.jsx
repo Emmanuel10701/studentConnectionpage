@@ -1,53 +1,54 @@
-import prisma from "@/libs/prisma";
-import { NextResponse } from "next/server";
+import prisma from '../../../../libs/prisma';
+import { NextResponse } from 'next/server';
 
-// GET /api/jobs/[id] - fetch a single job by id
+// ✅ Get a single job by ID
 export async function GET(req, { params }) {
   try {
-    const { id } = params; // destructure id from params
-
+    const { id } = await params; // ✅ must await
     const job = await prisma.job.findUnique({
       where: { id },
-      include: { employer: true, applications: true },
+      include: { company: true },
     });
 
-    if (!job) return NextResponse.json({ error: "Job not found" }, { status: 404 });
+    if (!job) {
+      return NextResponse.json({ error: 'Job not found' }, { status: 404 });
+    }
 
     return NextResponse.json(job);
   } catch (err) {
-    console.error("GET Error:", err);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 
-// PUT /api/jobs/[id] - update a job
+// ✅ Update a job
 export async function PUT(req, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params; // ✅ must await
     const body = await req.json();
 
     const updatedJob = await prisma.job.update({
       where: { id },
-      data: body,
+      data: {
+        ...body,
+        salaryRange: body.salaryRange || null,
+        type: body.type || null,
+        officeType: body.officeType || null,
+      },
     });
 
     return NextResponse.json(updatedJob);
   } catch (err) {
-    console.error("PUT Error:", err);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 
-// DELETE /api/jobs/[id] - delete a job
+// ✅ Delete a job
 export async function DELETE(req, { params }) {
   try {
-    const { id } = params;
-
+    const { id } = await params; // ✅ must await
     await prisma.job.delete({ where: { id } });
-
-    return NextResponse.json({ message: "Job deleted successfully" });
+    return NextResponse.json({ message: 'Job deleted successfully' });
   } catch (err) {
-    console.error("DELETE Error:", err);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

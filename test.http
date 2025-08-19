@@ -192,3 +192,83 @@ Content-Type: application/pdf
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
 ### 5️⃣ Delete Student Profile
+
+### Credentials login (return JSON, not redirect)
+POST http://localhost:3000/api/auth/callback/credentials?json=true
+Content-Type: application/json
+
+{
+  "email": "emmanuelmakau53@gmail.com",
+  "password": "StrongPass123!",
+  "redirect": false
+}
+
+### Get session
+GET http://localhost:3000/api/auth/session
+Content-Type: application/json
+
+
+### Login with Credentials
+POST http://localhost:3000/api/auth/callback/credentials?json=true
+Content-Type: application/x-www-form-urlencoded
+
+email=emmanuelmakau53@gmail.com&password=StrongPass123!
+
+
+### Login with Credentials
+
+POST http://localhost:3000/api/auth/signin/credentials
+Content-Type: application/json
+
+{
+  "email": "emmanuelmakau53@gmail.com",
+  "password": "StrongPass123!",
+  "redirect": false
+}
+### Get session
+GET http://localhost:3000/api/auth/session
+Content-Type: application/json
+
+### Login with Credentials
+POST http://localhost:3000/api/auth/callback/credentials
+Content-Type: application/x-www-form-urlencoded
+
+email=emmanuelmakau53@gmail.com&password=StroingPass123!&redirect=false&json=true
+
+
+### Login with credentials
+POST http://localhost:3000/api/auth/callback/credentials?redirect=false
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "123456"
+}
+### Get CSRF Token
+GET http://localhost:3000/api/auth/csrf
+### Get login 
+
+
+
+
+## 4️⃣ Update Student Profile (Complete Update with skills, bio, summary
+PUT http://localhost:3000/api/studententireprofile/68a4d5dc87fb935793051197
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="name"
+
+Emmanuel Makau
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="bio"
+
+A passionate software developer student with hands-on full-stack experience.
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="summary"
+
+Motivated software engineering student focused on scalable web applications, cloud computing, and teamwork.
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="skills"
+
+["React","Django","PHP","Teamwork","Node.js","TypeScript","Tailwind CSS","Prisma"]
+------WebKitFormBoundary7MA4YWxkTrZu0gW--

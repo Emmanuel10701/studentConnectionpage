@@ -30,6 +30,8 @@ model User {
   // Relations
   employerProfile EmployerProfile?
   studentProfile  StudentProfile?
+  Admin    Admin?
+
   newsletters     Newsletter[]
   accounts        Account[]
   sessions        Session[]
@@ -132,6 +134,8 @@ model StudentEntireProfile {
   resumePath     String?
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
+  skills         String[]       // <-- Add this line for skills array
+
 
   // One-to-one relationship with Address
   address        Address?       @relation(fields: [addressId], references: [id])
@@ -189,12 +193,12 @@ model Certification {
   studentProfile    StudentEntireProfile   @relation(fields: [studentProfileId], references: [id])
 }
 // Extended student info (resume/CV builder)
-
-
 model EmployerProfile {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   userId      String   @unique @db.ObjectId
   user        User     @relation(fields: [userId], references: [id])
+  companyId   String?  @db.ObjectId  // <-- make it optional
+  company     Company? @relation(fields: [companyId], references: [id])
   companyName String
   companySize String?
   industry    String?
@@ -203,10 +207,7 @@ model EmployerProfile {
   position    String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-    jobs        Job[]    // <-- add this to link all jobs posted by this employer
-
 }
-
 
 model Company {
   id                         String            @id @default(auto()) @map("_id") @db.ObjectId
@@ -217,6 +218,8 @@ model Company {
   companySize                String
   logoUrl                    String
   email                      String
+  jobs      Job[]       // <-- add this line to establish reverse relation
+
   phone                      String
   website                    String?
   street                     String
@@ -235,15 +238,17 @@ model Company {
   facebook                   String?
   instagram                  String?
 
-  // employers                   EmployerProfile[]
-  createdAt                   DateTime @default(now())
-  updatedAt                   DateTime @updatedAt
+  employers                  EmployerProfile[] // <-- relation only, no field removed
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
 }
 
 // ================== ADMIN MODELS ==================
 model Admin {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   name        String
+  userId      String   @unique @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id])
   email       String   @unique
   role        String
   status      String
@@ -286,22 +291,23 @@ model Event {
 
 
 model Job {
-  id           String           @id @default(auto()) @map("_id") @db.ObjectId
-  employerId   String?          @db.ObjectId        // <-- make optional
-  employer     EmployerProfile? @relation(fields: [employerId], references: [id])
-  title        String
-  description  String
-  location     String
-  officeType   String?   // "Remote" | "Hybrid" | "On-site"
-  salary       String?
-  type         String    // "Full-Time", "Part-Time", "Internship"
+  id            String           @id @default(auto()) @map("_id") @db.ObjectId
+  companyId     String?          @db.ObjectId   // 👈 make optional
+  company       Company?         @relation(fields: [companyId], references: [id])
+  title         String
+  description   String
+  location      String
+  officeType    String
+  salaryRange   String?   // 👈 make it optional
+  type          String
   qualifications String?
-  skills       String?
-  benefits     String?
-  applications JobApplication[]
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  skills        String?
+  benefits      String?
+  applications  JobApplication[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
 }
+
 
 model JobApplication {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId

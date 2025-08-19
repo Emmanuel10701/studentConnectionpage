@@ -1,70 +1,71 @@
 import prisma from '../../../../libs/prisma';
+import bcrypt from 'bcryptjs';
+import { NextResponse } from 'next/server';
 
-// GET SINGLE ADMIN
+// ---------------- GET SINGLE ADMIN ----------------
 export async function GET(req, { params }) {
-  const { id } = await params; // ✅ must await
-
   try {
+    const { id } = await params; // ✅ must await
     const admin = await prisma.admin.findUnique({
       where: { id },
+      include: { user: true },
     });
 
-    if (!admin) {
-      return new Response(
-        JSON.stringify({ message: 'Admin not found' }),
-        { status: 404 }
-      );
+    return NextResponse.json(admin || null);
+  } catch (error) {
+    console.error('GET Admin Error:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+// ---------------- PUT ADMIN ----------------
+export async function PUT(req, { params }) {
+  try {
+    const { id } = await params; // ✅ must await
+    const body = await req.json();
+
+    // Protect role and userId from being changed
+    delete body.role;
+    delete body.userId;
+
+    // Handle password update separately
+    let passwordData = {};
+    if (body.password) {
+      const hashedPassword = await bcrypt.hash(body.password, 10);
+      passwordData = { user: { update: { password: hashedPassword } } };
+      delete body.password;
     }
 
-    return new Response(JSON.stringify(admin), { status: 200 });
-  } catch (error) {
-    console.error('Error fetching admin:', error);
-    return new Response(
-      JSON.stringify({ message: 'Internal Server Error' }),
-      { status: 500 }
-    );
-  }
-}
-
-// UPDATE ADMIN
-export async function PUT(req, { params }) {
-  const { id } = await params;
-  const body = await req.json();
-
-  try {
     const updatedAdmin = await prisma.admin.update({
       where: { id },
-      data: body,
+      data: {
+        ...body,
+        ...passwordData,
+      },
+      include: { user: true },
     });
 
-    return new Response(JSON.stringify(updatedAdmin), { status: 200 });
+    return NextResponse.json(updatedAdmin);
   } catch (error) {
-    console.error('Error updating admin:', error);
-    return new Response(
-      JSON.stringify({ message: 'Internal Server Error' }),
-      { status: 500 }
-    );
+    console.error('PUT Admin Error:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
-// DELETE ADMIN
+// ---------------- DELETE ADMIN ----------------
 export async function DELETE(req, { params }) {
-  const { id } = await params;
-
   try {
-    await prisma.admin.delete({
-      where: { id },
-    });
+    const { id } = await params; // ✅ must await
 
-    return new Response(
-      JSON.stringify({ message: 'Admin deleted successfully' }),
-      { status: 200 }
-    );
+    const admin = await prisma.admin.findUnique({ where: { id } });
+    if (!admin) {
+      return NextResponse.json(null);
+    }
+
+    await prisma.admin.delete({ where: { id } });
+    return NextResponse.json({ message: 'Deleted successfully' });
   } catch (error) {
-    console.error('Error deleting admin:', error);
-    return new Response(
-      JSON.stringify({ message: 'Internal Server Error' }),
-      { status: 500 }
-    );
+    console.error('DELETE Admin Error:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

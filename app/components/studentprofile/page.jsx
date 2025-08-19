@@ -298,7 +298,7 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="p-4 sm:p-8"
+            className="p-4 sm:p-8 "
         >
             <components.CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-8">
                 <div className="flex flex-col space-y-1">
@@ -785,7 +785,7 @@ const App = () => {
         ],
         achievements: [{ name: "First Place, Regional Hackathon 2024" }],
         certifications: [{ name: "React - The Complete Guide", issuingBody: "Udemy" }],
-        skills: [{ name: "Python" }, { name: "React" }, { name: "Git" }]
+        skills: [{ name: "Teamwork" }, { name: "Programming" }, { name: "Problem soving" }]
     });
     const [isEditing, setIsEditing] = useState(false);
     const [resumeFile, setResumeFile] = useState(null);
@@ -797,7 +797,7 @@ const App = () => {
     return (
         <div className="min-h-screen bg-gray-100 p-4 sm:p-10 font-sans antialiased text-gray-900 flex justify-center items-center">
             <Toaster position="top-center" reverseOrder={false} />
-            <div className="w-full max-w-4xl">
+            <div className="w-full ">
                 <components.Card>
                     <StudentProfile
                         profile={profile}

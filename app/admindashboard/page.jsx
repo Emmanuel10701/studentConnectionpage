@@ -11,6 +11,7 @@ import {
   Trash2, 
   XCircle, 
   Menu, 
+  Mail, 
   User, 
   Settings, 
   LogOut, 
@@ -20,6 +21,7 @@ import {
 } from 'lucide-react';
 import ProfileSettings from '../components/adminprofile/page.jsx';
 import Usermanagement from "../components/admintab/page.jsx"
+import Emailform from "../components/Emailform/page.jsx";
 
 // --- Mock Data ---
 const initialUsers = [
@@ -571,6 +573,8 @@ export default function CareerConnectApp() {
     { id: 'news-content', label: 'News & Content', icon: Newspaper },
     { id: 'profile-settings', label: 'Profile & Settings', icon: Settings },
     { id: 'events-calendar', label: 'Events Calendar', icon: Calendar },
+    { id: 'email-form', label: 'Email Form', icon: Mail },
+
   ];
 
   const renderContent = () => {
@@ -609,12 +613,22 @@ export default function CareerConnectApp() {
       case 'profile-settings':
         return (
           <>
-            <header className="flex justify-between items-center mb-8">
-              <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900">Profile and Settings</h1>
-            </header>
+        
             <ProfileSettings />
           </>
         );
+case 'email-form':
+  return (
+    <>
+  {/* Add padding-top so content appears below the header */}
+      <div className="pt-32 px-4">
+        <Emailform />
+      </div>
+    </>
+  );
+
+
+      
       default:
         return <DashboardOverview newsItems={newsItems} />;
     }
@@ -714,15 +728,19 @@ export default function CareerConnectApp() {
   </div>
 
   {/* Bottom Section - Admin Portal Info */}
-  <div className="mt-[98%]  border-t border-gray-100">
-    <p className="text-sm font-semibold text-gray-600">© 2025 Admin Portal</p>
-    <span className="block text-xs text-gray-400 mt-1">@Admin Portal</span>
-  </div>
+      {/* Footer */}
+      <div className="mt-10 pt-6 border-t border-gray-700">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-gray-400">© 2024 Jobs For You</span>
+        </div>
+      </div>
 </aside>
+
+
 
 {/* Main Content Area */}
 <main className="flex-1 p-4 md:p-8 md:ml-[280px] bg-gradient-to-br from-gray-50 via-white to-gray-100">
-  <header className="flex justify-end items-center mb-8 sticky top-0 z-0">
+  <header className="flex justify-end items-center mb-8 fixed right-0 top-0 z-100">
     <div className="flex items-center space-x-5 bg-white/70 backdrop-blur-xl px-6 py-3 rounded-2xl shadow-lg border border-gray-200 transition-all duration-300 hover:shadow-md">
       
       {/* Logout button */}

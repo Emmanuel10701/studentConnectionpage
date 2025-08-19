@@ -188,7 +188,7 @@ const ProfileSettings = () => {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="bg-white p-6 md:p-10 rounded-3xl shadow-lg border border-gray-100 max-w-4xl mx-auto"
+      className="bg-white p-6 md:p-10 rounded-3xl shadow-lg border border-gray-100 w-full mx-auto"
     >
       {/* Header and Avatar Section */}
       <div className="flex flex-col md:flex-row items-center md:items-start justify-between mb-8">

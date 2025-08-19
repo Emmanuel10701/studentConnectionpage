@@ -43,12 +43,12 @@ Content-Type: application/json
 
 
 ### Student Registration
-POST http://localhost:3000/api/student/router
+POST http://localhost:3000/api/student
 Content-Type: application/json
 
 {
   "name": "Alex",
-  "email": "alex.studnt@example.com",
+  "email": "alex.studnrft@example.com",
   "password": "password123",
   "institution": "State University",
   "course": "Physics",
@@ -115,15 +115,14 @@ Content-Type: application/json
   "redirect": false
 }
 
-
-### Create Student Profile
-PUT http://localhost:3000/api/studententireprofile
+### 1️⃣ Create New Student Profile
+POST http://localhost:3000/api/studententireprofile
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="userId"
 
-68a21c5d52b4b2a5451368aa
+68a4580909a0ba5464dd3c7c
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="name"
 
@@ -131,11 +130,11 @@ Emmanuel Makau
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="bio"
 
-A passionate student developer with a keen  andperfroming algreat things interest in building scalable web applications. Eager to learn new technologies and contribute to open source projects.
+A passionate student developer with keen interest in scalable web applications.
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="summary"
 
-I am a motivated and detail-oriented software engineering student with hands-on experience in full-stack development and cloud computing. I am seeking opportunities to apply my skills in a professional setting.
+Motivated software engineering student with hands-on full-stack development and cloud computing.
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="address"
 
@@ -143,11 +142,11 @@ Content-Disposition: form-data; name="address"
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="education"
 
-[{"school":"University of Technology","degree":"Bachelor of Science","fieldOfStudy":"Software Engineering","graduationYear":2025}]
+[{"school":"University of Technology","degree":"BSc","fieldOfStudy":"Software Engineering","graduationYear":2025}]
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="experience"
 
-[{"title":"Intern Developer","company":"Innovative Solutions Ltd.","startDate":"2023-06-01","endDate":"2023-08-31","description":"Assisted in the development of a web-based project management tool. Gained experience with React, Node.js, and PostgreSQL."}]
+[{"title":"Intern Developer","company":"Innovative Solutions Ltd.","startDate":"2023-06-01","endDate":"2023-08-31","description":"Worked on React/Node/PostgreSQL."}]
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="achievements"
 
@@ -163,40 +162,33 @@ Content-Type: application/pdf
 < ./path/to/your/curriculum_vitae.pdf
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
+### 2️⃣ Get All Student Profiles
+GET http://localhost:3000/api/studententireprofile
 
+### 3️⃣ Get Single Student Profile
+GET http://localhost:3000/api/studententireprofile/68a4590609a0ba5464dd3c7f
 
-### Get a single student profile
-GET http://localhost:3000/api/studententireprofile/68a22fc7794c16e67b8e7fb6
+### 4️⃣ Update Student Profile
+PUT http://localhost:3000/api/studententireprofile/68a4590609a0ba5464dd3c7f
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
-### Update a student profile (optional resume)
-PUT http://localhost:3000/api/studententireprofile/68a21c5d52b4b2a5451368aa
-Content-Type: multipart/form-data
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="name"
 
---boundary
-Content-Disposition: form-data; name="Juma Makau"
+Emmanuel Makau Updated
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="bio"
 
-Updated Name
---boundary
-Content-Disposition: form-data; name="I am a motivated and detail-oriented software engineering student with hands-on experience in full-stack development and cloud computing. I am seeking opportunities to apply my skills in a professional setting."
+Updated bio for testing.
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="summary"
 
-Updated bio here.
---boundary
-Content-Disposition: form-data; name="resume"; filename="resume.pdf"
+Updated summary for testing.
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="resume"; filename="updated_resume.pdf"
 Content-Type: application/pdf
 
-(binary content)
---boundary--
+< ./path/to/your/updated_resume.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
-### Delete a student profile
-DELETE http://localhost:3000/api/studententireprofile/68a22fc7794c16e67b8e7fb6
-
-
-#put request
-PUT http://localhost:3000/api/studententireprofile/68a21c5d52b4b2a5451368aa
-Content-Type: application/json
-
-{
-  "name": "Emmanuel Makau",
-  "bio": "Updated bio",
-  "summary": "Updated summary"
-}
+### 5️⃣ Delete Student Profile

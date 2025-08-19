@@ -272,3 +272,34 @@ Content-Disposition: form-data; name="skills"
 
 ["React","Django","PHP","Teamwork","Node.js","TypeScript","Tailwind CSS","Prisma"]
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+
+###sendemail
+POST http://localhost:3000/api/sendmail
+Content-Type: application/json
+
+{
+  "subject": "Test Newsletter",
+  "message": "<p>Hello! This is a <strong>test email</strong> using the modern template.</p>",
+  "recipients": ["subscribers", "admins"],
+  "files": [
+    {
+      "name": "example.txt",
+      "content": "VGhpcyBpcyBhIHRlc3QgZmlsZSBjb250ZW50Lg=="  // Base64 encoded text: "This is a test file content."
+    },
+    {
+      "name": "hello.pdf",
+      "content": "JVBERi0xLjQKJcTl8uXrp/Og0MTGCjEgMCBvYmoK..."  // Example base64 PDF snippet
+    }
+  ]
+}
+
+###sendmail
+POST http://localhost:3000/api/sendmail
+Content-Type: application/json
+
+{
+  "subject": "Test Newsletter",
+  "message": "<p>Hello! This is a <strong>test email</strong> using the modern template.</p>",
+  "recipients": ["subscribers"]
+}

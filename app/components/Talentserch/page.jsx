@@ -240,9 +240,12 @@ const StudentProfile = ({ student, onClose }) => {
   if (!student) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[102] flex justify-end p-4 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity duration-300">
-      <div className="relative bg-white rounded-l-3xl p-8 max-w-lg w-full h-full overflow-y-auto transform transition-transform duration-300 translate-x-0">
-        <button onClick={onClose} className="absolute top-4 left-4 text-gray-400 hover:text-gray-700 transition-colors">
+    // Backdrop for the modal, now centered
+    <div className="fixed inset-0 z-[102] flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity duration-300">
+      {/* Centered modal content */}
+      <div className="relative bg-white rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-transform duration-300">
+        {/* Close button positioned to the top right of the modal */}
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors">
           <XCircle size={28} />
         </button>
         <div className="flex flex-col items-center text-center">

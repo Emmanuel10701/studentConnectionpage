@@ -512,7 +512,7 @@ const App = () => {
               setActiveSection('TalentSearch');
               setIsSidebarOpen(false);
             }}
-            className={`flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all duration-200 ${
+            className={`flex items-center gap-4 p-4  w-full rounded-xl cursor-pointer transition-all duration-200 ${
               activeSection === 'TalentSearch'
                 ? 'bg-blue-600 text-white shadow-lg border-l-4 border-blue-400'
                 : 'hover:bg-gray-700 hover:text-white'

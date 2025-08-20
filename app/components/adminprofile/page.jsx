@@ -98,7 +98,7 @@ const ProfileSettings = () => {
   });
   
   // Custom form state and validation logic for the password section
-  const { register: registerPassword, handleSubmit: handleSubmitPassword, formState: { errors: passwordErrors }, reset: resetPassword } = useForm();
+  const { register: registerPassword, handleSubmit: handleSubmitPassword, formState: { errors: passwordErrors }, reset: resetPassword, getValues: getPasswordValues } = useForm();
   
   // Use useWatch to get a reactive value for the avatar name
   const fullName = useWatch({
@@ -126,12 +126,6 @@ const ProfileSettings = () => {
   };
 
   const handlePasswordSave = (data) => {
-    // Basic client-side validation for password match
-    if (data.newPassword !== data.confirmPassword) {
-      setPasswordError("New password and confirm password must match.");
-      return;
-    }
-
     setPasswordError('');
     setSuccessMessage('');
     console.log("Submitting password change:", data);
@@ -363,7 +357,7 @@ const ProfileSettings = () => {
                 className="mt-6 border-t border-gray-100 pt-6 overflow-hidden"
               >
                 <h3 className="text-lg font-bold text-gray-800 mb-4">New Password</h3>
-                <div className="space-y-6">
+                <div className="space-y-6 md:grid md:grid-cols-2 md:gap-6 md:space-y-0">
                   <div>
                     <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
                     <div className="relative">
@@ -405,6 +399,7 @@ const ProfileSettings = () => {
                         placeholder="Confirm new password"
                         {...registerPassword("confirmPassword", {
                           required: "Please confirm your new password.",
+                          validate: (value) => value === getPasswordValues("newPassword") || "Passwords do not match."
                         })} 
                         className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
                       />
@@ -418,7 +413,7 @@ const ProfileSettings = () => {
                     </div>
                     {passwordErrors.confirmPassword && <p className="mt-1 text-sm text-red-500">{passwordErrors.confirmPassword.message}</p>}
                   </div>
-                  <div className="flex justify-end mt-4">
+                  <div className="md:col-span-2 flex justify-end">
                     <motion.button
                       type="button"
                       onClick={handleSubmitPassword(handlePasswordSave)}

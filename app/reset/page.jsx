@@ -1,92 +1,93 @@
 "use client";
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Mail, ShieldQuestion, LoaderCircle, CheckCircle, KeyRound, Eye, EyeOff } from 'lucide-react';
-import { z } from 'zod';
 
-// Mock `next/navigation` and `react-toastify` for this environment.
-const useRouter = () => ({
-  push: (path) => console.log(`Navigating to ${path}`)
-});
-
-const toast = {
-  success: (message) => console.log(`SUCCESS: ${message}`),
-  error: (message) => console.log(`ERROR: ${message}`),
-};
-const ToastContainer = () => null;
-
-// Zod schema for password validation
-const passwordSchema = z.object({
-  newPassword: z.string().min(8, 'Password must be at least 8 characters long').regex(/[0-9]/, 'Password must contain a number').regex(/[a-zA-Z]/, 'Password must contain a letter'),
-  confirmPassword: z.string().min(8, 'Confirm Password must be at least 8 characters long'),
-}).refine(data => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import {
+  LoaderCircle,
+  KeyRound,
+  Eye,
+  EyeOff,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
 
 const ResetPasswordPage = () => {
-  const router = useRouter();
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [token, setToken] = useState('');
 
-  // Safely access token from URL
+  // States to track password conditions
+  const [hasMinLength, setHasMinLength] = useState(false);
+  const [hasNumber, setHasNumber] = useState(false);
+  const [hasLetter, setHasLetter] = useState(false);
+  const [passwordsMatch, setPasswordsMatch] = useState(false);
+
+  // This useEffect hook updates the password conditions in real-time
   useEffect(() => {
+    // Check for minimum length (at least 8 characters)
+    setHasMinLength(newPassword.length >= 8);
 
-    const mockToken = "12345-mock-token-abcde";
-    setToken(mockToken);
-  }, []);
+    // Check for at least one number using a regular expression
+    setHasNumber(/[0-9]/.test(newPassword));
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
+    // Check for at least one letter (uppercase or lowercase)
+    setHasLetter(/[a-zA-Z]/.test(newPassword));
 
-  try {
-    // Validate passwords
-    const validationResult = passwordSchema.safeParse({ newPassword, confirmPassword });
+    // Check if the two password fields match
+    setPasswordsMatch(newPassword === confirmPassword && newPassword !== "");
+  }, [newPassword, confirmPassword]);
 
-    if (!validationResult.success) {
-      const firstError = validationResult.error?.errors?.[0]?.message || "Invalid input";
-      toast.error(firstError);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    // Check all conditions are met before attempting submission
+    if (!hasMinLength || !hasNumber || !hasLetter || !passwordsMatch) {
+      // In a real application, you might show a toast or a message here.
+      // For this example, we rely on the visual list for feedback.
+      console.log("Password conditions not met. Please check the list.");
       setLoading(false);
       return;
     }
 
-    // API call to reset password
-    const res = await fetch("/api/reset", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        token,
-        newPassword
-      }),
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      toast.success(data.message || "Password reset successfully!");
-      router.push("/login");
-    } else {
-      toast.error(data.message || "Failed to reset password. Token may be invalid.");
+    // Simulate an API call for password reset
+    console.log("Submitting password reset request...");
+    try {
+      // Simulate a network delay
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      console.log("Password reset successful!");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      console.error("Failed to reset password:", error);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    toast.error("Failed to reset password");
-    console.error(error);
-  } finally {
-    setLoading(false);
-  }
-};
-
-  // Framer-motion variants for animations
-  const containerVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, staggerChildren: 0.1 } }
   };
 
-  const itemVariants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, staggerChildren: 0.1 } },
+  };
+
+  // Helper component for the list items to apply conditional styling
+  const ConditionItem = ({ condition, text }) => {
+    const iconClasses = condition ? "text-green-500" : "text-gray-400";
+    const textClasses = condition ? "text-green-300" : "text-gray-400";
+
+    // Removed motion.li to prevent the item from "flying in" on focus/change
+    return (
+      <li className="flex items-center gap-2">
+        {condition ? (
+          <CheckCircle size={18} className={iconClasses} />
+        ) : (
+          <XCircle size={18} className={iconClasses} />
+        )}
+        <span className={textClasses}>{text}</span>
+      </li>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-indigo-900 text-white flex items-center justify-center p-4 font-sans">
@@ -96,17 +97,18 @@ const handleSubmit = async (e) => {
         initial="hidden"
         animate="visible"
       >
-        {/* Dynamic decorative elements */}
+        {/* Decorative elements */}
         <div className="absolute top-0 left-0 w-24 h-24 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
         <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
 
-        <motion.div className="relative z-10 text-center" variants={itemVariants}>
+        {/* The rest of the UI (title, description) still animates in */}
+        <motion.div className="relative z-10 text-center" variants={containerVariants}>
           <div className="flex items-center justify-center mb-4">
             <KeyRound className="text-white text-4xl mr-3" />
             <h1 className="text-4xl font-extrabold tracking-tight">Reset Password</h1>
           </div>
           <p className="text-base text-gray-300 mb-6">
-            Enter your new password below. It must be at least 8 characters long and contain a letter and a number.
+            Enter your new password below.
           </p>
           <div className="flex justify-center flex-wrap gap-2 text-sm font-medium mb-8">
             <span className="bg-white/20 text-white px-3 py-1 rounded-full">#Security</span>
@@ -115,11 +117,12 @@ const handleSubmit = async (e) => {
         </motion.div>
 
         <form onSubmit={handleSubmit} className="relative z-10 space-y-6">
-          <motion.div variants={itemVariants}>
+          {/* We removed the motion.div around the input field to prevent it from animating on focus */}
+          <div>
             <div className="relative">
               <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="New Password"
@@ -134,36 +137,48 @@ const handleSubmit = async (e) => {
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div variants={itemVariants}>
-            <div className="relative">
-              <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm Password"
-                className="w-full h-14 pl-12 pr-12 bg-white/20 text-white placeholder-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-300"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors duration-200"
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
+          {/* Password Condition List */}
+          <ul
+            className="text-sm space-y-2 mt-4 p-4 rounded-xl backdrop-blur-sm bg-white/10"
+          >
+            <h3 className="text-lg font-bold text-white mb-2">Password must:</h3>
+            <ConditionItem condition={hasMinLength} text="Be at least 8 characters long" />
+            <ConditionItem condition={hasNumber} text="Contain a number" />
+            <ConditionItem condition={hasLetter} text="Contain a letter" />
+            {/* Removed the motion.div around this input field to prevent animation */}
+            <div>
+              <div className="relative mt-6">
+                <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm Password"
+                  className="w-full h-14 pl-12 pr-12 bg-white/20 text-white placeholder-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-300"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors duration-200"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
-          </motion.div>
+            <ConditionItem condition={passwordsMatch} text="Passwords match" />
+          </ul>
 
-          <motion.div variants={itemVariants}>
+          <motion.div variants={containerVariants}>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !hasMinLength || !hasNumber || !hasLetter || !passwordsMatch}
               className={`w-full h-14 rounded-xl text-white font-semibold transition-all duration-300 transform ${
-                loading ? 'bg-indigo-400 cursor-not-allowed' :
-                'bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 hover:scale-105'
+                loading || !hasMinLength || !hasNumber || !hasLetter || !passwordsMatch
+                  ? "bg-indigo-400 cursor-not-allowed"
+                  : "bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 hover:scale-105"
               }`}
             >
               {loading ? (
@@ -178,13 +193,10 @@ const handleSubmit = async (e) => {
           </motion.div>
         </form>
       </motion.div>
-      <ToastContainer />
     </div>
   );
 };
 
 export default function App() {
-  return (
-    <ResetPasswordPage />
-  )
+  return <ResetPasswordPage />;
 }

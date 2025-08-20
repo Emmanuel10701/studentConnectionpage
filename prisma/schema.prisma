@@ -278,17 +278,16 @@ model Video {
   url         String
   createdAt   DateTime @default(now())
 }
-
 model Event {
-  id       String   @id @default(auto()) @map("_id") @db.ObjectId
-  title    String
-  date     DateTime
-  time     String
-  location String
-  createdAt DateTime @default(now())
+  id               String    @id @default(auto()) @map("_id") @db.ObjectId
+  title            String
+  date             DateTime
+  time             String
+  location         String
+  registrationLink String?
+  description      String?   // Add this line
+  createdAt        DateTime  @default(now())
 }
-
-
 
 model Job {
   id            String           @id @default(auto()) @map("_id") @db.ObjectId

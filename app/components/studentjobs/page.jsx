@@ -30,92 +30,14 @@ const formatTimeAgo = (date) => {
   return 'just now';
 };
 
-// Main App component which manages the overall application state and routing
-export default function App() {
-  // State to manage the current page ('job-postings' or 'job-details')
-  const [currentPage, setCurrentPage] = useState('job-postings');
-  // State to manage the active tab on the job board ('jobs' or 'applied')
-  const [activeTab, setActiveTab] = useState('jobs');
-  // State to store the details of the currently selected job
-  const [selectedJob, setSelectedJob] = useState(null);
-  // State to store the IDs of jobs the user has applied for
-  const [appliedJobIds, setAppliedJobIds] = useState([]);
-  // Mock user profile data
-  const [profile] = useState({
-    name: 'Jane Doe',
-    email: 'jane.doe@example.edu',
-    institution: 'University of Nairobi',
-  });
-
-  // Mock job data using useMemo for performance optimization
-  const mockJobs = useMemo(() => [
-    { id: 1, employerId: '68a21c5d52b4b2a5451368aa', title: 'Full Stack Developer', employer: 'Tech Innovations Inc.', description: 'We are looking for a talented Full Stack Developer to join our dynamic team. You will be responsible for developing and maintaining robust web applications, from server-side logic to client-side UI. This role requires a strong understanding of modern web technologies and a passion for creating seamless user experiences. You will collaborate with cross-functional teams to design, develop, and deploy new features, as well as ensure the performance and scalability of our existing platforms. This is a fast-paced environment where innovation is highly valued, and you\'ll have the opportunity to work on exciting new projects that impact millions of users.', location: 'Nairobi, Kenya', officeType: 'Onsite', salary: '2,000-3,000 USD', type: 'Full-Time', qualifications: 'BSc in Computer Science, or a related field. Proven experience in web development is a must. You should have a strong portfolio showcasing your projects. Experience with Agile/Scrum methodologies is a plus.', skills: ['React', 'Node.js', 'Prisma', 'MongoDB', 'JavaScript', 'HTML', 'CSS', 'REST APIs', 'Git'], benefits: 'Comprehensive health insurance, Remote work options, Paid time off, Professional development budget, Annual bonus', industry: 'Technology', postDate: new Date('2025-08-15T10:00:00Z') },
-    { id: 2, employerId: '68a21c5d52b4b2a5451368ab', title: 'Junior Financial Analyst', employer: 'Global Finance Group', description: 'Join our team as a Junior Financial Analyst and contribute to our client portfolio management. You will perform in-depth financial data analysis, assist in preparing detailed reports, and support senior analysts in various financial modeling tasks. This role is a great opportunity for a recent graduate to gain hands-on experience in the finance industry. You will be exposed to a wide range of financial instruments and market dynamics, and receive mentorship from seasoned professionals. Strong analytical skills and a meticulous attention to detail are key to success in this position.', location: 'London, UK', officeType: 'Hybrid', salary: '2,500-3,500 GBP', type: 'Full-Time', qualifications: 'Bachelor\'s degree in Finance, Economics, or a quantitative field. Prior internship experience in a financial role is highly preferred. Proficiency in financial software and tools is a plus.', skills: ['Financial Analysis', 'Excel', 'Data Modeling', 'Reporting', 'Market Research', 'SQL'], benefits: 'Competitive salary, Performance-based bonus, Pension plan, Health and dental coverage', industry: 'Finance', postDate: new Date('2025-08-14T15:30:00Z') },
-    { id: 3, employerId: '68a21c5d52b4b2a5451368ac', title: 'Marketing Assistant', employer: 'Creative Marketing Solutions', description: 'We are seeking a creative and enthusiastic Marketing Assistant to support our team in developing and executing marketing campaigns. You will play a crucial role in managing our social media presence, creating engaging content, and analyzing campaign performance. This position offers a hands-on learning experience and the chance to contribute to impactful marketing strategies. You should be passionate about brand storytelling and audience engagement. We value fresh ideas and a collaborative spirit, so bring your creativity and willingness to learn!', location: 'New York, USA', officeType: 'Remote', salary: '1,500-2,500 USD', type: 'Internship', qualifications: 'Pursuing or holding a degree in Marketing, Communications, or a related field. Strong writing and communication skills are essential. Experience with social media platforms and content creation tools is a plus.', skills: ['Social Media Management', 'Content Creation', 'SEO', 'Email Marketing', 'Analytics', 'Copywriting'], benefits: 'Flexible work schedule, Remote-first culture, Mentorship program, Networking opportunities', industry: 'Marketing', postDate: new Date('2025-08-13T09:45:00Z') },
-    { id: 4, employerId: '68a21c5d52b4b2a5451368ad', title: 'Environmental Research Associate', employer: 'Eco-Solutions Africa', description: 'As an Environmental Research Associate, you will conduct cutting-edge research on sustainable practices and environmental conservation. Your responsibilities will include data collection, analysis, and report writing, as well as assisting with field work. This role is ideal for a dedicated individual who wants to make a real-world impact. You will work on projects focused on renewable energy, waste management, and biodiversity preservation. The ideal candidate has a strong academic background and a deep commitment to environmental stewardship.', location: 'Cape Town, South Africa', officeType: 'Onsite', salary: '1,800-2,800 ZAR', type: 'Full-Time', qualifications: 'Master\'s degree in Environmental Science or a related discipline. Experience with research methods and statistical analysis is required. Must be comfortable with fieldwork.', skills: ['Research', 'Data Analysis', 'Fieldwork', 'Environmental Policy', 'Report Writing'], benefits: 'Field allowance, Health insurance, Opportunities for international conferences, Collaborative work environment', industry: 'Environmental', postDate: new Date('2025-08-12T11:20:00Z') },
-    { id: 5, employerId: '68a21c5d52b4b2a5451368ae', title: 'Data Scientist Intern', employer: 'Innovate Med', description: 'Join our team as a Data Scientist Intern and contribute to the future of healthcare. You will work with a team of experts to analyze patient data, develop predictive models, and extract valuable insights to improve patient outcomes. This internship provides a unique opportunity to apply your skills in a high-impact setting. You will be responsible for cleaning and preprocessing data, building and validating machine learning models, and presenting your findings to the team. A solid foundation in statistics, programming, and machine learning concepts is crucial.', location: 'Boston, USA', officeType: 'Hybrid', salary: '25-30 USD/hour', type: 'Internship', qualifications: 'Currently enrolled in a Bachelor\'s or Master\'s program in Data Science, Statistics, Computer Science, or a related field. Experience with Python/R and data science libraries is required.', skills: ['Python', 'Machine Learning', 'Data Analysis', 'SQL', 'Predictive Modeling', 'Data Visualization'], benefits: 'Flexible hours, Mentorship, Access to cutting-edge technology, Possibility of full-time offer upon completion', industry: 'Healthcare', postDate: new Date('2025-08-11T14:10:00Z') },
-    { id: 6, employerId: '68a21c5d52b4b2a5451368af', title: 'Full Stack Developer', employer: 'FutureTech Solutions', description: 'Develop robust, scalable web applications from front to back-end. You will work on a variety of projects, from internal tools to public-facing applications. We are looking for a creative problem-solver who can handle all aspects of the development lifecycle. The ideal candidate is self-motivated and passionate about writing clean, efficient, and well-documented code. You will work in a collaborative environment with other talented engineers, and will be expected to contribute ideas and solutions to complex technical challenges.', location: 'San Francisco, USA', officeType: 'Onsite', salary: '120,000-150,000 USD', type: 'Full-Time', qualifications: 'At least 3 years of professional experience in full-stack development. Strong command of multiple programming languages and frameworks. Experience with cloud platforms like AWS or Azure is highly desirable.', skills: ['React', 'Angular', 'Java', 'Spring Boot', 'SQL', 'CI/CD'], benefits: 'Unlimited paid time off, 401(k) matching, Stock options, Free meals and snacks, On-site gym', industry: 'Technology', postDate: new Date('2025-08-10T16:00:00Z') },
-    { id: 7, employerId: '68a21c5d52b4b2a5451368b0', title: 'Renewable Energy Technician', employer: 'Green Energy Co.', description: 'We are looking for a skilled Renewable Energy Technician to install and maintain solar power systems for our commercial and residential clients. This is a hands-on role that requires technical expertise and a strong commitment to safety. You will be responsible for system installation, troubleshooting, and repairs. The job involves working outdoors and at heights, so physical fitness is essential. We provide comprehensive training and all necessary equipment to ensure you can perform your job safely and effectively. Join us and help power the future!', location: 'Nairobi, Kenya', officeType: 'Onsite', salary: '1,200-1,800 USD', type: 'Full-Time', qualifications: 'Technical diploma or certification in electrical systems, solar technology, or a related field. Prior experience in solar installation or a similar trade is required. Must be a valid driver\'s license.', skills: ['Solar Panel Installation', 'Electrical Systems', 'Troubleshooting', 'Safety Protocols', 'Maintenance'], benefits: 'Fieldwork bonuses, All tools provided, Paid training, Health and life insurance', industry: 'Environmental', postDate: new Date('2025-08-09T08:00:00Z') },
-    { id: 8, employerId: '68a21c5d52b4b2a5451368b1', title: 'Business Analyst', employer: 'Data Insights Ltd.', description: 'As a Business Analyst, you will be the bridge between our business and technical teams. You will be responsible for gathering and documenting requirements, analyzing data to provide actionable insights, and making recommendations to improve business processes. This role requires a blend of strong communication skills, analytical thinking, and technical knowledge. You will work closely with stakeholders to understand their needs and translate them into clear specifications. We are looking for someone who is a natural problem-solver and can think critically about business challenges.', location: 'London, UK', officeType: 'Hybrid', salary: '45,000-55,000 GBP', type: 'Full-Time', qualifications: 'Bachelor\'s degree in Business, IT, or a related field. At least 2 years of experience as a business analyst. Proficiency in data analysis tools like Tableau or Power BI is a plus.', skills: ['Business Analysis', 'Requirements Gathering', 'Data Analysis', 'SQL', 'Process Mapping'], benefits: 'Generous holiday allowance, Flexible working hours, Professional development support, Company pension scheme', industry: 'Technology', postDate: new Date('2025-08-08T12:00:00Z') },
-    { id: 9, employerId: '68a21c5d52b4b2a5451368b2', title: 'Portfolio Management Intern', employer: 'Capital Investments', description: 'This internship is an excellent entry point into the world of investment management. You will support our investment team with market research, financial modeling, and portfolio analysis. You will be exposed to real-world investment decisions and gain a deep understanding of capital markets. This role requires a strong quantitative aptitude and a genuine interest in finance. You will be assigned a mentor who will guide you through various projects and help you build a solid foundation for a career in finance. We are looking for proactive and driven individuals who are eager to learn.', location: 'New York, USA', officeType: 'Onsite', salary: '20 USD/hour', type: 'Internship', qualifications: 'Currently enrolled in a Bachelor\'s or Master\'s program in Finance, Business, or a related field. Strong analytical skills and proficiency in Excel are essential. Must be a self-starter.', skills: ['Financial Modeling', 'Market Research', 'Excel', 'Valuation', 'Financial Statement Analysis'], benefits: 'Mentorship program, Networking events, Subway pass, Flexible schedule', industry: 'Finance', postDate: new Date('2025-08-07T13:30:00Z') },
-  ], []);
-  
-  // Generates mock applicant data for a given job post
-  const generateMockApplicants = (count) => {
-    const applicantNames = ['John Smith', 'Emily Chen', 'David Garcia', 'Sarah Brown', 'Michael Kim', 'Jessica Lee', 'Chris Evans', 'Olivia Wilson', 'Daniel Johnson', 'Amanda Martinez', 'Brian Adams', 'Lisa Rodriguez', 'Kevin Baker', 'Ashley Green', 'Mark Davis', 'Nicole King', 'Justin Hall', 'Rachel Perez', 'Thomas Moore', 'Hannah Wright'];
-    const institutions = ['University of Nairobi', 'Harvard University', 'Stanford University', 'MIT', 'University of Oxford', 'Cambridge University', 'Makerere University', 'University of Cape Town'];
-    const applicants = [];
-    for (let i = 0; i < count; i++) {
-      const name = applicantNames[Math.floor(Math.random() * applicantNames.length)];
-      const institution = institutions[Math.floor(Math.random() * institutions.length)];
-      applicants.push({
-        id: i,
-        name,
-        institution,
-        profileSummary: 'A highly motivated and enthusiastic candidate with a passion for problem-solving.'
-      });
-    }
-    return applicants;
-  };
-
-  // Handles the click on a job card to show job details
-  const handleApplyClick = (job) => {
-    setSelectedJob(job);
-    setCurrentPage('job-details');
-  };
-
-  // Callback function after a job has been successfully applied for
-  const handleJobApplied = (jobId) => {
-    setAppliedJobIds(prevIds => [...prevIds, jobId]);
-    setCurrentPage('job-postings');
-  };
-
-  // The main application layout with conditional rendering for different pages
-  return (
-    <div className="min-h-screen w-full bg-gray-100 p-4 md:p-8 font-sans antialiased text-gray-800">
-      <div className="w-full max-w-7xl mx-auto">
-        {currentPage === 'job-postings' && (
-          <JobPostings
-            onApply={handleApplyClick}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            appliedJobIds={appliedJobIds}
-            mockJobs={mockJobs}
-          />
-        )}
-        {currentPage === 'job-details' && (
-          <JobDetails
-            job={selectedJob}
-            profile={profile}
-            onGoBack={() => setCurrentPage('job-postings')}
-            onJobApplied={handleJobApplied}
-            generateMockApplicants={generateMockApplicants}
-          />
-        )}
-      </div>
-    </div>
-  );
-}
+// Map to select the correct icon for each job industry
+const IndustryIconMap = {
+  'Technology': Code,
+  'Finance': DollarSign,
+  'Marketing': Megaphone,
+  'Environmental': Leaf,
+  'Healthcare': HeartPulse
+};
 
 // Reusable Back Button component
 const BackButton = ({ onClick }) => (
@@ -153,15 +75,6 @@ const MessageBox = ({ message, type, onClose }) => {
       </button>
     </motion.div>
   );
-};
-
-// Map to select the correct icon for each job industry
-const IndustryIconMap = {
-  'Technology': Code,
-  'Finance': DollarSign,
-  'Marketing': Megaphone,
-  'Environmental': Leaf,
-  'Healthcare': HeartPulse
 };
 
 // Component to display the list of applied jobs
@@ -210,21 +123,18 @@ const AppliedJobs = ({ appliedJobs }) => {
 };
 
 // Component that displays the main job board with search and filters
-const JobPostings = ({ onApply, activeTab, setActiveTab, appliedJobIds, mockJobs }) => {
-  const uniqueIndustries = [...new Set(mockJobs.map(job => job.industry))];
-  const uniqueLocations = [...new Set(mockJobs.map(job => job.location))];
+const JobPostings = ({ onApply, activeTab, setActiveTab, appliedJobIds, jobs, isLoading, error }) => {
+  const uniqueIndustries = useMemo(() => [...new Set(jobs.map(job => job.industry))], [jobs]);
+  const uniqueLocations = useMemo(() => [...new Set(jobs.map(job => job.location))], [jobs]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedIndustry, setSelectedIndustry] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
   const [sortBy, setSortBy] = useState('latest');
-  const [isLoading] = useState(false);
-  const [error] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const jobsPerPage = 4;
+  const jobsPerPage = 6;
 
-  // Memoized function to filter and sort jobs based on user input
   const filteredAndSortedJobs = useMemo(() => {
-    const jobsToDisplay = activeTab === 'jobs' ? mockJobs.filter(job => !appliedJobIds.includes(job.id)) : mockJobs.filter(job => appliedJobIds.includes(job.id));
+    const jobsToDisplay = activeTab === 'jobs' ? jobs.filter(job => !appliedJobIds.includes(job.id)) : jobs.filter(job => appliedJobIds.includes(job.id));
     const filtered = jobsToDisplay.filter(job => {
       const matchesSearchTerm = job.title.toLowerCase().includes(searchTerm.toLowerCase()) || job.employer.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesIndustry = selectedIndustry === '' || job.industry === selectedIndustry;
@@ -233,20 +143,19 @@ const JobPostings = ({ onApply, activeTab, setActiveTab, appliedJobIds, mockJobs
     });
     const sorted = filtered.sort((a, b) => {
       if (sortBy === 'latest') {
-        return b.postDate - a.postDate;
+        return b.postDate.getTime() - a.postDate.getTime();
       } else {
-        return a.postDate - b.postDate;
+        return a.postDate.getTime() - b.postDate.getTime();
       }
     });
     return sorted;
-  }, [searchTerm, selectedIndustry, selectedLocation, activeTab, appliedJobIds, mockJobs, sortBy]);
+  }, [searchTerm, selectedIndustry, selectedLocation, activeTab, appliedJobIds, jobs, sortBy]);
 
   const totalPages = Math.ceil(filteredAndSortedJobs.length / jobsPerPage);
   const indexOfLastJob = currentPage * jobsPerPage;
   const indexOfFirstJob = indexOfLastJob - jobsPerPage;
   const currentJobs = filteredAndSortedJobs.slice(indexOfFirstJob, indexOfLastJob);
 
-  // Function to clear all search and filter options
   const handleClearFilters = () => {
     setSearchTerm('');
     setSelectedIndustry('');
@@ -254,7 +163,6 @@ const JobPostings = ({ onApply, activeTab, setActiveTab, appliedJobIds, mockJobs
     setCurrentPage(1);
   };
 
-  // Renders the pagination buttons
   const renderPageNumbers = () => {
     const pageNumbers = [];
     for (let i = 1; i <= totalPages; i++) {
@@ -273,21 +181,23 @@ const JobPostings = ({ onApply, activeTab, setActiveTab, appliedJobIds, mockJobs
     return pageNumbers;
   };
 
-  // Renders the list of jobs based on the active tab
   const renderJobs = () => {
+    if (isLoading) {
+      return <p className="text-center py-8 text-gray-500">Loading jobs...</p>;
+    }
+    if (error) {
+      return <p className="text-center py-8 text-red-500">Error: {error}</p>;
+    }
     if (activeTab === 'jobs') {
       return (
-        <AnimatePresence>
+        <>
           {currentJobs.length > 0 ? (
             currentJobs.map(job => {
               const IconComponent = IndustryIconMap[job.industry] || Briefcase;
               const isApplied = appliedJobIds.includes(job.id);
               return (
-                <motion.div
+                <div
                   key={job.id}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
                   className="bg-gray-50 p-6 rounded-3xl border border-gray-200 hover:shadow-lg transition-shadow duration-300 cursor-pointer"
                   onClick={() => onApply(job)}
                 >
@@ -314,7 +224,7 @@ const JobPostings = ({ onApply, activeTab, setActiveTab, appliedJobIds, mockJobs
                       'Click for details & Apply'
                     )}
                   </p>
-                </motion.div>
+                </div>
               );
             })
           ) : (
@@ -322,10 +232,10 @@ const JobPostings = ({ onApply, activeTab, setActiveTab, appliedJobIds, mockJobs
               No new jobs found matching your criteria.
             </motion.p>
           )}
-        </AnimatePresence>
+        </>
       );
     } else {
-      const appliedJobs = mockJobs.filter(job => appliedJobIds.includes(job.id));
+      const appliedJobs = jobs.filter(job => appliedJobIds.includes(job.id));
       return <AppliedJobs appliedJobs={appliedJobs} />;
     }
   };
@@ -414,7 +324,9 @@ const JobPostings = ({ onApply, activeTab, setActiveTab, appliedJobIds, mockJobs
             </div>
           </div>
         )}
-        {renderJobs()}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {renderJobs()}
+        </div>
         {totalPages > 1 && (
           <div className="mt-8 flex justify-center items-center gap-2">
             <button
@@ -440,35 +352,67 @@ const JobPostings = ({ onApply, activeTab, setActiveTab, appliedJobIds, mockJobs
 };
 
 // Component that displays the detailed view of a single job
-const JobDetails = ({ job, profile, onGoBack, onJobApplied, generateMockApplicants }) => {
+const JobDetails = ({ job, profile, onGoBack, onJobApplied }) => {
   const [isApplying, setIsApplying] = useState(false);
   const [message, setMessage] = useState(null);
-  const [applicants, setApplicants] = useState([]);
+  const [applicantCount, setApplicantCount] = useState(0);
   const [showCoverLetterModal, setShowCoverLetterModal] = useState(false);
+  const [applicantsLoading, setApplicantsLoading] = useState(true);
 
   useEffect(() => {
-    // We no longer need to generate mock applicants, but we'll keep the function for now
-    // and just set the applicants state to an empty array.
-    setApplicants([]);
-  }, [generateMockApplicants]);
+    const fetchApplicantCount = async () => {
+      if (!job || !job.id) return;
+      setApplicantsLoading(true);
+      try {
+        const response = await fetch(`http://localhost:3000/api/applied?jobId=${job.id}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch applicant count');
+        }
+        const data = await response.json();
+        setApplicantCount(data.length);
+      } catch (err) {
+        console.error('Error fetching applicant count:', err);
+        setApplicantCount(0); // Default to 0 on error
+      } finally {
+        setApplicantsLoading(false);
+      }
+    };
+    fetchApplicantCount();
+  }, [job]);
 
-  // Handle the "Apply Now" button click to show the cover letter modal
   const handleApplyClick = () => {
     setShowCoverLetterModal(true);
   };
 
-  // Handle the final application submission with the cover letter
-  const handleFinalApplication = (coverLetter) => {
+  const handleFinalApplication = async (coverLetter) => {
     setIsApplying(true);
     setShowCoverLetterModal(false);
 
-    // Simulate an API call with a delay
-    setTimeout(() => {
-      setIsApplying(false);
+    try {
+      const response = await fetch(`http://localhost:3000/api/applications`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          jobId: job.id,
+          applicantName: profile.name,
+          email: profile.email,
+          coverLetter: coverLetter
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit application');
+      }
+
       setMessage({ type: 'success', text: 'Application submitted successfully!' });
-      // Call the parent function to update the applied jobs list
       onJobApplied(job.id);
-    }, 2000);
+    } catch (err) {
+      setMessage({ type: 'error', text: 'Error submitting application. Please try again.' });
+    } finally {
+      setIsApplying(false);
+    }
   };
 
   const IconComponent = IndustryIconMap[job.industry] || Briefcase;
@@ -482,9 +426,15 @@ const JobDetails = ({ job, profile, onGoBack, onJobApplied, generateMockApplican
       className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100"
     >
       <BackButton onClick={onGoBack} />
-      {message && (
-        <MessageBox message={message.text} type={message.type} onClose={() => setMessage(null)} />
-      )}
+      <AnimatePresence>
+        {message && (
+          <MessageBox
+            message={message.text}
+            type={message.type}
+            onClose={() => setMessage(null)}
+          />
+        )}
+      </AnimatePresence>
       <div className="flex items-center gap-4 mb-4">
         <div className="p-4 bg-purple-100 rounded-xl text-purple-600">
           <IconComponent size={32} />
@@ -494,101 +444,95 @@ const JobDetails = ({ job, profile, onGoBack, onJobApplied, generateMockApplican
           <p className="text-sm text-gray-600">{job.employer}</p>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        <div className="flex items-center gap-2 text-gray-700">
-          <Building2 size={18} />
-          <span className="font-medium">{job.officeType}</span>
+        <div className="flex items-center gap-3">
+          <MapPin size={20} className="text-gray-500" />
+          <p className="text-gray-700">{job.location}</p>
         </div>
-        <div className="flex items-center gap-2 text-gray-700">
-          <MapPin size={18} />
-          <span className="font-medium">{job.location}</span>
+        <div className="flex items-center gap-3">
+          <Building2 size={20} className="text-gray-500" />
+          <p className="text-gray-700">{job.officeType}</p>
         </div>
-        <div className="flex items-center gap-2 text-gray-700">
-          <CircleDollarSign size={18} />
-          <span className="font-medium">{job.salary}</span>
+        <div className="flex items-center gap-3">
+          <CircleDollarSign size={20} className="text-gray-500" />
+          <p className="text-gray-700">{job.salary}</p>
         </div>
       </div>
 
       <div className="mb-8">
-        <h3 className="text-lg font-bold text-gray-900 mb-2">Job Description</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">Job Description</h3>
         <p className="text-gray-700 leading-relaxed">{job.description}</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-        <div>
-          <h3 className="text-lg font-bold text-gray-900 mb-2">Qualifications</h3>
-          <p className="text-gray-700 leading-relaxed">{job.qualifications}</p>
-        </div>
-        <div>
-          <h3 className="text-lg font-bold text-gray-900 mb-2">Skills Required</h3>
-          <div className="flex flex-wrap gap-2">
-            {job.skills.map(skill => (
-              <span key={skill} className="bg-purple-100 text-purple-800 text-sm font-medium px-3 py-1 rounded-full">
-                {skill}
-              </span>
-            ))}
+      <div className="mb-8">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">Key Requirements</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+            <h4 className="flex items-center gap-2 font-medium text-gray-800 mb-2"><NotebookPen size={18} /> Qualifications</h4>
+            <p className="text-sm text-gray-600">{job.qualifications}</p>
+          </div>
+          <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+            <h4 className="flex items-center gap-2 font-medium text-gray-800 mb-2"><ListChecks size={18} /> Skills</h4>
+            <p className="text-sm text-gray-600">{Array.isArray(job.skills) ? job.skills.join(', ') : job.skills}</p>
+          </div>
+          <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+            <h4 className="flex items-center gap-2 font-medium text-gray-800 mb-2"><HeartPulse size={18} /> Benefits</h4>
+            <p className="text-sm text-gray-600">{Array.isArray(job.benefits) ? job.benefits.join(', ') : job.benefits}</p>
           </div>
         </div>
       </div>
 
-      <div className="mb-8">
-        <h3 className="text-lg font-bold text-gray-900 mb-2">Benefits</h3>
-        <ul className="list-disc list-inside text-gray-700">
-          {job.benefits.split(',').map(benefit => (
-            <li key={benefit.trim()}>{benefit.trim()}</li>
-          ))}
-        </ul>
+      <div className="mb-8 p-6 bg-purple-50 rounded-2xl border border-purple-200 flex flex-col md:flex-row items-start md:items-center gap-4">
+        <div className="p-3 rounded-full bg-white text-purple-600 shadow-sm flex-shrink-0">
+          <Fingerprint size={24} />
+        </div>
+        <div>
+          <h4 className="text-lg font-semibold text-purple-800">Your Profile</h4>
+          <p className="text-purple-700">Name: <span className="font-medium">{profile.name}</span></p>
+          <p className="text-purple-700">Institution: <span className="font-medium">{profile.institution}</span></p>
+        </div>
+        <motion.button
+          onClick={handleApplyClick}
+          disabled={isApplying}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="ml-auto w-full md:w-auto px-8 py-3 bg-purple-600 text-white rounded-full font-bold shadow-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isApplying ? 'Applying...' : 'Apply Now'}
+        </motion.button>
       </div>
 
       <div className="mb-8">
-        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <Users size={20} className="text-blue-600" />
-          Our Commitment to Diversity
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <Users size={20} /> Applicants for this Job
         </h3>
-        <p className="text-gray-700 leading-relaxed">
-          At {job.employer}, we believe a diverse team is a stronger team. We are committed to fostering an inclusive environment that values unique perspectives and experiences. We encourage applications from all qualified candidates, regardless of background, race, ethnicity, religion, or gender identity.
-        </p>
+        <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+          <p className="text-sm text-gray-600">
+            Total applicants: {applicantsLoading ? 'Loading...' : applicantCount}
+          </p>
+        </div>
       </div>
 
-      <button
-        onClick={handleApplyClick}
-        disabled={isApplying}
-        className="w-fit mx-auto md:w-80 py-4 px-6 rounded-2xl bg-purple-600 text-white font-bold text-lg hover:bg-purple-700 transition-colors shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-      >
-        {isApplying ? (
-          <>
-            <Fingerprint size={20} className="animate-pulse" />
-            Submitting...
-          </>
-        ) : (
-          <>
-            <NotebookPen size={20} />
-            Apply Now
-          </>
-        )}
-      </button>
-
-      <AnimatePresence>
-        {showCoverLetterModal && (
-          <CoverLetterModal
-            onClose={() => setShowCoverLetterModal(false)}
-            onSubmit={handleFinalApplication}
-          />
-        )}
-      </AnimatePresence>
+      {showCoverLetterModal && (
+        <CoverLetterModal
+          profile={profile}
+          job={job}
+          onClose={() => setShowCoverLetterModal(false)}
+          onApply={handleFinalApplication}
+        />
+      )}
     </motion.div>
   );
 };
 
-// New Modal component for the cover letter input
-const CoverLetterModal = ({ onClose, onSubmit }) => {
+// Component for the cover letter modal
+const CoverLetterModal = ({ profile, job, onClose, onApply }) => {
   const [coverLetter, setCoverLetter] = useState('');
 
-  const handleSubmit = () => {
-    if (coverLetter.trim()) {
-      onSubmit(coverLetter);
-    }
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onApply(coverLetter);
   };
 
   return (
@@ -596,49 +540,145 @@ const CoverLetterModal = ({ onClose, onSubmit }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50"
     >
       <motion.div
-        initial={{ scale: 0.9, opacity: 0, y: 50 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.9, opacity: 0, y: 50 }}
-        transition={{ type: "spring", stiffness: 300, damping: 25 }}
-        className="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-2xl relative"
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 50, opacity: 0 }}
+        className="bg-white p-8 rounded-3xl shadow-xl w-full max-w-2xl relative"
       >
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 transition-colors">
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
           <X size={24} />
         </button>
-        <h3 className="text-xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-          <ClipboardList size={24} className="text-purple-600" />
-          Your Cover Letter
-        </h3>
-        <p className="text-sm text-gray-600 mb-4">
-          Please write or paste your cover letter below. This will be sent with your application.
-        </p>
-        <textarea
-          value={coverLetter}
-          onChange={(e) => setCoverLetter(e.target.value)}
-          placeholder="Start writing your cover letter here..."
-          rows="10"
-          className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-shadow mb-4 text-sm"
-        />
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="px-6 py-3 text-sm font-semibold rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={!coverLetter.trim()}
-            className="px-6 py-3 text-sm font-semibold rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            <CheckSquare size={18} />
-            Send Application
-          </button>
-        </div>
+        <h3 className="text-2xl font-bold text-gray-900 mb-2">Apply for {job.title}</h3>
+        <p className="text-sm text-gray-600 mb-6">Employer: {job.employer}</p>
+
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="block text-gray-700 font-semibold mb-2">Your Information</label>
+            <div className="p-4 bg-gray-100 rounded-xl space-y-2">
+              <p className="text-gray-800 flex items-center gap-2"><User size={16} /> Name: {profile.name}</p>
+              <p className="text-gray-800 flex items-center gap-2"><Mail size={16} /> Email: {profile.email}</p>
+              <p className="text-gray-800 flex items-center gap-2"><Building2 size={16} /> Institution: {profile.institution}</p>
+            </div>
+          </div>
+          <div className="mb-6">
+            <label htmlFor="coverLetter" className="block text-gray-700 font-semibold mb-2">Cover Letter</label>
+            <textarea
+              id="coverLetter"
+              value={coverLetter}
+              onChange={(e) => setCoverLetter(e.target.value)}
+              rows="6"
+              className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-shadow text-gray-800"
+              placeholder="Write a compelling cover letter here..."
+              required
+            ></textarea>
+          </div>
+          <div className="flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-6 py-3 text-sm font-semibold rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-3 text-sm font-semibold rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-colors shadow-md"
+            >
+              Submit Application
+            </button>
+          </div>
+        </form>
       </motion.div>
     </motion.div>
   );
 };
+
+// Main App component which manages the overall application state and routing
+export default function App() {
+  const [currentPage, setCurrentPage] = useState('job-postings');
+  const [activeTab, setActiveTab] = useState('jobs');
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [appliedJobIds, setAppliedJobIds] = useState([]);
+  const [profile] = useState({
+    name: 'Jane Doe',
+    email: 'jane.doe@example.edu',
+    institution: 'University of Nairobi',
+  });
+
+  const [apiJobs, setApiJobs] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch('http://localhost:3000/api/jobs/');
+        if (!response.ok) {
+          throw new Error('Failed to fetch jobs');
+        }
+        const data = await response.json();
+        const formattedJobs = data.map(job => ({
+          id: job.id,
+          title: job.title,
+          employer: job.company?.name || 'N/A',
+          description: job.description,
+          location: job.location,
+          officeType: job.officeType,
+          salary: job.salaryRange,
+          type: job.type,
+          qualifications: job.qualifications,
+          skills: job.skills,
+          benefits: job.benefits,
+          industry: job.company?.industry || 'N/A',
+          postDate: new Date(job.createdAt)
+        }));
+        setApiJobs(formattedJobs);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchJobs();
+  }, []);
+
+  const handleApplyClick = (job) => {
+    setSelectedJob(job);
+    setCurrentPage('job-details');
+  };
+
+  const handleJobApplied = (jobId) => {
+    setAppliedJobIds(prevIds => [...prevIds, jobId]);
+    setCurrentPage('job-postings');
+  };
+
+  return (
+    <div className="min-h-screen w-full bg-gray-100 p-4 md:p-8 font-sans antialiased text-gray-800">
+      <div className="w-full max-w-7xl mx-auto">
+        {currentPage === 'job-postings' && (
+          <JobPostings
+            onApply={handleApplyClick}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            appliedJobIds={appliedJobIds}
+            jobs={apiJobs}
+            isLoading={isLoading}
+            error={error}
+          />
+        )}
+        {currentPage === 'job-details' && (
+          <JobDetails
+            job={selectedJob}
+            profile={profile}
+            onGoBack={() => setCurrentPage('job-postings')}
+            onJobApplied={handleJobApplied}
+          />
+        )}
+      </div>
+    </div>
+  );
+}

@@ -729,9 +729,9 @@ case 'email-form':
 
   {/* Bottom Section - Admin Portal Info */}
       {/* Footer */}
-      <div className="mt-10 pt-6 border-t border-gray-700">
+      <div className="md:hidden mt-10 pt-6 border-t border-gray-700">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-400">© 2024 Jobs For You</span>
+          <span className="text-sm text-gray-400">© 2025 admin dashboard</span>
         </div>
       </div>
 </aside>

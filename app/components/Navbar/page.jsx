@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 
 // This is a simulated backend API for the purpose of this demo.
 // In a real Next.js application, this would be a separate API route.
@@ -111,14 +112,13 @@ export default function Navbar() {
       <div className="container mx-auto flex justify-between items-center px-4 py-3">
         {/* Logo */}
         <a href="/" className="flex items-center space-x-2">
-          <img
-            src="https://placehold.co/40x40/1d4ed8/ffffff?text=Logo"
+          <Image
+            src="/leaders/KCUTSA_LOGO.png"
             alt="Logo"
-            width={40}
-            height={40}
-            className="rounded-full ring-2 ring-blue-500"
+            width={60}
+            height={50}
+            className="rounded-md  ring-2 ring-blue-500"
           />
-          <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Community</span>
         </a>
 
         {/* Hamburger and News for mobile */}

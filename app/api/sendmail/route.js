@@ -62,8 +62,8 @@ export async function POST(request) {
       <div style="font-family: 'Inter', 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f0f4f8; padding: 40px 20px; text-align: center;">
         <div style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); max-width: 600px; margin: auto; overflow: hidden;">
           <div style="background-color: #4a90e2; color: #ffffff; padding: 30px 20px; text-align: center;">
-            <h1 style="margin: 0; font-size: 28px; font-weight: 600;">Prescripto Newsletter</h1>
-            <p style="margin: 5px 0 0; font-size: 16px; opacity: 0.9;">Your latest updates from the Prescripto team</p>
+            <h1 style="margin: 0; font-size: 28px; font-weight: 600;">KTSCU Newsletter</h1>
+            <p style="margin: 5px 0 0; font-size: 16px; opacity: 0.9;">Your latest updates from the KTSCU team</p>
           </div>
           <div style="padding: 30px;">
             <div style="text-align: left; font-size: 16px; color: #555;">
@@ -71,7 +71,7 @@ export async function POST(request) {
             </div>
           </div>
           <div style="background-color: #f7f9fc; padding: 20px; border-top: 1px solid #e2e8f0;">
-            <p style="margin: 0; font-size: 12px; color: #999;">This email was sent by a Prescripto administrator.</p>
+            <p style="margin: 0; font-size: 12px; color: #999;">This email was sent by a ktsu for young youth administrator.</p>
           </div>
         </div>
       </div>

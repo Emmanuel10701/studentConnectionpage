@@ -4,13 +4,21 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Mail, Users, GraduationCap, Calendar, Zap, LayoutDashboard, 
   Send, ChevronRight, XCircle, User, Search, Briefcase, 
-  Settings, LogOut, Trash2, Eye, Edit, UserPlus, Ban, 
+  Settings, LogOut, Trash2, Eye, Edit, UserPlus, 
   Plus, Newspaper, Video, Upload, Link, CheckCircle, ChevronLeft, ChevronRight as ChevronRightIcon,
-  Crown, Book, Building, UserCheck, UserX, Square, CheckSquare
+  Crown, Book, Building, UserCheck, UserX, Square, CheckSquare, Info
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
 // --- Reusable Modal Component ---
+/**
+ * A reusable modal component.
+ * @param {object} props
+ * @param {boolean} props.isOpen - Whether the modal is open.
+ * @param {function} props.onClose - Function to call when the modal is closed.
+ * @param {string} props.title - The title of the modal.
+ * @param {React.ReactNode} props.children - The content to display inside the modal.
+ */
 const Modal = ({ isOpen, onClose, title, children }) => {
   const modalRef = useRef();
 
@@ -52,6 +60,12 @@ const Modal = ({ isOpen, onClose, title, children }) => {
 };
 
 // --- Form Components ---
+/**
+ * Form for adding a new admin.
+ * @param {object} props
+ * @param {function} props.onAdd - Callback to add the new user.
+ * @param {function} props.onCancel - Callback to cancel the form.
+ */
 const AddAdminForm = ({ onAdd, onCancel }) => {
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
 
@@ -191,15 +205,20 @@ const AddAdminForm = ({ onAdd, onCancel }) => {
   );
 };
 
+/**
+ * Form for editing an existing admin's details.
+ * @param {object} props
+ * @param {object} props.admin - The admin user object to edit.
+ * @param {function} props.onUpdate - Callback to update the user.
+ * @param {function} props.onCancel - Callback to cancel the form.
+ */
 const EditAdminForm = ({ admin, onUpdate, onCancel }) => {
-  const { register, handleSubmit, formState: { errors }, reset } = useForm({
+  const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: admin,
   });
 
   const onSubmit = (data) => {
-    // Only pass back the changed data
     onUpdate({ ...admin, ...data });
-    onCancel();
   };
 
   return (
@@ -308,69 +327,101 @@ const EditAdminForm = ({ admin, onUpdate, onCancel }) => {
   );
 };
 
-// --- Email Form Component ---
-const SendEmailForm = ({ user, onSend, onCancel }) => {
-  const { register, handleSubmit, formState: { errors } } = useForm();
-  
-  const onSubmit = (data) => {
-    onSend(user, data.subject, data.body);
-  };
-  
+// --- View Details Component ---
+/**
+ * A component to display user details in a clean, readable format.
+ * @param {object} props
+ * @param {object} props.user - The user object to display.
+ */
+const UserDetails = ({ user }) => {
+  if (!user) {
+    return <p>No user selected.</p>;
+  }
+
+  const formattedDate = new Date(user.createdAt).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <p className="text-gray-700 text-lg font-semibold">To: <span className="font-bold text-gray-900">{user.email}</span></p>
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Subject</label>
-        <input 
-          type="text" 
-          {...register("subject", { required: "Subject is required" })} 
-          className="mt-1 w-full p-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
-        />
-        {errors.subject && <p className="text-red-500 text-xs mt-1">{errors.subject.message}</p>}
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Message</label>
-        <textarea 
-          rows="5"
-          {...register("body", { required: "Message body is required" })} 
-          className="mt-1 w-full p-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
-        />
-        {errors.body && <p className="text-red-500 text-xs mt-1">{errors.body.message}</p>}
-      </div>
-      
-      <div className="flex justify-end gap-4 mt-6">
-        <button 
-          type="button" 
-          onClick={onCancel}
-          className="px-6 py-2 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors"
-        >
-          Cancel
-        </button>
-        <button 
-          type="submit" 
-          className="bg-green-600 text-white font-bold py-2 px-4 rounded-full hover:bg-green-700 transition-colors"
-        >
-          <div className="flex items-center gap-2">
-            <Send size={18} /> Send Email
+    <div className="space-y-4 text-gray-800">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <p className="text-sm font-medium text-gray-500">Full Name</p>
+          <p className="font-semibold text-lg">{user.name}</p>
+        </div>
+        <div>
+          <p className="text-sm font-medium text-gray-500">Email</p>
+          <p className="text-blue-600 font-semibold">{user.email}</p>
+        </div>
+        <div>
+          <p className="text-sm font-medium text-gray-500">Role</p>
+          <p className="font-semibold">{user.role}</p>
+        </div>
+        <div>
+          <p className="text-sm font-medium text-gray-500">Status</p>
+          <p className="font-semibold capitalize text-green-600">{user.status}</p>
+        </div>
+        {user.department && (
+          <div>
+            <p className="text-sm font-medium text-gray-500">Department</p>
+            <p className="font-semibold">{user.department}</p>
           </div>
-        </button>
+        )}
+        {user.title && (
+          <div>
+            <p className="text-sm font-medium text-gray-500">Title/Position</p>
+            <p className="font-semibold">{user.title}</p>
+          </div>
+        )}
+        {user.accessLevel && (
+          <div>
+            <p className="text-sm font-medium text-gray-500">Access Level</p>
+            <p className="font-semibold">{user.accessLevel}</p>
+          </div>
+        )}
+        {user.phoneNumber && (
+          <div>
+            <p className="text-sm font-medium text-gray-500">Phone Number</p>
+            <p className="font-semibold">{user.phoneNumber}</p>
+          </div>
+        )}
+        {(user.street || user.city || user.postalCode || user.country) && (
+          <div className="col-span-1 md:col-span-2">
+            <p className="text-sm font-medium text-gray-500">Address</p>
+            <p className="font-semibold">
+              {user.street}, {user.city}, {user.postalCode}, {user.country}
+            </p>
+          </div>
+        )}
+        <div>
+          <p className="text-sm font-medium text-gray-500">Created On</p>
+          <p className="font-semibold">{formattedDate}</p>
+        </div>
       </div>
-    </form>
+    </div>
   );
 };
 
+
 // --- Table Component ---
+/**
+ * Main component for user management, including search, tabs, and modals.
+ * @param {object} props
+ * @param {object[]} props.users - The array of user objects.
+ * @param {function} props.setUsers - State setter for the users array.
+ */
 const UserManagementTable = ({ users, setUsers }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
-  const [isManageModalOpen, setIsManageModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false); // State for the new view modal
   const [isEditAdminModalOpen, setIsEditAdminModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
-  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeTab, setActiveTab] = useState('Admins'); // New state for tabs
+  const [activeTab, setActiveTab] = useState('Admins'); // State for tabs
   const usersPerPage = 10;
 
   const userRoles = {
@@ -405,57 +456,13 @@ const UserManagementTable = ({ users, setUsers }) => {
     setCurrentPage(1); // Reset pagination when changing tabs
   };
 
-  const handleSendEmail = (user) => {
+  /**
+   * Opens the user details modal for a selected user.
+   * @param {object} user - The user object to display.
+   */
+  const handleViewUser = (user) => {
     setSelectedUser(user);
-    setIsEmailModalOpen(true);
-  };
-
-  const handleEmailSend = (user, subject, body) => {
-    console.log(`Sending email to ${user.email} with subject "${subject}" and body: "${body}"`);
-    alert(`Simulating email send to ${user.email}.`);
-    setIsEmailModalOpen(false);
-    setSelectedUser(null);
-  };
-
-  const handleManageUser = (user) => {
-    setSelectedUser(user);
-    if (user.role === 'Admin') {
-      setIsEditAdminModalOpen(true);
-    } else {
-      setIsManageModalOpen(true);
-    }
-  };
-  
-  const handleUpdateAdmin = (updatedData) => {
-    setUsers(prevUsers => 
-      prevUsers.map(u => u.id === updatedData.id ? { ...u, ...updatedData } : u)
-    );
-    setIsEditAdminModalOpen(false);
-    setSelectedUser(null);
-  };
-
-  const handleTerminateUser = (user) => {
-    setUsers(prevUsers => 
-      prevUsers.map(u => u.id === user.id ? { ...u, status: 'terminated' } : u)
-    );
-    setSelectedUser(null);
-    setIsManageModalOpen(false);
-  };
-  
-  const handleBlockUser = (user) => {
-    setUsers(prevUsers =>
-      prevUsers.map(u => u.id === user.id ? { ...u, status: 'blocked' } : u)
-    );
-    setSelectedUser(null);
-    setIsManageModalOpen(false);
-  };
-  
-  const handleUndoTermination = (user) => {
-    setUsers(prevUsers =>
-      prevUsers.map(u => u.id === user.id ? { ...u, status: 'active' } : u)
-    );
-    setSelectedUser(null);
-    setIsManageModalOpen(false);
+    setIsViewModalOpen(true);
   };
 
   const handleAddAdmin = (userData) => {
@@ -468,6 +475,14 @@ const UserManagementTable = ({ users, setUsers }) => {
       return [...prevUsers, newUser];
     });
     setIsAddModalOpen(false);
+  };
+  
+  const handleUpdateAdmin = (updatedData) => {
+    setUsers(prevUsers => 
+      prevUsers.map(u => u.id === updatedData.id ? { ...u, ...updatedData } : u)
+    );
+    setIsEditAdminModalOpen(false);
+    setSelectedUser(null);
   };
   
   const handleDeleteUserConfirmation = (user) => {
@@ -562,29 +577,40 @@ const UserManagementTable = ({ users, setUsers }) => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full capitalize 
-                      ${user.status === 'active' ? 'bg-green-100 text-green-800' :
-                        user.status === 'blocked' ? 'bg-red-100 text-red-800' :
-                        'bg-yellow-100 text-yellow-800'}`}>
+                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full capitalize bg-green-100 text-green-800">
                       {user.status}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center space-x-2 md:space-x-3">
+                      {/* New 'View' button to open user details modal */}
                       <button 
-                        onClick={() => handleSendEmail(user)}
+                        onClick={() => handleViewUser(user)}
+                        className="text-gray-600 hover:text-gray-900 transition-colors"
+                        title="View User Details"
+                      >
+                        <Eye size={18} />
+                      </button>
+                      {/* Original 'Mail' button now opens Gmail directly */}
+                      <a 
+                        href={`mailto:${user.email}`}
                         className="text-green-600 hover:text-green-900 transition-colors"
                         title="Send Email"
                       >
                         <Mail size={18} />
-                      </button>
-                      <button 
-                        onClick={() => handleManageUser(user)}
-                        className="text-blue-600 hover:text-blue-900 transition-colors"
-                        title="Manage/Edit User"
-                      >
-                        <Edit size={18} />
-                      </button>
+                      </a>
+                      {user.role === 'Admin' && (
+                        <button 
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setIsEditAdminModalOpen(true);
+                          }}
+                          className="text-blue-600 hover:text-blue-900 transition-colors"
+                          title="Edit Admin"
+                        >
+                          <Edit size={18} />
+                        </button>
+                      )}
                       <button 
                         onClick={() => handleDeleteUserConfirmation(user)}
                         className="text-red-600 hover:text-red-900 transition-colors"
@@ -649,52 +675,9 @@ const UserManagementTable = ({ users, setUsers }) => {
         {selectedUser && <EditAdminForm admin={selectedUser} onUpdate={handleUpdateAdmin} onCancel={() => setIsEditAdminModalOpen(false)} />}
       </Modal>
 
-      {/* Send Email Modal */}
-      <Modal isOpen={isEmailModalOpen} onClose={() => setIsEmailModalOpen(false)} title="Send Email Notification">
-        {selectedUser && <SendEmailForm user={selectedUser} onSend={handleEmailSend} onCancel={() => setIsEmailModalOpen(false)} />}
-      </Modal>
-
-      {/* Manage User Modal (for students/employers) */}
-      <Modal isOpen={isManageModalOpen} onClose={() => setIsManageModalOpen(false)} title={`Manage ${selectedUser?.role}`}>
-        {selectedUser && (
-          <div className="space-y-6">
-            <div className="flex items-center space-x-4">
-              <User size={40} className="text-gray-500" />
-              <div>
-                <h4 className="text-xl font-bold">{selectedUser.name}</h4>
-                <p className="text-sm text-gray-500">{selectedUser.email}</p>
-                <p className="text-sm text-gray-500 capitalize">Role: {selectedUser.role}</p>
-              </div>
-            </div>
-            
-            <div className="border-t border-gray-200 pt-4 space-y-4">
-              <p className="font-semibold text-gray-900">Admin Actions</p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button 
-                  onClick={() => handleTerminateUser(selectedUser)}
-                  className="w-full bg-red-100 text-red-700 hover:bg-red-200 transition-colors py-2 px-4 rounded-xl flex items-center justify-center gap-2"
-                  disabled={selectedUser.status === 'terminated'}
-                >
-                  <UserX size={18} /> {selectedUser.status === 'terminated' ? 'Already Terminated' : 'Terminate'}
-                </button>
-                <button
-                  onClick={() => handleBlockUser(selectedUser)}
-                  className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors py-2 px-4 rounded-xl flex items-center justify-center gap-2"
-                  disabled={selectedUser.status === 'blocked'}
-                >
-                  <Ban size={18} /> {selectedUser.status === 'blocked' ? 'Already Blocked' : 'Block'}
-                </button>
-                <button
-                  onClick={() => handleUndoTermination(selectedUser)}
-                  className="w-full bg-green-100 text-green-700 hover:bg-green-200 transition-colors py-2 px-4 rounded-xl flex items-center justify-center gap-2"
-                  disabled={selectedUser.status === 'active'}
-                >
-                  <UserCheck size={18} /> Undo Termination
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+      {/* View User Details Modal */}
+      <Modal isOpen={isViewModalOpen} onClose={() => setIsViewModalOpen(false)} title="User Details">
+        {selectedUser && <UserDetails user={selectedUser} />}
       </Modal>
 
       {/* Delete Confirmation Modal */}
@@ -735,44 +718,39 @@ const App = () => {
     { id: 15, name: 'Subbie Five', email: 'sub.five@example.com', role: 'Subscriber', status: 'active', department: null, title: null, accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-03-05T13:00:00Z' },
     { id: 16, name: 'Subbie Six', email: 'sub.six@example.com', role: 'Subscriber', status: 'active', department: null, title: null, accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-03-05T13:00:00Z' },
     { id: 17, name: 'Subbie Seven', email: 'sub.seven@example.com', role: 'Subscriber', status: 'active', department: null, title: null, accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-03-05T13:00:00Z' },
+    { id: 18, name: 'Subbie Eight', email: 'sub.eight@example.com', role: 'Subscriber', status: 'active', department: null, title: null, accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-03-05T13:00:00Z' },
+    { id: 19, name: 'Subbie Nine', email: 'sub.nine@example.com', role: 'Subscriber', status: 'active', department: null, title: null, accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-03-05T13:00:00Z' },
     // Students/Job Seekers
-    { id: 5, name: 'Jane Doe', email: 'jane.d@example.com', role: 'Student', status: 'active', department: null, title: 'Job Seeker', accessLevel: 'User', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-04-10T14:00:00Z' },
-    { id: 6, name: 'Emily White', email: 'emily.w@example.com', role: 'Student', status: 'active', department: null, title: 'Job Seeker', accessLevel: 'User', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-04-12T15:00:00Z' },
-    { id: 7, name: 'Rachel Zane', email: 'rachel.z@example.com', role: 'Student', status: 'terminated', department: null, title: 'Job Seeker', accessLevel: 'User', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-04-15T16:00:00Z' },
-    { id: 18, name: 'Student One', email: 'student.one@example.com', role: 'Student', status: 'active', department: null, title: 'Job Seeker', accessLevel: 'User', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-04-10T14:00:00Z' },
-    { id: 19, name: 'Student Two', email: 'student.two@example.com', role: 'Student', status: 'active', department: null, title: 'Job Seeker', accessLevel: 'User', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-04-10T14:00:00Z' },
-    { id: 20, name: 'Student Three', email: 'student.three@example.com', role: 'Student', status: 'active', department: null, title: 'Job Seeker', accessLevel: 'User', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-04-10T14:00:00Z' },
-    { id: 21, name: 'Student Four', email: 'student.four@example.com', role: 'Student', status: 'active', department: null, title: 'Job Seeker', accessLevel: 'User', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-04-10T14:00:00Z' },
+    { id: 5, name: 'Rachel Zane', email: 'rachel.z@student.com', role: 'Student', status: 'active', department: 'Law', title: 'Student', accessLevel: 'Basic', phoneNumber: '555-0105', street: '101 University Dr', city: 'Collegeville', postalCode: '20001', country: 'USA', createdAt: '2023-04-10T14:00:00Z' },
+    { id: 6, name: 'Harvey Specter', email: 'harvey.s@student.com', role: 'Student', status: 'active', department: 'Law', title: 'Job Seeker', accessLevel: 'Basic', phoneNumber: '555-0106', street: '202 Corporate Rd', city: 'Metropolis', postalCode: '10002', country: 'USA', createdAt: '2023-05-15T15:00:00Z' },
     // Employers
-    { id: 8, name: 'John Smith', email: 'john.s@employer.com', role: 'Employer', status: 'active', department: 'Hiring', title: 'Hiring Manager', accessLevel: 'User', phoneNumber: '555-0200', street: '789 Business Blvd', city: 'Corp City', postalCode: '20002', country: 'USA', createdAt: '2023-05-01T17:00:00Z' },
-    { id: 9, name: 'Jessica Pearson', email: 'jessica.p@employer.com', role: 'Employer', status: 'active', department: 'Legal', title: 'CEO', accessLevel: 'User', phoneNumber: '555-0201', street: '101 Legal St', city: 'Lawton', postalCode: '30003', country: 'USA', createdAt: '2023-05-05T18:00:00Z' },
-    { id: 10, name: 'Harvey Specter', email: 'harvey.s@employer.com', role: 'Employer', status: 'blocked', department: 'Legal', title: 'Senior Partner', accessLevel: 'User', phoneNumber: '555-0202', street: '111 Fifth Ave', city: 'Lawton', postalCode: '30003', country: 'USA', createdAt: '2023-05-10T19:00:00Z' },
-    { id: 22, name: 'Employer One', email: 'employer.one@employer.com', role: 'Employer', status: 'active', department: 'Hiring', title: 'Hiring Manager', accessLevel: 'User', phoneNumber: '555-0200', street: '789 Business Blvd', city: 'Corp City', postalCode: '20002', country: 'USA', createdAt: '2023-05-01T17:00:00Z' },
-    { id: 23, name: 'Employer Two', email: 'employer.two@employer.com', role: 'Employer', status: 'active', department: 'Legal', title: 'CEO', accessLevel: 'User', phoneNumber: '555-0201', street: '101 Legal St', city: 'Lawton', postalCode: '30003', country: 'USA', createdAt: '2023-05-05T18:00:00Z' },
-    { id: 24, name: 'Employer Three', email: 'employer.three@employer.com', role: 'Employer', status: 'blocked', department: 'Legal', title: 'Senior Partner', accessLevel: 'User', phoneNumber: '555-0202', street: '111 Fifth Ave', city: 'Lawton', postalCode: '30003', country: 'USA', createdAt: '2023-05-10T19:00:00Z' },
-     { id: 9, name: 'Jessica Pearson', email: 'jessica.p@employer.com', role: 'Employer', status: 'active', department: 'Legal', title: 'CEO', accessLevel: 'User', phoneNumber: '555-0201', street: '101 Legal St', city: 'Lawton', postalCode: '30003', country: 'USA', createdAt: '2023-05-05T18:00:00Z' },
-    { id: 10, name: 'Harvey Specter', email: 'harvey.s@employer.com', role: 'Employer', status: 'blocked', department: 'Legal', title: 'Senior Partner', accessLevel: 'User', phoneNumber: '555-0202', street: '111 Fifth Ave', city: 'Lawton', postalCode: '30003', country: 'USA', createdAt: '2023-05-10T19:00:00Z' },
-    { id: 22, name: 'Employer One', email: 'employer.one@employer.com', role: 'Employer', status: 'active', department: 'Hiring', title: 'Hiring Manager', accessLevel: 'User', phoneNumber: '555-0200', street: '789 Business Blvd', city: 'Corp City', postalCode: '20002', country: 'USA', createdAt: '2023-05-01T17:00:00Z' },
-    { id: 23, name: 'Employer Two', email: 'employer.two@employer.com', role: 'Employer', status: 'active', department: 'Legal', title: 'CEO', accessLevel: 'User', phoneNumber: '555-0201', street: '101 Legal St', city: 'Lawton', postalCode: '30003', country: 'USA', createdAt: '2023-05-05T18:00:00Z' },
-    { id: 24, name: 'Employer Three', email: 'employer.three@employer.com', role: 'Employer', status: 'blocked', department: 'Legal', title: 'Senior Partner', accessLevel: 'User', phoneNumber: '555-0202', street: '111 Fifth Ave', city: 'Lawton', postalCode: '30003', country: 'USA', createdAt: '2023-05-10T19:00:00Z' },
-   { id: 9, name: 'Jessica Pearson', email: 'jessica.p@employer.com', role: 'Employer', status: 'active', department: 'Legal', title: 'CEO', accessLevel: 'User', phoneNumber: '555-0201', street: '101 Legal St', city: 'Lawton', postalCode: '30003', country: 'USA', createdAt: '2023-05-05T18:00:00Z' },
-    { id: 10, name: 'Harvey Specter', email: 'harvey.s@employer.com', role: 'Employer', status: 'blocked', department: 'Legal', title: 'Senior Partner', accessLevel: 'User', phoneNumber: '555-0202', street: '111 Fifth Ave', city: 'Lawton', postalCode: '30003', country: 'USA', createdAt: '2023-05-10T19:00:00Z' },
-    { id: 22, name: 'Employer One', email: 'employer.one@employer.com', role: 'Employer', status: 'active', department: 'Hiring', title: 'Hiring Manager', accessLevel: 'User', phoneNumber: '555-0200', street: '789 Business Blvd', city: 'Corp City', postalCode: '20002', country: 'USA', createdAt: '2023-05-01T17:00:00Z' },
-    { id: 23, name: 'Employer Two', email: 'employer.two@employer.com', role: 'Employer', status: 'active', department: 'Legal', title: 'CEO', accessLevel: 'User', phoneNumber: '555-0201', street: '101 Legal St', city: 'Lawton', postalCode: '30003', country: 'USA', createdAt: '2023-05-05T18:00:00Z' },
-    { id: 24, name: 'Employer Three', email: 'employer.three@employer.com', role: 'Employer', status: 'blocked', department: 'Legal', title: 'Senior Partner', accessLevel: 'User', phoneNumber: '555-0202', street: '111 Fifth Ave', city: 'Lawton', postalCode: '30003', country: 'USA', createdAt: '2023-05-10T19:00:00Z' },
-
+    { id: 7, name: 'Jessica Pearson', email: 'jessica.p@employer.com', role: 'Employer', status: 'active', department: 'HR', title: 'HR Manager', accessLevel: 'Premium', phoneNumber: '555-0107', street: '303 Business Blvd', city: 'Enterprise', postalCode: '30001', country: 'USA', createdAt: '2023-06-20T16:00:00Z' },
+    { id: 8, name: 'Louis Litt', email: 'louis.l@employer.com', role: 'Employer', status: 'active', department: 'Talent Acquisition', title: 'Recruiter', accessLevel: 'Premium', phoneNumber: '555-0108', street: '404 Hire St', city: 'Jobsville', postalCode: '40001', country: 'USA', createdAt: '2023-07-25T17:00:00Z' },
+    // More users for pagination testing
+    { id: 20, name: 'Student Ten', email: 'student.ten@student.com', role: 'Student', status: 'active', department: 'Engineering', title: 'Student', accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-08-01T10:00:00Z' },
+    { id: 21, name: 'Student Eleven', email: 'student.eleven@student.com', role: 'Student', status: 'active', department: 'Arts', title: 'Student', accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-08-02T11:00:00Z' },
+    { id: 22, name: 'Student Twelve', email: 'student.twelve@student.com', role: 'Student', status: 'active', department: 'Science', title: 'Student', accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-08-03T12:00:00Z' },
+    { id: 23, name: 'Student Thirteen', email: 'student.thirteen@student.com', role: 'Student', status: 'active', department: 'Business', title: 'Student', accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-08-04T13:00:00Z' },
+    { id: 24, name: 'Student Fourteen', email: 'student.fourteen@student.com', role: 'Student', status: 'active', department: 'Law', title: 'Student', accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-08-05T14:00:00Z' },
+    { id: 25, name: 'Student Fifteen', email: 'student.fifteen@student.com', role: 'Student', status: 'active', department: 'Medicine', title: 'Student', accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-08-06T15:00:00Z' },
+    { id: 26, name: 'Student Sixteen', email: 'student.sixteen@student.com', role: 'Student', status: 'active', department: 'Education', title: 'Student', accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-08-07T16:00:00Z' },
+    { id: 27, name: 'Student Seventeen', email: 'student.seventeen@student.com', role: 'Student', status: 'active', department: 'Design', title: 'Student', accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-08-08T17:00:00Z' },
+    { id: 28, name: 'Student Eighteen', email: 'student.eighteen@student.com', role: 'Student', status: 'active', department: 'Journalism', title: 'Student', accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-08-09T18:00:00Z' },
+    { id: 29, name: 'Student Nineteen', email: 'student.nineteen@student.com', role: 'Student', status: 'active', department: 'Economics', title: 'Student', accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-08-10T19:00:00Z' },
+    { id: 30, name: 'Student Twenty', email: 'student.twenty@student.com', role: 'Student', status: 'active', department: 'History', title: 'Student', accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-08-11T20:00:00Z' },
+    // More employers for pagination
+    { id: 31, name: 'Employer Nine', email: 'emp.nine@employer.com', role: 'Employer', status: 'active', department: 'HR', title: 'Recruiter', accessLevel: 'Premium', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-09-01T10:00:00Z' },
+    { id: 32, name: 'Employer Ten', email: 'emp.ten@employer.com', role: 'Employer', status: 'active', department: 'Talent Acquisition', title: 'HR Manager', accessLevel: 'Premium', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-09-02T11:00:00Z' },
+    { id: 33, name: 'Employer Eleven', email: 'emp.eleven@employer.com', role: 'Employer', status: 'active', department: 'HR', title: 'Recruiter', accessLevel: 'Premium', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-09-03T12:00:00Z' },
+    { id: 34, name: 'Employer Twelve', email: 'emp.twelve@employer.com', role: 'Employer', status: 'active', department: 'Recruitment', title: 'HR Coordinator', accessLevel: 'Premium', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-09-04T13:00:00Z' },
   ];
-  
   const [users, setUsers] = useState(initialUsers);
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans p-4 sm:p-8">
-      <div className="sticky top-0 bg-gray-50 z-20 pb-4">
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-2">Admin Dashboard</h1>
-        <p className="text-gray-600 mb-8">Manage user accounts from a single place.</p>
+    <div className="bg-gray-50 min-h-screen p-4 md:p-8 font-[Inter]">
+      <div className="container mx-auto">
+        <UserManagementTable users={users} setUsers={setUsers} />
       </div>
-      
-      <UserManagementTable users={users} setUsers={setUsers} />
     </div>
   );
 };

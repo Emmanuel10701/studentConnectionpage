@@ -73,7 +73,7 @@ export async function POST(request) {
               <p><strong>Your Message:</strong></p>
               <p style="white-space: pre-wrap; word-wrap: break-word;">${message}</p>
             </div>
-            <p style="margin-top: 25px; font-size: 14px; color: #777;">Best regards,<br>The Prescripto Team</p>
+            <p style="margin-top: 25px; font-size: 14px; color: #777;">Best regards,<br>The KTSCU Team</p>
           </div>
         </div>
       `,

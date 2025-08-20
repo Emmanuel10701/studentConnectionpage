@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "TalentConnect Hub",
+  title: "KCUTSA  community",
   description: "A vibrant community platform connecting young talents with employers and opportunities.",
 };
 

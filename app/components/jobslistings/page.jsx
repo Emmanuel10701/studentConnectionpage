@@ -713,199 +713,152 @@ const JobPostings = ({
               <div key={job.id} className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 flex flex-col justify-between hover:shadow-2xl transition-shadow duration-200">
                 <div className="space-y-4">
                   <div className="flex items-start justify-between">
-                    <div className="flex flex-col">
-                      <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                        <Briefcase size={20} className="text-blue-500" />{job.title}
-                      </h3>
-                      <p className="text-sm font-semibold text-gray-600 mt-1">{job.employer}</p>
+                    <div className="space-y-1">
+                      <h3 className="text-xl font-bold text-gray-900">{job.title}</h3>
+                      <p className="text-md text-gray-600 font-medium flex items-center gap-2"><Building size={16} className="text-gray-400" /> {job.employer}</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-gray-600">{job.applicants?.length || 0} Applicants</span>
-                      <Users size={20} className="text-gray-400" />
-                    </div>
+                    <span className="bg-gray-200 text-gray-700 text-xs font-semibold px-3 py-1 rounded-full shadow-inner">{job.industry}</span>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm font-medium text-gray-600">
-                    <div className="flex items-center gap-2">
-                      <MapPin size={16} className="text-gray-400" /> {job.location}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Building size={16} className="text-gray-400" /> {job.officeType}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <DollarSign size={16} className="text-gray-400" /> {job.salary}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock size={16} className="text-gray-400" /> {job.type}
-                    </div>
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                    <span className="flex items-center gap-1"><MapPin size={16} /> {job.location}</span>
+                    <span className="flex items-center gap-1"><Shield size={16} /> {job.officeType}</span>
+                    <span className="flex items-center gap-1"><DollarSign size={16} /> {job.salary}</span>
+                    <span className="flex items-center gap-1"><Briefcase size={16} /> {job.type}</span>
                   </div>
-                  <p className="text-base text-gray-600">{job.description}</p>
-                  <div className="text-sm text-gray-500 space-y-2">
-                    <h4 className="font-semibold text-gray-700 flex items-center gap-2">
-                      <Star size={16} className="text-gray-400" /> Qualifications:
-                    </h4>
-                    <p>{job.qualifications}</p>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-700 flex items-center gap-2 text-sm mb-2">
-                      <Paperclip size={16} className="text-gray-400" /> Skills:
-                    </h4>
+                  <p className="text-sm text-gray-700 leading-relaxed mt-2">{job.description}</p>
+                  <div className="space-y-2 mt-4">
+                    <p className="text-sm font-semibold text-gray-800 flex items-center gap-2"><Star size={16} /> Key Skills</p>
                     <div className="flex flex-wrap gap-2">
-                      {job.skills?.map(skill => (
-                        <span key={skill} className="bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full shadow-sm">
-                          {skill}
-                        </span>
+                      {job.skills.map(skill => (
+                        <span key={skill} className="bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full">{skill}</span>
                       ))}
                     </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-700 flex items-center gap-2 text-sm mb-2">
-                      <Shield size={16} className="text-gray-400" /> Benefits:
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {job.benefits?.map(benefit => (
-                        <span key={benefit} className="bg-green-100 text-green-800 text-xs font-medium px-3 py-1 rounded-full shadow-sm">
-                          {benefit}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+                  <p className="text-xs text-gray-400 mt-4 flex items-center gap-1"><Clock size={12} /> Posted: {new Date(job.postDate).toLocaleDateString()}</p>
                 </div>
-                <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-end">
-                  <button
-                    onClick={() => handleEditJob(job)}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 text-sm font-medium rounded-full shadow-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-                  >
-                    <Pencil size={18} /> Edit
-                  </button>
-                  <button
-                    onClick={() => handleViewApplicants(job)}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 border border-transparent text-sm font-medium rounded-full shadow-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
-                  >
-                    <Eye size={18} /> View Applicants
-                  </button>
-                  <button
-                    onClick={() => openDeleteModal(job.id)}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 border border-transparent text-sm font-medium rounded-full shadow-md text-white bg-red-600 hover:bg-red-700 transition-colors"
-                  >
-                    <Trash2 size={18} /> Delete
-                  </button>
+                <div className="mt-6 flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-gray-100">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleViewApplicants(job)}
+                      className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-sm font-medium rounded-full text-gray-700 bg-white hover:bg-gray-100 transition-colors shadow-sm"
+                    >
+                      <Users size={16} /> View Applicants ({job.applicants.length})
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleEditJob(job)}
+                      className="p-3 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 transition-colors shadow-sm"
+                    >
+                      <Pencil size={18} />
+                    </button>
+                    <button
+                      onClick={() => openDeleteModal(job.id)}
+                      className="p-3 bg-red-100 text-red-600 rounded-full hover:bg-red-200 transition-colors shadow-sm"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))
           ) : (
-            <p className="text-center text-gray-500 col-span-full py-12">You haven't posted any jobs yet.</p>
+            <p className="text-center text-gray-500 text-lg py-12">No job listings found.</p>
           )}
         </div>
 
-        {jobs.length > jobsPerPage && (
-          <div className="flex justify-center items-center gap-2 mt-8">
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-4 mt-8">
             <button
               onClick={() => paginate(currentPage - 1)}
               disabled={currentPage === 1}
-              className={`p-2 rounded-full transition-colors ${currentPage === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-200'}`}
+              className="p-2 rounded-full text-gray-700 bg-white shadow-sm border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
             >
               <ChevronLeft size={20} />
             </button>
-            {[...Array(totalPages)].map((_, index) => (
-              <button
-                key={index}
-                onClick={() => paginate(index + 1)}
-                className={`w-8 h-8 rounded-full font-semibold transition-colors
-                  ${currentPage === index + 1 ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-gray-700 hover:bg-gray-200'}`}
-              >
-                {index + 1}
-              </button>
-            ))}
+            <span className="text-sm font-medium text-gray-700">
+              Page {currentPage} of {totalPages}
+            </span>
             <button
               onClick={() => paginate(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className={`p-2 rounded-full transition-colors ${currentPage === totalPages ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-200'}`}
+              className="p-2 rounded-full text-gray-700 bg-white shadow-sm border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
             >
               <ChevronRight size={20} />
             </button>
           </div>
         )}
-
-        {showDeleteModal && (
-          <DeleteConfirmationModal
-            onConfirm={confirmDelete}
-            onCancel={closeDeleteModal}
-            title="Confirm Deletion"
-            message="Are you sure you want to delete this job posting? This action cannot be undone."
-          />
-        )}
       </div>
+
+      {showDeleteModal && (
+        <DeleteConfirmationModal
+          title="Delete Job Posting?"
+          message="Are you sure you want to delete this job posting? This action cannot be undone."
+          onConfirm={confirmDelete}
+          onCancel={closeDeleteModal}
+        />
+      )}
     </>
   );
 };
 
-/**
- * Main App Component to manage state and render different views.
- */
-export default function App() {
+
+const App = () => {
   const [jobs, setJobs] = useState(mockJobs);
-  const [view, setView] = useState('job-postings');
+  const [editingJob, setEditingJob] = useState(null);
+  const [showApplicantsModal, setShowApplicantsModal] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
 
-  const handleSaveJob = (jobData, jobId = null) => {
+  const handleSaveJob = (jobData, jobId) => {
     if (jobId) {
-      setJobs(jobs.map(job => (job.id === jobId ? { ...job, ...jobData } : job)));
+      setJobs(prevJobs => prevJobs.map(job => job.id === jobId ? { ...job, ...jobData } : job));
     } else {
-      const newId = `job-${Date.now()}`;
-      setJobs([{ ...jobData, id: newId, postDate: new Date(), applicants: [] }, ...jobs]);
+      const newId = `job-${jobs.length + 1}`;
+      const newJob = { ...jobData, id: newId, postDate: new Date(), applicants: [] };
+      setJobs(prevJobs => [newJob, ...prevJobs]);
     }
   };
 
   const handleDeleteJob = (jobId) => {
-    setJobs(jobs.filter(job => job.id !== jobId));
+    setJobs(prevJobs => prevJobs.filter(job => job.id !== jobId));
+  };
+
+  const handleEditJob = (job) => {
+    setEditingJob(job);
   };
 
   const handleViewApplicants = (job) => {
     setSelectedJob(job);
-    setView('applicants');
+    setShowApplicantsModal(true);
   };
 
-  const handleEditJob = (job) => {
-    setJobs(jobs.map(j => j.id === job.id ? { ...j, isEditing: true } : { ...j, isEditing: false }));
-  };
-
-  const handleEditJobSave = (updatedJob) => {
-    setJobs(jobs.map(job =>
-      job.id === updatedJob.id ? { ...updatedJob, isEditing: false } : job
-    ));
-  };
-
-  const renderView = () => {
-    switch (view) {
-      case 'job-postings':
-        return (
-          <JobPostings
-            jobs={jobs}
-            handleSaveJob={handleSaveJob}
-            handleDeleteJob={handleDeleteJob}
-            handleViewApplicants={handleViewApplicants}
-            handleEditJob={handleEditJob}
-            editingJob={jobs.find(j => j.isEditing)}
-            setEditingJob={job => setJobs(jobs.map(j => j.id === job.id ? { ...j, isEditing: true } : { ...j, isEditing: false }))}
-          />
-        );
-      case 'applicants':
-        return (
-          <ApplicantsModal
-            job={selectedJob}
-            applicants={selectedJob.applicants}
-            allStudents={mockStudents}
-            onClose={() => setView('job-postings')}
-          />
-        );
-      default:
-        return null;
-    }
+  const closeApplicantsModal = () => {
+    setSelectedJob(null);
+    setShowApplicantsModal(false);
   };
 
   return (
-    <div className="font-sans text-gray-900 antialiased">
-      {renderView()}
+    <div className="font-sans antialiased text-gray-800 bg-gray-100">
+      <JobPostings
+        jobs={jobs}
+        handleSaveJob={handleSaveJob}
+        handleDeleteJob={handleDeleteJob}
+        handleViewApplicants={handleViewApplicants}
+        handleEditJob={handleEditJob}
+        editingJob={editingJob}
+        setEditingJob={setEditingJob}
+      />
+      {showApplicantsModal && (
+        <ApplicantsModal
+          job={selectedJob}
+          applicants={selectedJob.applicants}
+          allStudents={mockStudents}
+          onClose={closeApplicantsModal}
+        />
+      )}
     </div>
   );
-}
+};
+
+export default App;

@@ -38,8 +38,8 @@ const Select = ({ value, onValueChange, children, disabled }) => {
     // Pass items to context for the trigger to find the selected label
     const items = React.Children.toArray(children).find(child => child.type === SelectContent)?.props.children || [];
     const itemMap = React.Children.toArray(items).reduce((acc, item) => {
-      acc[item.props.value] = item.props.children;
-      return acc;
+        acc[item.props.value] = item.props.children;
+        return acc;
     }, {});
 
     return (
@@ -143,12 +143,12 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
     const [skillInput, setSkillInput] = useState(''); // New state for the skill input field
 
     const avatarColors = [
-      '#1e40af', // blue
-      '#dc2626', // red
-      '#713f12', // brown
-      '#4b5563', // gray
-      '#059669', // green
-      '#9333ea'  // purple
+        '#1e40af', // blue
+        '#dc2626', // red
+        '#713f12', // brown
+        '#4b5563', // gray
+        '#059669', // green
+        '#9333ea'  // purple
     ];
 
     // Use useFieldArray for dynamic fields, with Framer Motion layout
@@ -183,6 +183,14 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
             setValue("address.ward", "");
         }
     }, [selectedSubCounty, wards, setValue, watch, isEditing]);
+
+    // Reset form to the current profile data when entering edit mode
+    useEffect(() => {
+        if (isEditing) {
+            reset(profile);
+            setAvatarBgColor(profile.avatarColor || '#1e40af');
+        }
+    }, [isEditing, profile, reset]);
 
     const onSubmit = async (data) => {
         setIsUpdating(true);
@@ -253,14 +261,14 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
     const renderDynamicSection = (fields, append, remove, name, icon, title, renderItems) => (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
-                <h3 className="flex items-center text-xl font-semibold text-gray-900">
+                <h3 className="flex items-center text-2xl font-bold text-gray-900">
                     {icon} {title}
                 </h3>
                 {isEditing && (name !== 'skills') && (
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <components.Button type="button" variant="secondary" onClick={() => append({})} className="shadow-none">
-                          <PlusCircle className="mr-2 h-4 w-4" /> Add
-                      </components.Button>
+                        <components.Button type="button" variant="secondary" onClick={() => append({})} className="shadow-none">
+                            <PlusCircle className="mr-2 h-4 w-4" /> Add
+                        </components.Button>
                     </motion.div>
                 )}
             </div>
@@ -274,7 +282,7 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
                             exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
                             transition={{ duration: 0.3, ease: "easeInOut" }}
                             layout // This enables smooth layout transitions
-                            className="relative grid grid-cols-1 md:grid-cols-2 gap-4"
+                            className="relative grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg shadow-inner"
                         >
                             {isEditing && (name !== 'skills') && (
                                 <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
@@ -307,9 +315,9 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
                 </div>
                 {!isEditing && Object.keys(profile).length > 0 && (
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                      <components.Button variant="secondary" className="mt-4 sm:mt-0" onClick={() => setIsEditing(true)}>
-                          <Edit className="mr-2 h-5 w-5" /> Edit Profile
-                      </components.Button>
+                        <components.Button variant="secondary" className="mt-4 sm:mt-0" onClick={() => setIsEditing(true)}>
+                            <Edit className="mr-2 h-5 w-5" /> Edit Profile
+                        </components.Button>
                     </motion.div>
                 )}
             </components.CardHeader>
@@ -397,7 +405,7 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
                     <components.Separator />
 
                     {/* Education Section */}
-                    {renderDynamicSection(educationFields, appendEducation, removeEducation, "education", <GraduationCap className="text-purple-600" />, "Education", (field, index, isEditing, register, watch) => {
+                    {renderDynamicSection(educationFields, appendEducation, removeEducation, "education", <GraduationCap className="mr-3 h-6 w-6 text-purple-600" />, "Education", (field, index, isEditing, register, watch) => {
                         const isCurrent = watch(`education.${index}.isCurrent`);
                         return (
                             <>
@@ -427,13 +435,13 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
                                 </div>
                                 <div>
                                     <div className="flex items-center justify-between">
-                                      <components.Label htmlFor={`education.${index}.graduationYear`}>Graduation Year</components.Label>
-                                      {isEditing && (
-                                          <div className="flex items-center space-x-2 text-sm text-gray-500">
-                                            <input type="checkbox" id={`education.${index}.isCurrent`} {...register(`education.${index}.isCurrent`)} className="rounded text-blue-600" />
-                                            <label htmlFor={`education.${index}.isCurrent`}>Currently Studying</label>
-                                          </div>
-                                      )}
+                                        <components.Label htmlFor={`education.${index}.graduationYear`}>Graduation Year</components.Label>
+                                        {isEditing && (
+                                            <div className="flex items-center space-x-2 text-sm text-gray-500">
+                                                <input type="checkbox" id={`education.${index}.isCurrent`} {...register(`education.${index}.isCurrent`)} className="rounded text-blue-600" />
+                                                <label htmlFor={`education.${index}.isCurrent`}>Currently Studying</label>
+                                            </div>
+                                        )}
                                     </div>
                                     {isEditing ? (
                                         <components.Input type="number" id={`education.${index}.graduationYear`} {...register(`education.${index}.graduationYear`)} placeholder="e.g., 2025" disabled={isCurrent} />
@@ -448,7 +456,7 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
                     <components.Separator />
                     
                     {/* Work Experience Section */}
-                    {renderDynamicSection(experienceFields, appendExperience, removeExperience, "experience", <Briefcase className="text-cyan-600" />, "Work Experience", (field, index, isEditing, register, watch) => {
+                    {renderDynamicSection(experienceFields, appendExperience, removeExperience, "experience", <Briefcase className="mr-3 h-6 w-6 text-cyan-600" />, "Work Experience", (field, index, isEditing, register, watch) => {
                         const isCurrent = watch(`experience.${index}.isCurrent`);
                         return (
                             <>
@@ -478,13 +486,13 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
                                 </div>
                                 <div>
                                     <div className="flex items-center justify-between">
-                                      <components.Label htmlFor={`experience.${index}.endDate`}>End Date</components.Label>
-                                      {isEditing && (
-                                          <div className="flex items-center space-x-2 text-sm text-gray-500">
-                                            <input type="checkbox" id={`experience.${index}.isCurrent`} {...register(`experience.${index}.isCurrent`)} className="rounded text-blue-600" />
-                                            <label htmlFor={`experience.${index}.isCurrent`}>Currently Working</label>
-                                          </div>
-                                      )}
+                                        <components.Label htmlFor={`experience.${index}.endDate`}>End Date</components.Label>
+                                        {isEditing && (
+                                            <div className="flex items-center space-x-2 text-sm text-gray-500">
+                                                <input type="checkbox" id={`experience.${index}.isCurrent`} {...register(`experience.${index}.isCurrent`)} className="rounded text-blue-600" />
+                                                <label htmlFor={`experience.${index}.isCurrent`}>Currently Working</label>
+                                            </div>
+                                        )}
                                     </div>
                                     {isEditing ? (
                                         <components.Input type="date" id={`experience.${index}.endDate`} {...register(`experience.${index}.endDate`)} disabled={isCurrent} />
@@ -508,178 +516,173 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
 
                     {/* Skills Section - NEW */}
                     <div className="space-y-4">
-                        <h3 className="flex items-center text-xl font-semibold text-gray-900">
+                        <h3 className="flex items-center text-2xl font-bold text-gray-900">
                             <Briefcase className="mr-3 h-6 w-6 text-indigo-600" /> Skills
                         </h3>
                         {isEditing ? (
-                            <div className="flex flex-col sm:flex-row items-end gap-2">
-                                <div className="flex-1 w-full">
-                                    <components.Label htmlFor="skillInput">Add a skill</components.Label>
-                                    <components.Input 
-                                        id="skillInput"
-                                        type="text"
-                                        value={skillInput}
-                                        onChange={(e) => setSkillInput(e.target.value)}
-                                        placeholder="e.g., JavaScript, Python, React"
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                                e.preventDefault();
-                                                handleAddSkill();
-                                            }
-                                        }}
-                                    />
+                            <>
+                                <div className="flex flex-col sm:flex-row items-end gap-2">
+                                    <div className="flex-1 w-full">
+                                        <components.Label htmlFor="skillInput">Add a skill</components.Label>
+                                        <components.Input 
+                                            id="skillInput"
+                                            type="text"
+                                            value={skillInput}
+                                            onChange={(e) => setSkillInput(e.target.value)}
+                                            placeholder="e.g., JavaScript, Python, React"
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    handleAddSkill();
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                                        <components.Button 
+                                            type="button" 
+                                            onClick={handleAddSkill} 
+                                            disabled={skillsFields.length >= 10 || skillInput.trim() === ''}
+                                            className="w-full sm:w-auto h-12"
+                                        >
+                                            <PlusCircle className="mr-2 h-5 w-5" /> Add
+                                        </components.Button>
+                                    </motion.div>
                                 </div>
-                                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                                    <components.Button 
-                                        type="button" 
-                                        onClick={handleAddSkill} 
-                                        disabled={skillsFields.length >= 10 || skillInput.trim() === ''}
-                                        className="w-full sm:w-auto h-12"
-                                    >
-                                        <PlusCircle className="mr-2 h-5 w-5" /> Add
-                                    </components.Button>
-                                </motion.div>
-                            </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {skillsFields.map((skill, index) => (
+                                        <motion.div
+                                            key={skill.id}
+                                            initial={{ opacity: 0, scale: 0.9 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            exit={{ opacity: 0, scale: 0.9 }}
+                                            className="flex items-center bg-gray-200 text-gray-700 rounded-full px-4 py-2 text-sm font-medium"
+                                        >
+                                            <span>{skill.name}</span>
+                                            <motion.button 
+                                                type="button"
+                                                onClick={() => removeSkill(index)}
+                                                className="ml-2 text-gray-500 hover:text-red-500 transition-colors"
+                                                whileHover={{ scale: 1.2 }}
+                                                whileTap={{ scale: 0.8 }}
+                                            >
+                                                <MinusCircle className="h-4 w-4" />
+                                            </motion.button>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                                {skillsFields.length === 0 && (
+                                    <p className="text-gray-500 italic">Add your skills above.</p>
+                                )}
+                            </>
                         ) : (
-                            // Read-only display of skills
-                            <div className="flex flex-wrap gap-2">
-                                {skillsFields.length > 0 ? (
-                                    skillsFields.map((skill, index) => (
-                                        <div key={skill.id} className="inline-flex items-center rounded-full bg-blue-100 text-blue-700 px-4 py-2 text-sm font-medium">
+                            skillsFields.length > 0 ? (
+                                <div className="flex flex-wrap gap-2">
+                                    {skillsFields.map((skill, index) => (
+                                        <div key={index} className="bg-gray-200 text-gray-700 rounded-full px-4 py-2 text-sm font-medium">
                                             {skill.name}
                                         </div>
-                                    ))
-                                ) : (
-                                    <p className="text-gray-500 italic">No skills added yet.</p>
-                                )}
-                            </div>
-                        )}
-
-                        {/* Display of skills with remove button */}
-                        {isEditing && (
-                            <div className="flex flex-wrap gap-2">
-                                {skillsFields.map((field, index) => (
-                                    <motion.div
-                                        key={field.id}
-                                        initial={{ opacity: 0, scale: 0.9 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.9 }}
-                                        transition={{ duration: 0.2 }}
-                                        className="inline-flex items-center rounded-full bg-blue-100 text-blue-700 pr-2 pl-4 py-2 text-sm font-medium"
-                                        layout
-                                    >
-                                        {field.name}
-                                        <motion.button 
-                                            type="button" 
-                                            onClick={() => removeSkill(index)} 
-                                            className="ml-2 h-6 w-6 rounded-full text-blue-500 hover:text-red-600 transition-colors"
-                                            whileHover={{ scale: 1.1 }}
-                                            whileTap={{ scale: 0.9 }}
-                                        >
-                                            <MinusCircle className="h-4 w-4" />
-                                        </motion.button>
-                                    </motion.div>
-                                ))}
-                            </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-gray-500 italic">No skills added yet.</p>
+                            )
                         )}
                     </div>
                     
                     <components.Separator />
 
-                    {/* Achievements & Certifications Section */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                        {renderDynamicSection(achievementsFields, appendAchievement, removeAchievement, "achievements", <Trophy className="text-amber-600" />, "Achievements", (field, index, isEditing, register) => (
-                            <>
-                                <div className="col-span-2">
-                                    <components.Label htmlFor={`achievements.${index}.name`}>Achievement</components.Label>
-                                    {isEditing ? (
-                                        <components.Input {...register(`achievements.${index}.name`)} placeholder="e.g., Dean's List 2023" />
-                                    ) : (
-                                        <p className="mt-2 text-gray-800 font-medium">{field.name}</p>
-                                    )}
-                                </div>
-                            </>
-                        ))}
-                        {renderDynamicSection(certificationsFields, appendCertification, removeCertification, "certifications", <FileText className="text-green-600" />, "Certifications", (field, index, isEditing, register) => (
-                            <>
-                                <div className="col-span-2">
-                                    <components.Label htmlFor={`certifications.${index}.name`}>Certificate Name</components.Label>
-                                    {isEditing ? (
-                                        <components.Input {...register(`certifications.${index}.name`)} placeholder="e.g., AWS Certified Cloud Practitioner" />
-                                    ) : (
-                                        <p className="mt-2 text-gray-800 font-medium">{field.name}</p>
-                                    )}
-                                </div>
-                                <div className="col-span-2">
-                                    <components.Label htmlFor={`certifications.${index}.issuingBody`}>Issuing Body</components.Label>
-                                    {isEditing ? (
-                                        <components.Input {...register(`certifications.${index}.issuingBody`)} placeholder="e.g., Amazon Web Services" />
-                                    ) : (
-                                        <p className="mt-2 text-gray-800 font-medium">{field.issuingBody}</p>
-                                    )}
-                                </div>
-                            </>
-                        ))}
-                    </div>
+                    {/* Achievements Section */}
+                    {renderDynamicSection(achievementsFields, appendAchievement, removeAchievement, "achievements", <Trophy className="mr-3 h-6 w-6 text-yellow-500" />, "Achievements", (field, index, isEditing, register) => (
+                        <>
+                            <div className="col-span-2">
+                                <components.Label htmlFor={`achievements.${index}.title`}>Achievement Title</components.Label>
+                                {isEditing ? (
+                                    <components.Input id={`achievements.${index}.title`} {...register(`achievements.${index}.title`)} placeholder="e.g., Dean's List, Top 10% in Class" />
+                                ) : (
+                                    <p className="mt-2 text-gray-800 font-medium">{field.title}</p>
+                                )}
+                            </div>
+                            <div className="col-span-2">
+                                <components.Label htmlFor={`achievements.${index}.description`}>Description</components.Label>
+                                {isEditing ? (
+                                    <components.Textarea id={`achievements.${index}.description`} rows="3" {...register(`achievements.${index}.description`)} placeholder="Describe the achievement in detail." />
+                                ) : (
+                                    <p className="mt-2 text-gray-800 font-medium whitespace-pre-wrap">{field.description}</p>
+                                )}
+                            </div>
+                        </>
+                    ))}
+
+                    <components.Separator />
+                    
+                    {/* Certifications Section */}
+                    {renderDynamicSection(certificationsFields, appendCertification, removeCertification, "certifications", <CheckCircle className="mr-3 h-6 w-6 text-green-500" />, "Certifications", (field, index, isEditing, register) => (
+                        <>
+                            <div>
+                                <components.Label htmlFor={`certifications.${index}.name`}>Certification Name</components.Label>
+                                {isEditing ? (
+                                    <components.Input id={`certifications.${index}.name`} {...register(`certifications.${index}.name`)} placeholder="e.g., Certified Scrum Master" />
+                                ) : (
+                                    <p className="mt-2 text-gray-800 font-medium">{field.name}</p>
+                                )}
+                            </div>
+                            <div>
+                                <components.Label htmlFor={`certifications.${index}.issuingOrganization`}>Issuing Organization</components.Label>
+                                {isEditing ? (
+                                    <components.Input id={`certifications.${index}.issuingOrganization`} {...register(`certifications.${index}.issuingOrganization`)} placeholder="e.g., Scrum Alliance" />
+                                ) : (
+                                    <p className="mt-2 text-gray-800 font-medium">{field.issuingOrganization}</p>
+                                )}
+                            </div>
+                            <div>
+                                <components.Label htmlFor={`certifications.${index}.issueDate`}>Issue Date</components.Label>
+                                {isEditing ? (
+                                    <components.Input type="date" id={`certifications.${index}.issueDate`} {...register(`certifications.${index}.issueDate`)} />
+                                ) : (
+                                    <p className="mt-2 text-gray-800 font-medium">{field.issueDate}</p>
+                                )}
+                            </div>
+                        </>
+                    ))}
 
                     <components.Separator />
 
-                    {/* Address Section */}
-                    <div className="space-y-6">
+                    {/* Location Section */}
+                    <div className="space-y-4">
                         <h3 className="flex items-center text-2xl font-bold text-gray-900">
-                            <MapPin className="mr-3 h-6 w-6 text-teal-600" /> Contact & Location
+                            <MapPin className="mr-3 h-6 w-6 text-orange-500" /> Location
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <components.Label htmlFor="phone">Phone Number</components.Label>
-                                {isEditing ? (
-                                    <components.Input id="phone" type="tel" {...register("phone")} placeholder="+254 7XX XXX XXX" />
-                                ) : (
-                                    <p className="mt-2 text-gray-800 font-medium">{profile.phone || "Not provided"}</p>
-                                )}
-                            </div>
-                            <div>
-                                <components.Label htmlFor="county">County</components.Label>
-                                {isEditing ? (
-                                    <Controller
-                                        name="address.county"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <Select onValueChange={field.onChange} value={field.value}>
-                                                <SelectTrigger placeholder="Select County" />
-                                                <SelectContent>
-                                                    <SelectItem value="Kirinyaga">Kirinyaga</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        )}
-                                    />
-                                ) : (
-                                    <p className="mt-2 text-gray-800 font-medium">{profile.address.county || "Not provided"}</p>
-                                )}
-                            </div>
-                            <div>
-                                <components.Label htmlFor="subCounty">Sub-County</components.Label>
+                                <components.Label htmlFor="sub-county-select">Sub-County</components.Label>
                                 {isEditing ? (
                                     <Controller
                                         name="address.subCounty"
                                         control={control}
                                         render={({ field }) => (
-                                            <Select onValueChange={field.onChange} value={field.value} disabled={!watch("address.county")}>
+                                            <Select onValueChange={(val) => {
+                                                field.onChange(val);
+                                                // Reset the ward when the sub-county changes
+                                                setValue("address.ward", "");
+                                            }} value={field.value}>
                                                 <SelectTrigger placeholder="Select Sub-County" />
                                                 <SelectContent>
                                                     {Object.keys(kirinyagaLocations).map(subCounty => (
-                                                        <SelectItem key={subCounty} value={subCounty}>{subCounty}</SelectItem>
+                                                        <SelectItem key={subCounty} value={subCounty}>
+                                                            {subCounty}
+                                                        </SelectItem>
                                                     ))}
                                                 </SelectContent>
                                             </Select>
                                         )}
                                     />
                                 ) : (
-                                    <p className="mt-2 text-gray-800 font-medium">{profile.address.subCounty || "Not provided"}</p>
+                                    <p className="mt-2 text-gray-800 font-medium">{profile.address?.subCounty}</p>
                                 )}
                             </div>
                             <div>
-                                <components.Label htmlFor="ward">Ward</components.Label>
+                                <components.Label htmlFor="ward-select">Ward</components.Label>
                                 {isEditing ? (
                                     <Controller
                                         name="address.ward"
@@ -688,15 +691,23 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
                                             <Select onValueChange={field.onChange} value={field.value} disabled={!selectedSubCounty}>
                                                 <SelectTrigger placeholder="Select Ward" />
                                                 <SelectContent>
-                                                    {wards.map(ward => (
-                                                        <SelectItem key={ward} value={ward}>{ward}</SelectItem>
-                                                    ))}
+                                                    {wards.length > 0 ? (
+                                                        wards.map(ward => (
+                                                            <SelectItem key={ward} value={ward}>
+                                                                {ward}
+                                                            </SelectItem>
+                                                        ))
+                                                    ) : (
+                                                        <div className="p-4 text-center text-gray-500">
+                                                            Select a Sub-County first
+                                                        </div>
+                                                    )}
                                                 </SelectContent>
                                             </Select>
                                         )}
                                     />
                                 ) : (
-                                    <p className="mt-2 text-gray-800 font-medium">{profile.address.ward || "Not provided"}</p>
+                                    <p className="mt-2 text-gray-800 font-medium">{profile.address?.ward}</p>
                                 )}
                             </div>
                         </div>
@@ -706,54 +717,66 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
 
                     {/* Resume Upload Section */}
                     <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <h3 className="flex items-center text-xl font-semibold text-gray-900">
-                                <FileText className="mr-3 h-6 w-6 text-gray-600" /> Resume / CV
-                            </h3>
-                            {isEditing && (
-                                <components.Button type="button" variant="secondary" onClick={() => resumeInputRef.current?.click()} className="shadow-none">
-                                    <Upload className="mr-2 h-4 w-4" /> Upload
-                                </components.Button>
-                            )}
-                        </div>
-                        {isEditing && (
-                            <components.Input
-                                type="file"
-                                accept=".pdf,.doc,.docx"
-                                ref={resumeInputRef}
-                                onChange={handleResumeUpload}
-                                className="hidden"
-                            />
+                        <h3 className="flex items-center text-2xl font-bold text-gray-900">
+                            <FileText className="mr-3 h-6 w-6 text-green-600" /> Resume
+                        </h3>
+                        {isEditing ? (
+                            <div className="flex flex-col sm:flex-row items-center gap-4">
+                                <components.Input 
+                                    id="resume"
+                                    type="file" 
+                                    ref={resumeInputRef} 
+                                    className="flex-1"
+                                    accept=".pdf,.doc,.docx" 
+                                />
+                                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                                    <components.Button
+                                        type="button"
+                                        onClick={handleResumeUpload}
+                                        disabled={!resumeInputRef.current?.files[0]}
+                                        className="w-full sm:w-auto"
+                                    >
+                                        <Upload className="mr-2 h-5 w-5" /> Upload Resume
+                                    </components.Button>
+                                </motion.div>
+                            </div>
+                        ) : (
+                            <p className="text-gray-800 font-medium flex items-center">
+                                {resumeFile ? (
+                                    <><CheckCircle className="mr-2 h-5 w-5 text-green-500" /> {resumeFile.name}</>
+                                ) : (
+                                    "No resume uploaded."
+                                )}
+                            </p>
                         )}
-                        <div className="flex flex-col sm:flex-row items-center justify-between p-4 border rounded-lg bg-gray-50">
-                            <span className="text-gray-600 font-medium">
-                                {resumeFile ? `File: ${resumeFile.name}` : 'No resume uploaded.'}
-                            </span>
-                            {resumeFile && (
-                                <components.Button
-                                    type="button"
-                                    onClick={() => setResumeFile(null)}
-                                    variant="ghost"
-                                    className="text-red-500 mt-2 sm:mt-0 shadow-none"
-                                >
-                                    <MinusCircle className="mr-2 h-4 w-4" /> Remove
-                                </components.Button>
-                            )}
-                        </div>
                     </div>
                     
-                    {/* Form Submission Buttons */}
+                    {/* Form Actions */}
                     {isEditing && (
-                        <div className="flex justify-end space-x-4">
+                        <div className="flex flex-col sm:flex-row gap-4 justify-end">
                             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                                <components.Button type="button" variant="secondary" onClick={() => { setIsEditing(false); reset(profile); }}>
+                                <components.Button
+                                    type="button"
+                                    variant="secondary"
+                                    onClick={() => {
+                                        setIsEditing(false);
+                                        // Reset form on cancel to revert changes
+                                        reset(profile); 
+                                    }}
+                                    className="w-full sm:w-auto"
+                                >
                                     <ChevronLeft className="mr-2 h-5 w-5" /> Cancel
                                 </components.Button>
                             </motion.div>
                             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                                <components.Button type="submit" disabled={isUpdating}>
-                                    {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    Save Changes
+                                <components.Button 
+                                    type="submit" 
+                                    variant="gradient"
+                                    disabled={isUpdating}
+                                    className="w-full sm:w-auto"
+                                >
+                                    {isUpdating ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <CheckCircle className="mr-2 h-5 w-5" />}
+                                    {isUpdating ? "Saving..." : "Save Profile"}
                                 </components.Button>
                             </motion.div>
                         </div>
@@ -764,54 +787,55 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
     );
 };
 
-// Main App component to run the application
+// Main App component to manage state and render the profile
 const App = () => {
-    // Mock user profile data
-    const [profile, setProfile] = useState({
-        name: "Jane Doe",
-        email: "jane.doe@example.com",
-        summary: "A dedicated student with a strong passion for software development and problem-solving. Seeking opportunities to apply learned skills in a practical environment.",
-        phone: "+254712345678",
-        address: {
-            county: "Kirinyaga",
-            subCounty: "Mwea",
-            ward: "Mutithi"
-        },
-        education: [
-            { school: "Jomo Kenyatta University of Agriculture and Technology", degree: "Bachelor of Science", fieldOfStudy: "Computer Science", isCurrent: true, graduationYear: "" }
-        ],
-        experience: [
-            { title: "Junior Web Developer", company: "Local Devs Co.", startDate: "2023-01-01", endDate: "", isCurrent: true, description: "Developed and maintained responsive web applications using React and Node.js. Collaborated with a small team to deliver features on schedule." }
-        ],
-        achievements: [{ name: "First Place, Regional Hackathon 2024" }],
-        certifications: [{ name: "React - The Complete Guide", issuingBody: "Udemy" }],
-        skills: [{ name: "Teamwork" }, { name: "Programming" }, { name: "Problem soving" }]
-    });
+    // This state would typically be fetched from a backend
+    const [profile, setProfile] = useState({});
     const [isEditing, setIsEditing] = useState(false);
     const [resumeFile, setResumeFile] = useState(null);
 
-    const handleSaveProfile = (updatedProfile) => {
-        setProfile(updatedProfile);
+    const handleSaveProfile = (newProfileData) => {
+        setProfile(newProfileData);
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 p-4 sm:p-10 font-sans antialiased text-gray-900 flex justify-center items-center">
-            <Toaster position="top-center" reverseOrder={false} />
-            <div className="w-full ">
-                <components.Card>
-                    <StudentProfile
-                        profile={profile}
-                        setProfile={setProfile}
-                        isEditing={isEditing}
-                        setIsEditing={setIsEditing}
-                        onSaveProfile={handleSaveProfile}
-                        resumeFile={resumeFile}
-                        setResumeFile={setResumeFile}
-                    />
-                </components.Card>
+        <div className="min-h-screen bg-gray-50 font-sans p-4 sm:p-8 flex flex-col items-center">
+            <Toaster position="bottom-right" />
+            <div className="w-full max-w-7xl">
+                {Object.keys(profile).length === 0 && !isEditing ? (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2, duration: 0.5 }}
+                        className="flex flex-col items-center justify-center text-center p-8 bg-white rounded-3xl shadow-2xl space-y-4"
+                    >
+                        <components.CardTitle>Welcome!</components.CardTitle>
+                        <components.CardDescription>
+                            Your profile is currently empty. Click the button below to get started and create your profile.
+                        </components.CardDescription>
+                        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                            <components.Button onClick={() => setIsEditing(true)}>
+                                <Edit className="mr-2 h-5 w-5" /> Create My Profile
+                            </components.Button>
+                        </motion.div>
+                    </motion.div>
+                ) : (
+                    <components.Card className="w-full">
+                        <StudentProfile 
+                            profile={profile} 
+                            setProfile={setProfile} 
+                            isEditing={isEditing} 
+                            setIsEditing={setIsEditing} 
+                            onSaveProfile={handleSaveProfile}
+                            resumeFile={resumeFile}
+                            setResumeFile={setResumeFile}
+                        />
+                    </components.Card>
+                )}
             </div>
         </div>
     );
 };
 
 export default App;
+

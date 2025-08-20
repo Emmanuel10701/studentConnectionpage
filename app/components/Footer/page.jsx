@@ -12,29 +12,43 @@ export default function Footer() {
   const [status, setStatus] = useState("idle"); // idle, processing, success, error
   const [message, setMessage] = useState("");
 
-  const handleSubscribe = async (e) => {
-    e.preventDefault();
-    setStatus("processing");
-    setMessage("");
 
-    if (!email || !email.includes("@")) {
-      setStatus("error");
-      setMessage("Please enter a valid email address.");
-      return;
+
+  
+const handleSubscribe = async (e) => {
+  e.preventDefault();
+  setStatus("processing");
+  setMessage("");
+
+  if (!email || !email.includes("@")) {
+    setStatus("error");
+    setMessage("Please enter a valid email address.");
+    return;
+  }
+
+  try {
+    // send email to your API
+    const response = await fetch("/api/subscriber", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
     }
 
-    try {
-      // simulate API request
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      setStatus("success");
-      setMessage("Thank you for subscribing! You'll receive the latest updates shortly.");
-      setEmail("");
-    } catch (error) {
-      console.error("Subscription failed:", error);
-      setStatus("error");
-      setMessage("Something went wrong. Please try again later.");
-    }
-  };
+    setStatus("success");
+    setMessage("Thank you for subscribing! You'll receive the latest updates shortly.");
+    setEmail("");
+  } catch (error) {
+    console.error("Subscription failed:", error);
+    setStatus("error");
+    setMessage("Something went wrong. Please try again later.");
+  }
+};
 
   const socialLinks = [
     { name: "Instagram", icon: FaInstagram, url: "https://www.instagram.com/kcutsakirinyaga?igsh=MTdoMW53N3EzajVvbw==", color: "text-pink-500" },

@@ -1,6 +1,7 @@
 "use client"
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/navigation'; // Using next/navigation for App Router
 import { 
   LayoutDashboard, 
   Users, 
@@ -22,7 +23,7 @@ import {
 import ProfileSettings from '../components/adminprofile/page.jsx';
 import Usermanagement from "../components/admintab/page.jsx"
 import Emailform from "../components/Emailform/page.jsx";
-
+import { useSession, signOut } from 'next-auth/react';
 // --- Mock Data ---
 const initialUsers = [
   { id: 1, name: 'John Doe', email: 'john.doe@example.com', role: 'Administrator', status: 'Active' },
@@ -65,6 +66,7 @@ const initialEvents = [
     target: "Employers",
   },
 ];
+
 const dashboardMetrics = [
   { id: 1, title: 'Total Users', value: '4,200', icon: Users, color: 'bg-blue-100 text-blue-600' },
   { id: 2, title: 'New Signups', value: '350', icon: Plus, color: 'bg-green-100 text-green-600' },
@@ -277,7 +279,7 @@ const EventsCalendar = ({ events, setEvents }) => {
 
                   {/* NEW: Target Audience */}
                   <p className="text-xs font-medium mt-2 px-2 py-1 inline-block rounded-full 
-                                bg-blue-100 text-blue-700">
+                               bg-blue-100 text-blue-700">
                     🎯 Target: {event.target || "All"}
                   </p>
                 </div>
@@ -285,7 +287,7 @@ const EventsCalendar = ({ events, setEvents }) => {
                 {/* Delete Button */}
                 <div className="flex-shrink-0">
                   <button 
-                onClick={() => confirmDelete(event)}
+                onClick={() => confirm("Are you sure you want to delete this event?") && handleDeleteEvent(event.id)}
                     className="text-red-600 hover:text-red-800 transition-colors p-2 rounded-full hover:bg-red-100"
                     title="Delete"
                   >
@@ -567,6 +569,15 @@ export default function CareerConnectApp() {
   const [newsItems, setNewsItems] = useState(initialNews);
   const [events, setEvents] = useState(initialEvents);
 
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/adminlogin');
+    }
+  }, [status, router]);
+
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'user-management', label: 'User Management', icon: Users },
@@ -578,6 +589,14 @@ export default function CareerConnectApp() {
   ];
 
   const renderContent = () => {
+    if (status === 'loading') {
+      return (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+        </div>
+      );
+    }
+    
     switch(view) {
       case 'dashboard':
         return <DashboardOverview newsItems={newsItems} />;
@@ -745,24 +764,26 @@ case 'email-form':
       
       {/* Logout button */}
       <button
-        className="flex items-center px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-xl shadow-sm transition-all duration-200"
+        onClick={() => signOut({ callbackUrl: '/adminlogin' })} // Redirects to the admin login page
+        className="flex items-center px-4 py-2 text-sm cursor-pointer font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-xl shadow-sm transition-all duration-200"
       >
         <LogOut size={18} className="mr-2" /> Logout
       </button>
 
       {/* Profile Avatar */}
-      <div className="flex items-center space-x-2">
-        <img
-          src="https://placehold.co/40x40/D1D5DB/1F2937?text=AD"
-          alt="Profile"
-          className="w-11 h-11 rounded-full border-2 border-gray-300 shadow-sm"
-        />
-        <span className="font-semibold text-sm hidden md:block text-gray-800 tracking-wide">
-          Admin User
-        </span>
+    {/* Profile Avatar */}
+    <div className="flex items-center space-x-2">
+      <div className="w-11 h-11 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+        {session?.user?.name ? 
+          session.user.name.split(' ').map(n => n[0]).join('')
+          : 'AD'}
       </div>
+      <span className="font-semibold text-sm hidden md:block text-gray-800 tracking-wide">
+        {session?.user?.name || "Admin User"}
+      </span>
     </div>
-  </header>
+  </div>
+</header>
 
   {/* Main content wrapper */}
   <div className="max-w-7xl mx-auto transition-all duration-300">

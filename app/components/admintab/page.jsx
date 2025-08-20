@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { 
-  Mail, Users, GraduationCap, Calendar, Zap, LayoutDashboard, 
-  Send, ChevronRight, XCircle, User, Search, Briefcase, 
-  Settings, LogOut, Trash2, Eye, Edit, UserPlus, 
+import {
+  Mail, Users, GraduationCap, Calendar, Zap, LayoutDashboard,
+  Send, ChevronRight, XCircle, User, Search, Briefcase,
+  Settings, LogOut, Trash2, Eye, Edit, UserPlus,
   Plus, Newspaper, Video, Upload, Link, CheckCircle, ChevronLeft, ChevronRight as ChevronRightIcon,
   Crown, Book, Building, UserCheck, UserX, Square, CheckSquare, Info
 } from 'lucide-react';
@@ -41,8 +41,8 @@ const Modal = ({ isOpen, onClose, title, children }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 backdrop-blur-sm p-4 animate-fade-in">
-      <div 
-        ref={modalRef} 
+      <div
+        ref={modalRef}
         className="bg-white p-6 md:p-8 rounded-3xl shadow-2xl max-w-2xl w-full m-4 border border-gray-200 animate-fade-in-down transition-transform duration-300"
       >
         <div className="flex justify-between items-center mb-6 border-b pb-4">
@@ -73,7 +73,7 @@ const AddAdminForm = ({ onAdd, onCancel }) => {
     // Add role and created at timestamp before submitting
     const newAdminData = {
       ...data,
-      role: "Admin",
+      role: "ADMIN",
       status: "active",
       createdAt: new Date().toISOString()
     };
@@ -86,116 +86,116 @@ const AddAdminForm = ({ onAdd, onCancel }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700">Full Name</label>
-          <input 
-            type="text" 
-            {...register("name", { required: "Name is required" })} 
+          <input
+            type="text"
+            {...register("name", { required: "Name is required" })}
             className="mt-1 w-full p-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
           />
           {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Email</label>
-          <input 
-            type="email" 
-            {...register("email", { required: "Email is required" })} 
+          <input
+            type="email"
+            {...register("email", { required: "Email is required" })}
             className="mt-1 w-full p-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
           />
           {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Password</label>
-          <input 
-            type="password" 
-            {...register("password", { required: "Password is required" })} 
+          <input
+            type="password"
+            {...register("password", { required: "Password is required" })}
             className="mt-1 w-full p-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
           />
           {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-          <input 
-            type="tel" 
-            {...register("phoneNumber")} 
+          <input
+            type="tel"
+            {...register("phoneNumber")}
             className="mt-1 w-full p-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Department</label>
-          <input 
-            type="text" 
-            {...register("department")} 
+          <input
+            type="text"
+            {...register("department")}
             className="mt-1 w-full p-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Title/Position</label>
-          <input 
-            type="text" 
-            {...register("title")} 
+          <input
+            type="text"
+            {...register("title")}
             className="mt-1 w-full p-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Access Level</label>
-          <input 
-            type="text" 
-            {...register("accessLevel")} 
+          <input
+            type="text"
+            {...register("accessLevel")}
             className="mt-1 w-full p-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Street</label>
-          <input 
-            type="text" 
-            {...register("street")} 
+          <input
+            type="text"
+            {...register("street")}
             className="mt-1 w-full p-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">City</label>
-          <input 
-            type="text" 
-            {...register("city")} 
+          <input
+            type="text"
+            {...register("city")}
             className="mt-1 w-full p-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Postal Code</label>
-          <input 
-            type="text" 
-            {...register("postalCode")} 
+          <input
+            type="text"
+            {...register("postalCode")}
             className="mt-1 w-full p-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Country</label>
-          <input 
-            type="text" 
-            {...register("country")} 
+          <input
+            type="text"
+            {...register("country")}
             className="mt-1 w-full p-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700">Role</label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             value="Admin"
             readOnly
             className="mt-1 w-full p-2 border border-gray-300 rounded-xl bg-gray-100 cursor-not-allowed"
           />
         </div>
       </div>
-      
+
       <div className="flex justify-end gap-4 mt-6">
-        <button 
-          type="button" 
+        <button
+          type="button"
           onClick={onCancel}
           className="px-6 py-2 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors"
         >
           Cancel
         </button>
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           className="bg-blue-600 text-white font-bold py-2 px-4 rounded-full hover:bg-blue-700 transition-colors"
         >
           Add Admin
@@ -205,13 +205,8 @@ const AddAdminForm = ({ onAdd, onCancel }) => {
   );
 };
 
-/**
- * Form for editing an existing admin's details.
- * @param {object} props
- * @param {object} props.admin - The admin user object to edit.
- * @param {function} props.onUpdate - Callback to update the user.
- * @param {function} props.onCancel - Callback to cancel the form.
- */
+// --- Form for Editing Admin (Not Used, but Kept for Reference) ---
+// Note: This component is not currently used in the main table UI.
 const EditAdminForm = ({ admin, onUpdate, onCancel }) => {
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: admin,
@@ -226,98 +221,98 @@ const EditAdminForm = ({ admin, onUpdate, onCancel }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700">Full Name</label>
-          <input 
-            type="text" 
-            {...register("name", { required: "Name is required" })} 
+          <input
+            type="text"
+            {...register("name", { required: "Name is required" })}
             className="mt-1 w-full p-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
           />
           {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Email</label>
-          <input 
-            type="email" 
-            {...register("email", { required: "Email is required" })} 
+          <input
+            type="email"
+            {...register("email", { required: "Email is required" })}
             className="mt-1 w-full p-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
           />
           {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-          <input 
-            type="tel" 
-            {...register("phoneNumber")} 
+          <input
+            type="tel"
+            {...register("phoneNumber")}
             className="mt-1 w-full p-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Department</label>
-          <input 
-            type="text" 
-            {...register("department")} 
+          <input
+            type="text"
+            {...register("department")}
             className="mt-1 w-full p-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Title/Position</label>
-          <input 
-            type="text" 
-            {...register("title")} 
+          <input
+            type="text"
+            {...register("title")}
             className="mt-1 w-full p-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Access Level</label>
-          <input 
-            type="text" 
-            {...register("accessLevel")} 
+          <input
+            type="text"
+            {...register("accessLevel")}
             className="mt-1 w-full p-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Street</label>
-          <input 
-            type="text" 
-            {...register("street")} 
+          <input
+            type="text"
+            {...register("street")}
             className="mt-1 w-full p-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">City</label>
-          <input 
-            type="text" 
-            {...register("city")} 
+          <input
+            type="text"
+            {...register("city")}
             className="mt-1 w-full p-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Postal Code</label>
-          <input 
-            type="text" 
-            {...register("postalCode")} 
+          <input
+            type="text"
+            {...register("postalCode")}
             className="mt-1 w-full p-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Country</label>
-          <input 
-            type="text" 
-            {...register("country")} 
+          <input
+            type="text"
+            {...register("country")}
             className="mt-1 w-full p-2 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
       </div>
-      
+
       <div className="flex justify-end gap-4 mt-6">
-        <button 
-          type="button" 
+        <button
+          type="button"
           onClick={onCancel}
           className="px-6 py-2 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors"
         >
           Cancel
         </button>
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           className="bg-blue-600 text-white font-bold py-2 px-4 rounded-full hover:bg-blue-700 transition-colors"
         >
           Update Admin
@@ -405,7 +400,7 @@ const UserDetails = ({ user }) => {
 };
 
 
-// --- Table Component ---
+// --- UserManagementTable Component ---
 /**
  * Main component for user management, including search, tabs, and modals.
  * @param {object} props
@@ -415,29 +410,34 @@ const UserDetails = ({ user }) => {
 const UserManagementTable = ({ users, setUsers }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false); // State for the new view modal
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditAdminModalOpen, setIsEditAdminModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeTab, setActiveTab] = useState('Admins'); // State for tabs
+  const [activeTab, setActiveTab] = useState('Admins');
   const usersPerPage = 10;
 
   const userRoles = {
-    'Admins': 'Admin',
+    'Admins': 'ADMIN',
     'Subscribers': 'Subscriber',
-    'Students/Job Seekers': 'Student',
+    'Students/Job Seekers': ['Student', 'Job Seeker'],
     'Employers': 'Employer'
   };
 
   // Memoize filtered users to avoid re-calculating on every render
   const filteredUsers = useMemo(() => {
-    return users.filter(user => 
-      user.role === userRoles[activeTab] &&
-      (user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    return users.filter(user => {
+      const roleFilter = userRoles[activeTab];
+      const isCorrectRole = Array.isArray(roleFilter)
+        ? roleFilter.includes(user.role)
+        : user.role === roleFilter;
+
+      return isCorrectRole &&
+        (user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.email?.toLowerCase().includes(searchTerm.toLowerCase()));
+    });
   }, [users, searchTerm, activeTab]);
 
   // Pagination logic
@@ -449,62 +449,100 @@ const UserManagementTable = ({ users, setUsers }) => {
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
-  
+
   const handleTabChange = (tab) => {
     setActiveTab(tab);
-    setSearchTerm(''); // Reset search when changing tabs
-    setCurrentPage(1); // Reset pagination when changing tabs
+    setSearchTerm('');
+    setCurrentPage(1);
   };
 
-  /**
-   * Opens the user details modal for a selected user.
-   * @param {object} user - The user object to display.
-   */
   const handleViewUser = (user) => {
     setSelectedUser(user);
     setIsViewModalOpen(true);
   };
 
-  const handleAddAdmin = (userData) => {
-    setUsers(prevUsers => {
-      const newId = Math.max(...prevUsers.map(u => u.id), 0) + 1;
-      const newUser = {
-        id: newId,
-        ...userData
-      };
-      return [...prevUsers, newUser];
-    });
-    setIsAddModalOpen(false);
+  const handleAddAdmin = async (userData) => {
+    try {
+      const response = await fetch('http://localhost:3000/api/adminregister', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add admin.');
+      }
+
+      const newAdmin = await response.json();
+      setUsers(prevUsers => [...prevUsers, { ...newAdmin, role: 'ADMIN' }]);
+      setIsAddModalOpen(false);
+    } catch (error) {
+      console.error('Error adding admin:', error);
+      alert('Failed to add new admin. Please try again.');
+    }
   };
-  
-  const handleUpdateAdmin = (updatedData) => {
-    setUsers(prevUsers => 
-      prevUsers.map(u => u.id === updatedData.id ? { ...u, ...updatedData } : u)
-    );
-    setIsEditAdminModalOpen(false);
-    setSelectedUser(null);
-  };
-  
+
   const handleDeleteUserConfirmation = (user) => {
     setUserToDelete(user);
     setIsDeleteModalOpen(true);
   };
 
-  const handleDeleteUser = () => {
+  const handleDeleteUser = async () => {
     if (userToDelete) {
-      setUsers(prevUsers => prevUsers.filter(u => u.id !== userToDelete.id));
-      setIsDeleteModalOpen(false);
-      setUserToDelete(null);
+      const { id, role } = userToDelete;
+      let endpoint;
+
+      // Determine the correct API endpoint based on the user's role
+      switch (role) {
+        case 'ADMIN':
+          endpoint = `http://localhost:3000/api/adminregister/${id}`;
+          break;
+        case 'Subscriber':
+          endpoint = `http://localhost:3000/api/subscriber/${id}`;
+          break;
+        case 'Employer':
+          endpoint = `http://localhost:3000/api/employer/${id}`;
+          break;
+        case 'Student':
+        case 'Job Seeker':
+          endpoint = `http://localhost:3000/api/student/${id}`;
+          break;
+        default:
+          console.error("Unknown user role:", role);
+          alert("Cannot delete user with unknown role.");
+          setIsDeleteModalOpen(false);
+          return;
+      }
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to delete the user.');
+        }
+
+        // Filter the user from the local state after successful API deletion
+        setUsers(prevUsers => prevUsers.filter(u => u.id !== id));
+        setIsDeleteModalOpen(false);
+        setUserToDelete(null);
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        alert('Failed to delete user. Please try again.');
+      }
     }
   };
 
   return (
-    <div className="bg-white p-4 sm:p-8 rounded-3xl shadow-lg border border-gray-100 overflow-x-auto h-full flex flex-col">
+    <div className="bg-white p-4 sm:p-8 rounded-3xl shadow-lg border border-gray-100 overflow-x-auto h-full flex flex-col font-serif">
       <div className="sticky top-0 bg-white z-10 pb-4 sm:pb-6 -mt-4 sm:-mt-8 -mx-4 sm:-mx-8 px-4 sm:px-8 pt-4 sm:pt-8 rounded-t-3xl">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
           <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-4 sm:mb-0">User Management</h3>
           <div className="flex flex-col sm:flex-row gap-4">
-            <button 
+            <button
               onClick={() => setIsAddModalOpen(true)}
               className="w-full sm:w-auto bg-blue-600 text-white font-bold py-2 px-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
             >
@@ -512,7 +550,7 @@ const UserManagementTable = ({ users, setUsers }) => {
             </button>
           </div>
         </div>
-      
+
         {/* Tabs for user categories */}
         <div className="flex flex-wrap gap-2 mb-6 border-b border-gray-200">
           {Object.keys(userRoles).map(tab => (
@@ -529,19 +567,19 @@ const UserManagementTable = ({ users, setUsers }) => {
             </button>
           ))}
         </div>
-      
+
         <div className="mb-6">
           <div className="relative">
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
               <Search size={20} className="text-gray-400" />
             </div>
-            <input 
+            <input
               type="text"
               placeholder={`Search ${activeTab.toLowerCase()} by name or email...`}
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
-                setCurrentPage(1); // Reset to first page on search
+                setCurrentPage(1);
               }}
               className="w-full p-3 pl-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
             />
@@ -567,12 +605,12 @@ const UserManagementTable = ({ users, setUsers }) => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.name}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                      ${user.role === 'Student' ? 'bg-blue-100 text-blue-800' :
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                      ${user.role === 'Student' || user.role === 'Job Seeker' ? 'bg-blue-100 text-blue-800' :
                         user.role === 'Employer' ? 'bg-purple-100 text-purple-800' :
-                        user.role === 'Admin' ? 'bg-gray-200 text-gray-800' :
-                        user.role === 'Subscriber' ? 'bg-indigo-100 text-indigo-800' :
-                        'bg-yellow-100 text-yellow-800'}`}>
+                          user.role === 'ADMIN' ? 'bg-gray-200 text-gray-800' :
+                            user.role === 'Subscriber' ? 'bg-indigo-100 text-indigo-800' :
+                              'bg-yellow-100 text-yellow-800'}`}>
                       {user.role}
                     </span>
                   </td>
@@ -583,41 +621,30 @@ const UserManagementTable = ({ users, setUsers }) => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center space-x-2 md:space-x-3">
-                      {/* New 'View' button to open user details modal */}
-                      <button 
+                      <button
                         onClick={() => handleViewUser(user)}
-                        className="text-gray-600 hover:text-gray-900 transition-colors"
+                        className="text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
                         title="View User Details"
                       >
                         <Eye size={18} />
                       </button>
-                      {/* Original 'Mail' button now opens Gmail directly */}
-                      <a 
+                      <a
                         href={`mailto:${user.email}`}
-                        className="text-green-600 hover:text-green-900 transition-colors"
+                        className="text-green-600 hover:text-green-900 transition-colors cursor-pointer"
                         title="Send Email"
                       >
                         <Mail size={18} />
                       </a>
-                      {user.role === 'Admin' && (
-                        <button 
-                          onClick={() => {
-                            setSelectedUser(user);
-                            setIsEditAdminModalOpen(true);
-                          }}
-                          className="text-blue-600 hover:text-blue-900 transition-colors"
-                          title="Edit Admin"
+                      {/* Only show the delete button for ADMIN role */}
+                      {user.role === 'ADMIN' && (
+                        <button
+                          onClick={() => handleDeleteUserConfirmation(user)}
+                          className="text-red-600 hover:text-red-900 transition-colors cursor-pointer"
+                          title="Delete User"
                         >
-                          <Edit size={18} />
+                          <Trash2 size={18} />
                         </button>
                       )}
-                      <button 
-                        onClick={() => handleDeleteUserConfirmation(user)}
-                        className="text-red-600 hover:text-red-900 transition-colors"
-                        title="Delete User"
-                      >
-                        <Trash2 size={18} />
-                      </button>
                     </div>
                   </td>
                 </tr>
@@ -632,7 +659,7 @@ const UserManagementTable = ({ users, setUsers }) => {
           </tbody>
         </table>
       </div>
-      
+
       {/* Pagination controls */}
       {filteredUsers.length > usersPerPage && (
         <div className="flex flex-col sm:flex-row items-center justify-between mt-6 px-4 py-3 bg-gray-50 rounded-xl">
@@ -669,15 +696,10 @@ const UserManagementTable = ({ users, setUsers }) => {
       <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Add New Admin">
         <AddAdminForm onAdd={handleAddAdmin} onCancel={() => setIsAddModalOpen(false)} />
       </Modal>
-      
-      {/* Edit Admin Modal */}
-      <Modal isOpen={isEditAdminModalOpen} onClose={() => setIsEditAdminModalOpen(false)} title="Edit Admin Details">
-        {selectedUser && <EditAdminForm admin={selectedUser} onUpdate={handleUpdateAdmin} onCancel={() => setIsEditAdminModalOpen(false)} />}
-      </Modal>
 
       {/* View User Details Modal */}
       <Modal isOpen={isViewModalOpen} onClose={() => setIsViewModalOpen(false)} title="User Details">
-        {selectedUser && <UserDetails user={selectedUser} />}
+        <UserDetails user={selectedUser} />
       </Modal>
 
       {/* Delete Confirmation Modal */}
@@ -704,53 +726,116 @@ const UserManagementTable = ({ users, setUsers }) => {
 // --- Main App Component ---
 // This component acts as the entry point and state manager.
 const App = () => {
-  const initialUsers = [
-    // Admins
-    { id: 1, name: 'Alex Johnson', email: 'alex.j@admin.com', role: 'Admin', status: 'active', department: 'IT', title: 'Lead Administrator', accessLevel: 'Full', phoneNumber: '555-0101', street: '123 Admin Way', city: 'Admin City', postalCode: '90210', country: 'USA', createdAt: '2023-01-15T10:00:00Z' },
-    { id: 2, name: 'Donna Paulsen', email: 'donna.p@admin.com', role: 'Admin', status: 'active', department: 'Operations', title: 'COO', accessLevel: 'Full', phoneNumber: '555-0102', street: '456 Operations Ave', city: 'Businessburg', postalCode: '10001', country: 'USA', createdAt: '2023-02-20T11:00:00Z' },
-    // Subscribers
-    { id: 3, name: 'Sarah Kim', email: 'sarah.k@example.com', role: 'Subscriber', status: 'active', department: null, title: null, accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-03-01T12:00:00Z' },
-    { id: 4, name: 'Mike Ross', email: 'mike.r@example.com', role: 'Subscriber', status: 'active', department: null, title: null, accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-03-05T13:00:00Z' },
-    { id: 11, name: 'Subbie One', email: 'sub.one@example.com', role: 'Subscriber', status: 'active', department: null, title: null, accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-03-05T13:00:00Z' },
-    { id: 12, name: 'Subbie Two', email: 'sub.two@example.com', role: 'Subscriber', status: 'active', department: null, title: null, accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-03-05T13:00:00Z' },
-    { id: 13, name: 'Subbie Three', email: 'sub.three@example.com', role: 'Subscriber', status: 'active', department: null, title: null, accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-03-05T13:00:00Z' },
-    { id: 14, name: 'Subbie Four', email: 'sub.four@example.com', role: 'Subscriber', status: 'active', department: null, title: null, accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-03-05T13:00:00Z' },
-    { id: 15, name: 'Subbie Five', email: 'sub.five@example.com', role: 'Subscriber', status: 'active', department: null, title: null, accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-03-05T13:00:00Z' },
-    { id: 16, name: 'Subbie Six', email: 'sub.six@example.com', role: 'Subscriber', status: 'active', department: null, title: null, accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-03-05T13:00:00Z' },
-    { id: 17, name: 'Subbie Seven', email: 'sub.seven@example.com', role: 'Subscriber', status: 'active', department: null, title: null, accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-03-05T13:00:00Z' },
-    { id: 18, name: 'Subbie Eight', email: 'sub.eight@example.com', role: 'Subscriber', status: 'active', department: null, title: null, accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-03-05T13:00:00Z' },
-    { id: 19, name: 'Subbie Nine', email: 'sub.nine@example.com', role: 'Subscriber', status: 'active', department: null, title: null, accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-03-05T13:00:00Z' },
-    // Students/Job Seekers
-    { id: 5, name: 'Rachel Zane', email: 'rachel.z@student.com', role: 'Student', status: 'active', department: 'Law', title: 'Student', accessLevel: 'Basic', phoneNumber: '555-0105', street: '101 University Dr', city: 'Collegeville', postalCode: '20001', country: 'USA', createdAt: '2023-04-10T14:00:00Z' },
-    { id: 6, name: 'Harvey Specter', email: 'harvey.s@student.com', role: 'Student', status: 'active', department: 'Law', title: 'Job Seeker', accessLevel: 'Basic', phoneNumber: '555-0106', street: '202 Corporate Rd', city: 'Metropolis', postalCode: '10002', country: 'USA', createdAt: '2023-05-15T15:00:00Z' },
-    // Employers
-    { id: 7, name: 'Jessica Pearson', email: 'jessica.p@employer.com', role: 'Employer', status: 'active', department: 'HR', title: 'HR Manager', accessLevel: 'Premium', phoneNumber: '555-0107', street: '303 Business Blvd', city: 'Enterprise', postalCode: '30001', country: 'USA', createdAt: '2023-06-20T16:00:00Z' },
-    { id: 8, name: 'Louis Litt', email: 'louis.l@employer.com', role: 'Employer', status: 'active', department: 'Talent Acquisition', title: 'Recruiter', accessLevel: 'Premium', phoneNumber: '555-0108', street: '404 Hire St', city: 'Jobsville', postalCode: '40001', country: 'USA', createdAt: '2023-07-25T17:00:00Z' },
-    // More users for pagination testing
-    { id: 20, name: 'Student Ten', email: 'student.ten@student.com', role: 'Student', status: 'active', department: 'Engineering', title: 'Student', accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-08-01T10:00:00Z' },
-    { id: 21, name: 'Student Eleven', email: 'student.eleven@student.com', role: 'Student', status: 'active', department: 'Arts', title: 'Student', accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-08-02T11:00:00Z' },
-    { id: 22, name: 'Student Twelve', email: 'student.twelve@student.com', role: 'Student', status: 'active', department: 'Science', title: 'Student', accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-08-03T12:00:00Z' },
-    { id: 23, name: 'Student Thirteen', email: 'student.thirteen@student.com', role: 'Student', status: 'active', department: 'Business', title: 'Student', accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-08-04T13:00:00Z' },
-    { id: 24, name: 'Student Fourteen', email: 'student.fourteen@student.com', role: 'Student', status: 'active', department: 'Law', title: 'Student', accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-08-05T14:00:00Z' },
-    { id: 25, name: 'Student Fifteen', email: 'student.fifteen@student.com', role: 'Student', status: 'active', department: 'Medicine', title: 'Student', accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-08-06T15:00:00Z' },
-    { id: 26, name: 'Student Sixteen', email: 'student.sixteen@student.com', role: 'Student', status: 'active', department: 'Education', title: 'Student', accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-08-07T16:00:00Z' },
-    { id: 27, name: 'Student Seventeen', email: 'student.seventeen@student.com', role: 'Student', status: 'active', department: 'Design', title: 'Student', accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-08-08T17:00:00Z' },
-    { id: 28, name: 'Student Eighteen', email: 'student.eighteen@student.com', role: 'Student', status: 'active', department: 'Journalism', title: 'Student', accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-08-09T18:00:00Z' },
-    { id: 29, name: 'Student Nineteen', email: 'student.nineteen@student.com', role: 'Student', status: 'active', department: 'Economics', title: 'Student', accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-08-10T19:00:00Z' },
-    { id: 30, name: 'Student Twenty', email: 'student.twenty@student.com', role: 'Student', status: 'active', department: 'History', title: 'Student', accessLevel: 'Basic', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-08-11T20:00:00Z' },
-    // More employers for pagination
-    { id: 31, name: 'Employer Nine', email: 'emp.nine@employer.com', role: 'Employer', status: 'active', department: 'HR', title: 'Recruiter', accessLevel: 'Premium', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-09-01T10:00:00Z' },
-    { id: 32, name: 'Employer Ten', email: 'emp.ten@employer.com', role: 'Employer', status: 'active', department: 'Talent Acquisition', title: 'HR Manager', accessLevel: 'Premium', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-09-02T11:00:00Z' },
-    { id: 33, name: 'Employer Eleven', email: 'emp.eleven@employer.com', role: 'Employer', status: 'active', department: 'HR', title: 'Recruiter', accessLevel: 'Premium', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-09-03T12:00:00Z' },
-    { id: 34, name: 'Employer Twelve', email: 'emp.twelve@employer.com', role: 'Employer', status: 'active', department: 'Recruitment', title: 'HR Coordinator', accessLevel: 'Premium', phoneNumber: null, street: null, city: null, postalCode: null, country: null, createdAt: '2023-09-04T13:00:00Z' },
-  ];
-  const [users, setUsers] = useState(initialUsers);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        // Fetch data from all four endpoints
+        const [adminRes, subscriberRes, employerRes, studentRes] = await Promise.all([
+          fetch('http://localhost:3000/api/adminregister'),
+          fetch('http://localhost:3000/api/subscriber'),
+          fetch('http://localhost:3000/api/employer'),
+          fetch('http://localhost:3000/api/student')
+        ]);
+
+        if (!adminRes.ok || !subscriberRes.ok || !employerRes.ok || !studentRes.ok) {
+          throw new Error('Failed to fetch data from one or more APIs');
+        }
+
+        const admins = await adminRes.json();
+        const subscribers = await subscriberRes.json();
+        const employerData = await employerRes.json();
+        const students = await studentRes.json();
+        const employers = employerData.employers;
+
+        // Map and normalize the data to a consistent user object format
+        const allUsers = [
+          ...admins.map(user => ({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            status: user.status,
+            department: user.department,
+            title: user.title,
+            accessLevel: user.accessLevel,
+            phoneNumber: user.phoneNumber,
+            street: user.street,
+            city: user.city,
+            postalCode: user.postalCode,
+            country: user.country,
+            createdAt: user.createdAt,
+          })),
+          ...subscribers.map(user => ({
+            id: user.id,
+            name: user.email.split('@')[0],
+            email: user.email,
+            role: 'Subscriber',
+            status: 'active',
+            department: null,
+            title: null,
+            accessLevel: 'Basic',
+            phoneNumber: null,
+            street: null,
+            city: null,
+            postalCode: null,
+            country: null,
+            createdAt: user.createdAt,
+          })),
+          ...employers.map(user => ({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: 'Employer',
+            status: 'active',
+            department: user.employerProfile?.industry,
+            title: user.employerProfile?.position,
+            accessLevel: 'Premium',
+            phoneNumber: user.employerProfile?.phone,
+            street: user.employerProfile?.company?.street,
+            city: user.employerProfile?.company?.city,
+            postalCode: user.employerProfile?.company?.postalCode,
+            country: user.employerProfile?.company?.country,
+            createdAt: user.createdAt,
+          })),
+          ...students.map(user => ({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.studentProfile?.studentStatus || 'Student',
+            status: 'active',
+            department: user.studentProfile?.fieldOfStudy,
+            title: user.studentProfile?.studentStatus,
+            accessLevel: 'Basic',
+            phoneNumber: user.studentProfile?.phone,
+            street: null,
+            city: null,
+            postalCode: null,
+            country: null,
+            createdAt: user.createdAt,
+          }))
+        ];
+
+        setUsers(allUsers);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUsers();
+  }, []);
+
+  if (loading) return <div className="flex items-center justify-center min-h-screen font-serif text-lg text-gray-700">Loading user data...</div>;
+  if (error) return <div className="flex items-center justify-center min-h-screen font-serif text-lg text-red-600">Error: {error}</div>;
 
   return (
-    <div className="bg-gray-50 min-h-screen p-4 md:p-8 font-[Inter]">
-      <div className="container mx-auto">
-        <UserManagementTable users={users} setUsers={setUsers} />
-      </div>
+    <div className="min-h-screen bg-gray-100 p-4 sm:p-8 font-serif">
+      <UserManagementTable users={users} setUsers={setUsers} />
     </div>
   );
 };

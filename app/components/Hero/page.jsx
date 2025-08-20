@@ -1,11 +1,14 @@
 'use client'
 import { motion } from 'framer-motion';
-import Image  from "next/image";
+import Image from "next/image";
 import imagePath from "../../../public/leaders/KCUTSA_FLAG.png";
+import { useEffect, useState } from 'react';
 
 const backgroundImageUrl = imagePath.src;
 export default function Home() {
-  // Animation variants
+  const [videoUrl, setVideoUrl] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -41,24 +44,52 @@ export default function Home() {
     }
   };
 
+  useEffect(() => {
+    async function fetchVideo() {
+      const url = "/api/video";
+      try {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        
+        if (data && data.url) {
+          const videoId = data.url.split('v=')[1];
+          if (videoId) {
+            // 🚀 FIX: Add 'rel=0' and 'modestbranding=1' to disable most recommendations
+            const embedUrl = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
+            setVideoUrl(embedUrl);
+          } else {
+            console.error('Video URL is not in the expected format.');
+          }
+        } else {
+          console.error('Video data or URL not found in the API response.');
+        }
+      } catch (error) {
+        console.error('Error fetching video:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchVideo();
+  }, []);
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Hero Background with an imported image */}
-      {/* The grid overlay has been removed to simplify the background with the new image */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-fixed"
         style={{ 
           backgroundImage: `url(${backgroundImageUrl})`
         }}
       >
-        {/* Add a dark overlay to make text more readable on top of the image */}
         <div className="absolute inset-0 bg-black/50"></div>
       </div>
-      {/* --- End of update --- */}
 
-      {/* Floating Elements - The `top`, `bottom`, `left`, `right` classes are reduced to move them inwards */}
+      {/* Floating Elements */}
       <div className="absolute inset-0 pointer-events-none hidden md:block">
-        {/* Top Left - University Icon */}
         <motion.div 
           className="absolute top-6 md:top-14 left-6 md:left-14 w-12 h-12 md:w-16 md:h-16 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg flex items-center justify-center"
           variants={floatingVariants}
@@ -72,7 +103,6 @@ export default function Home() {
           </svg>
         </motion.div>
 
-        {/* Top Right - Unity Icon */}
         <motion.div 
           className="absolute top-14 md:top-22 right-6 md:right-22 w-12 h-12 md:w-16 md:h-16 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg flex items-center justify-center"
           variants={floatingVariants}
@@ -86,7 +116,6 @@ export default function Home() {
           </svg>
         </motion.div>
 
-        {/* Center Left - Leadership Icon */}
         <motion.div 
           className="absolute top-1/2 left-4 md:left-10 w-12 h-12 md:w-16 md:h-16 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg flex items-center justify-center"
           variants={floatingVariants}
@@ -100,7 +129,6 @@ export default function Home() {
           </svg>
         </motion.div>
 
-        {/* Center Right - Empowerment Icon */}
         <motion.div 
           className="absolute top-1/2 right-4 md:right-10 w-16 h-16 md:w-20 md:h-20 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg flex items-center justify-center"
           variants={floatingVariants}
@@ -114,7 +142,6 @@ export default function Home() {
           </svg>
         </motion.div>
 
-        {/* Bottom Left - Integrity Icon */}
         <motion.div 
           className="absolute bottom-14 md:bottom-22 left-6 md:left-22 w-12 h-12 md:w-16 md:h-16 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg flex items-center justify-center"
           variants={floatingVariants}
@@ -128,7 +155,6 @@ export default function Home() {
           </svg>
         </motion.div>
 
-        {/* Bottom Right - Service Icon */}
         <motion.div 
           className="absolute bottom-4 md:bottom-6 right-4 md:right-6 w-10 h-10 md:w-12 md:h-12 bg-white/90 rounded-full shadow-lg flex items-center justify-center"
           variants={floatingVariants}
@@ -156,7 +182,6 @@ export default function Home() {
             className="text-center max-w-4xl lg:max-w-5xl mx-auto mb-8 sm:mb-12 lg:mb-16"
             variants={itemVariants}
           >
-            {/* KCUTSA Logo Placeholder */}
             <motion.div 
               className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-blue-600 rounded-full mx-auto mb-6 sm:mb-8 flex items-center justify-center shadow-2xl"
               whileHover={{ 
@@ -192,7 +217,6 @@ export default function Home() {
               Kirinyaga County University and Tertiary Students Association
             </motion.p>
             
-            {/* CTA Buttons */}
             <motion.div 
               className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center px-4"
               variants={itemVariants}
@@ -298,38 +322,49 @@ export default function Home() {
             className="max-w-4xl mx-auto px-4 mt-16 sm:mt-24 lg:mt-32"
             variants={itemVariants}
           >
-           <motion.h2
-  className="text-3xl md:text-4xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-8"
-  variants={itemVariants}
->
-  Get to Know Us
-</motion.h2>
+            <motion.h2
+              className="text-3xl md:text-4xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-8"
+              variants={itemVariants}
+            >
+              Get to Know Us
+            </motion.h2>
 
-<motion.div
-  className="w-full rounded-3xl overflow-hidden shadow-2xl border-4 border-blue-600/50"
-  style={{ aspectRatio: "16/9", height: "600px" }} // ✅ set a custom height
-  variants={itemVariants}
->
-  <iframe
-    className="w-full h-full"
-    src="https://www.youtube.com/embed/33bm9ssnuuM"
-    title="KCUTSA Introductory Video"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    allowFullScreen
-  ></iframe>
-</motion.div>
+            <motion.div
+              className="w-full rounded-3xl overflow-hidden shadow-2xl border-4 border-blue-600/50"
+              style={{ aspectRatio: "16/9", height: "600px" }}
+              variants={itemVariants}
+            >
+              {isLoading ? (
+                <div className="flex items-center justify-center w-full h-full text-white bg-gray-800">
+                  Loading video...
+                </div>
+              ) : (
+                videoUrl ? (
+                  <iframe
+                    className="w-full h-full"
+                    src={videoUrl}
+                    title="KCUTSA Introductory Video"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
+                ) : (
+                  <div className="flex items-center justify-center w-full h-full text-white bg-gray-800">
+                    <p>Failed to load video. Please try again later.</p>
+                  </div>
+                )
+              )}
+            </motion.div>
 
-<motion.p
-  className="mt-8 text-center text-lg text-gray-300 max-w-2xl mx-auto"
-  variants={itemVariants}
->
-  Watch our video to learn more about our mission, our community, and the impact we're making on students in Kirinyaga County.
-</motion.p>
+            <motion.p
+              className="mt-8 text-center text-lg text-gray-300 max-w-2xl mx-auto"
+              variants={itemVariants}
+            >
+              Watch our video to learn more about our mission, our community, and the impact we're making on students in Kirinyaga County.
+            </motion.p>
 
           </motion.div>
-
         </motion.div>
       </div>
     </div>
-  )
+  );
 }

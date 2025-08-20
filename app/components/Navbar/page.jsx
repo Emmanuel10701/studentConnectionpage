@@ -1,31 +1,9 @@
-"use client";
-
+'use client'
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
-// This is a simulated backend API for the purpose of this demo.
-// In a real Next.js application, this would be a separate API route.
-let _newsData = [
-    { id: 1, title: "Career Fair Announcement", description: "The annual KCSO career fair will be held on December 15th. Mark your calendars!", read: false },
-    { id: 2, title: "New Mentorship Program", description: "Our new mentorship program is now live. Sign up to connect with industry professionals.", read: false },
-    { id: 3, title: "Tech Workshop Series", description: "Join our free workshop series on data science and machine learning, starting next week.", read: false },
-    { id: 4, title: "Volunteer Opportunity", description: "We are seeking volunteers for our upcoming community outreach event. Your help makes a difference!", read: false },
-    { id: 5, title: "Scholarship Application Window", description: "The application period for the 2024 KCSO scholarship is now open. Apply by Nov 30th.", read: false },
-    { id: 6, title: "System Maintenance Scheduled", description: "Please be advised that our systems will be down for scheduled maintenance this Saturday from 2 AM to 4 AM.", read: false },
-    { id: 7, title: "New Partnership with TechCorp", description: "We are excited to announce a new partnership that will bring more job opportunities to our platform.", read: false },
-    { id: 8, title: "Holiday Office Closure", description: "Our offices will be closed on December 24th and 25th for the holidays.", read: false },
-    { id: 9, title: "Cybersecurity Awareness Training", description: "Mandatory cybersecurity training for all employees is due by the end of the month.", read: false },
-    { id: 10, title: "Updated Health & Safety Guidelines", description: "Please review the updated health and safety protocols available on the company intranet.", read: false },
-    { id: 11, title: "Annual Performance Reviews", description: "Performance review season is upon us. Please schedule a meeting with your manager.", read: false },
-    { id: 12, title: "Q4 Financial Results", description: "The Q4 financial results have been published and are available for review.", read: false },
-    { id: 13, "title": "Welcome New Hires!", "description": "Let's give a warm welcome to the new members who joined our team this month.", read: false },
-    { id: 14, title: "Innovation Challenge Kick-off", description: "The annual innovation challenge starts next Monday. Get your ideas ready!", read: false },
-    { id: 15, title: "Employee Satisfaction Survey", description: "Please take a few minutes to complete the annual employee satisfaction survey. Your feedback is valuable.", read: false }
-];
-
-
-// Inline SVG icons to replace react-icons/fi
+// Inline SVG icons
 const FiMenu = (props) => (
   <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
 );
@@ -38,55 +16,78 @@ const FiChevronDown = (props) => (
   <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
 );
 
-// Replaced FiBell with FiNewspaper
 const FiNewspaper = (props) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h4M4 9h16M4 15h16M10 3v18"/></svg>
 );
 
-
-// Modern Navbar component with a sleek, responsive design and dynamic dropdowns.
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  // Directly initialize news items, removing the loading state
-  const [newsItems, setNewsItems] = useState(_newsData);
-  
-  // Refs for closing dropdowns and sidebar when clicking outside
+  const [newsAndEvents, setNewsAndEvents] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
   const dropdownRef = useRef(null);
   const sidebarRef = useRef(null);
-  
-  // Computed value for unread news count
-  const unreadCount = newsItems.filter(item => !item.read).length;
+  const readStatusRef = useRef(new Set());
 
-  // Function to toggle the sidebar and mark all news items as read
   const toggleNewsSidebar = () => {
     setIsSidebarOpen(prevState => !prevState);
     if (!isSidebarOpen) {
-      // Mark all news as read and "persist" the change to our mock database.
-      const updatedNews = _newsData.map(item => ({ ...item, read: true }));
-      _newsData = updatedNews;
-      setNewsItems(updatedNews);
+      const newReadItems = new Set(readStatusRef.current);
+      newsAndEvents.forEach(item => newReadItems.add(item.id));
+      readStatusRef.current = newReadItems;
+      setUnreadCount(0);
     }
   };
 
-  // Close dropdown and mobile menu if a click occurs outside of the dropdown menu.
+  useEffect(() => {
+    async function fetchNewsAndEvents() {
+      try {
+        const [newsResponse, eventsResponse] = await Promise.all([
+          fetch("/api/new"),
+          fetch("/api/events")
+        ]);
+
+        if (!newsResponse.ok || !eventsResponse.ok) {
+          throw new Error("Failed to fetch news or events data");
+        }
+
+        const newsData = await newsResponse.json();
+        const eventsData = await eventsResponse.json();
+        
+        // Ensure data is always an array for combining
+        const combinedData = [...(Array.isArray(newsData) ? newsData : [newsData]), ...(Array.isArray(eventsData) ? eventsData : [eventsData])];
+        
+        combinedData.sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date));
+
+        // 🚀 FIX: Calculate unread count for items <= 24 hours old
+        const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
+        const newItems = combinedData.filter(item => {
+          const itemDate = new Date(item.createdAt || item.date).getTime();
+          return itemDate >= twentyFourHoursAgo && !readStatusRef.current.has(item.id);
+        });
+
+        setNewsAndEvents(combinedData);
+        setUnreadCount(newItems.length);
+
+      } catch (error) {
+        console.error("Error fetching news and events:", error);
+      }
+    }
+
+    fetchNewsAndEvents();
+    const intervalId = setInterval(fetchNewsAndEvents, 5 * 60 * 1000);
+    return () => clearInterval(intervalId);
+  }, []);
+
   useEffect(() => {
     function handleClickOutside(event) {
-      // Close the main mobile menu and any open dropdowns if a click is outside the menu container
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setOpenDropdown(null);
-        setMenuOpen(false); // Added to close the mobile menu
+        setMenuOpen(false);
       }
-      // Close the sidebar if a click is outside the sidebar container and not on the news button
-      if (
-        sidebarRef.current &&
-        !sidebarRef.current.contains(event.target) &&
-        !event.target.closest("#news-button")
-      ) {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target) && !event.target.closest("#news-button")) {
         setIsSidebarOpen(false);
       }
     }
@@ -101,7 +102,6 @@ export default function Navbar() {
     setOpenDropdown(openDropdown === dropdown ? null : dropdown);
   };
   
-  // Close the mobile menu and dropdowns when a link is clicked.
   const handleLinkClick = useCallback(() => {
     setMenuOpen(false);
     setOpenDropdown(null);
@@ -110,20 +110,17 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 w-full z-50 bg-[#1e2a3b] bg-opacity-80 backdrop-filter backdrop-blur-lg text-white shadow-xl">
       <div className="container mx-auto flex justify-between items-center px-4 py-3">
-        {/* Logo */}
         <a href="/" className="flex items-center space-x-2">
           <Image
             src="/leaders/KCUTSA_LOGO.png"
             alt="Logo"
             width={60}
             height={50}
-            className="rounded-md  ring-2 ring-blue-500"
+            className="rounded-md ring-2 ring-blue-500"
           />
         </a>
 
-        {/* Hamburger and News for mobile */}
         <div className="flex items-center space-x-4 md:hidden">
-          {/* News button for mobile */}
           <div className="relative">
             <button
               id="news-button"
@@ -149,23 +146,18 @@ export default function Navbar() {
         </div>
 
 
-        {/* Desktop Menu */}
         <motion.div
-          // Use Framer Motion for a smooth dropdown animation on mobile
           initial={false}
           animate={{ height: menuOpen ? "60vh" : "0" }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
           className={`overflow-hidden md:flex md:flex-row md:h-auto md:overflow-visible md:space-x-6 absolute md:static top-full left-0 w-full md:w-auto bg-[#1e2a3b] md:bg-transparent`}
           ref={dropdownRef}
         >
-          {/* The flexbox properties below center the content vertically and horizontally */}
           <div className="flex flex-col md:flex-row md:space-x-6 py-4 md:py-0 w-full justify-center items-center h-full">
-              {/* Main Navigation Links */}
               <a href="/" className="block px-4 py-2 hover:text-blue-400 transition-colors duration-300" onClick={handleLinkClick}>
                 Home
               </a>
 
-              {/* Register Dropdown */}
               <div className="relative group">
                 <button
                   onClick={() => toggleDropdown("register")}
@@ -185,7 +177,6 @@ export default function Navbar() {
                 )}
               </div>
 
-              {/* Login Dropdown */}
               <div className="relative group">
                 <button
                   onClick={() => toggleDropdown("login")}
@@ -208,7 +199,6 @@ export default function Navbar() {
                 )}
               </div>
               
-              {/* News button for desktop */}
               <div className="relative hidden md:block">
                 <button
                   id="news-button"
@@ -225,7 +215,6 @@ export default function Navbar() {
                 </button>
               </div>
 
-              {/* Contact Us Button */}
               <a href="/contact">
                 <button 
                   className="mt-4 md:mt-0 px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-full shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105"
@@ -238,7 +227,6 @@ export default function Navbar() {
         </motion.div>
       </div>
 
-      {/* Sidebar and Overlay */}
       <AnimatePresence>
         {isSidebarOpen && (
           <motion.div
@@ -246,26 +234,34 @@ export default function Navbar() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="fixed top-0 right-0 h-screen w-full md:w-80 bg-[#172234] shadow-2xl z-40 p-6"
+            className="fixed top-0 right-0 h-screen w-full md:w-[40rem] bg-[#172234] shadow-2xl z-40 p-6"
             ref={sidebarRef}
           >
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Latest News</h2>
+              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Latest News & Events</h2>
               <button onClick={toggleNewsSidebar} aria-label="Close news" className="text-white hover:text-blue-400 transition-colors duration-300">
                 <FiX className="w-6 h-6" />
               </button>
             </div>
             <div className="h-[calc(100%-4rem)] overflow-y-auto">
                 <ul className="space-y-4">
-                {newsItems.length > 0 ? (
-                    newsItems.map((item) => (
+                {newsAndEvents.length > 0 ? (
+                    newsAndEvents.map((item) => (
                     <li key={item.id} className="bg-blue-900/50 p-4 rounded-xl shadow-md border border-blue-800">
-                        <h3 className="text-lg font-semibold text-white">{item.title}</h3>
-                        <p className="text-sm text-gray-400 mt-1">{item.description}</p>
+                        <h3 className="text-lg font-semibold text-white">
+                            {/* Display 'News' or 'Event' label */}
+                            <span className={`inline-block px-2 py-1 text-xs font-bold rounded-full mr-2 ${'description' in item ? 'bg-green-500' : 'bg-purple-500'}`}>
+                                {'description' in item ? 'News' : 'Event'}
+                            </span>
+                            {item.title}
+                        </h3>
+                        {/* 🚀 IMPROVED: Display description or location based on the item type */}
+                        <p className="text-sm text-gray-400 mt-1">{item.description || `Location: ${item.location}`}</p>
+                        <p className="text-xs text-gray-500 mt-1">Posted: {new Date(item.createdAt || item.date).toLocaleString()}</p>
                     </li>
                     ))
                 ) : (
-                    <li className="text-center text-gray-500 mt-10">You're all caught up! No new news.</li>
+                    <li className="text-center text-gray-500 mt-10">You're all caught up! No new news or events.</li>
                 )}
                 </ul>
             </div>

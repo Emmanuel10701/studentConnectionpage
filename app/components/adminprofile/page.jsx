@@ -1,7 +1,9 @@
-"use client"
-import { useState } from 'react';
+'use client';
+
+import { useState, useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSession } from 'next-auth/react';
 import { 
   User, 
   Mail, 
@@ -13,51 +15,24 @@ import {
   Globe, 
   Home, 
   CheckCircle,
-  Calendar,
-  Clock,
   Pencil,
   Eye,
   EyeOff,
   AlertCircle
 } from 'lucide-react';
 
-// --- Mock User Data (Replace with real data from your backend) ---
-const mockProfileData = {
-  fullName: 'Admin User',
-  email: 'admin@example.com',
-  // Note: Password is never stored here. This is just for UI purposes.
-  // The actual password hash is handled on the backend.
-  password: '', 
-  role: 'Administrator',
-  phoneNumber: '+1-555-123-4567',
-  department: 'IT Solutions',
-  title: 'Lead Administrator',
-  accessLevel: 'Full Access',
-  street: '123 Tech Lane',
-  city: 'San Francisco',
-  postalCode: '94107',
-  country: 'United States',
-  createdAt: '2023-01-15T10:00:00Z',
-  updatedAt: '2024-08-16T15:30:00Z',
-  avatarUrl: null, // Use null to test the initials fallback
-  // avatarUrl: 'https://placehold.co/100x100/A0B9E3/0C2F6A?text=AU', // Example with a real URL
-};
-
 // --- Reusable Avatar Component ---
 const ProfileAvatar = ({ name, avatarUrl }) => {
   const getInitials = (name) => {
-    // Add a robust check to handle null, undefined, or empty names.
-    if (!name || name.trim() === '') return '??';
+    if (!name || name.trim() === '') return 'AD';
     
     const parts = name.trim().split(' ');
     let initials = '';
     
-    // Check if the first part of the name exists before trying to access it.
     if (parts.length > 0 && parts[0].length > 0) {
       initials += parts[0][0].toUpperCase();
     }
     
-    // Check if the second part of the name exists before trying to access it.
     if (parts.length > 1 && parts[parts.length - 1].length > 0) {
       initials += parts[parts.length - 1][0].toUpperCase();
     }
@@ -87,107 +62,177 @@ const ProfileAvatar = ({ name, avatarUrl }) => {
 
 // --- Main Component ---
 const ProfileSettings = () => {
+  const { data: session, status } = useSession();
+  
   const [isEditing, setIsEditing] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-  const [passwordError, setPasswordError] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const [isPasswordSectionOpen, setIsPasswordSectionOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const { register, handleSubmit, formState: { errors, isSubmitting }, reset, control, getValues } = useForm({
-    defaultValues: mockProfileData
+  // Form for general profile information
+  const { 
+    register, 
+    handleSubmit, 
+    formState: { errors, isSubmitting }, 
+    reset, 
+    control, 
+    getValues 
+  } = useForm({
+    defaultValues: {
+      fullName: session?.user?.name || '',
+      email: session?.user?.email || '',
+      role: session?.user?.role || '',
+      phoneNumber: session?.user?.admin?.phoneNumber || '',
+      department: session?.user?.department || '',
+      title: session?.user?.title || '',
+      accessLevel: session?.admin?.accessLevel || '',
+      street: session?.admin?.street || '',
+      city: session?.admin?.city || '',
+      postalCode: session?.admin?.postalCode || '',
+      country: session?.admin?.country || '',
+    }
   });
+
+  // Form for password change
+  const { 
+    register: registerPassword, 
+    handleSubmit: handleSubmitPassword, 
+    formState: { errors: passwordErrors }, 
+    reset: resetPassword, 
+    getValues: getPasswordValues 
+  } = useForm();
   
-  // Custom form state and validation logic for the password section
-  const { register: registerPassword, handleSubmit: handleSubmitPassword, formState: { errors: passwordErrors }, reset: resetPassword, getValues: getPasswordValues } = useForm();
-  
-  // Use useWatch to get a reactive value for the avatar name
   const fullName = useWatch({
     control,
     name: 'fullName',
-    defaultValue: mockProfileData.fullName,
+    defaultValue: session?.user?.name || '',
   });
 
-
-  const handleSave = (data) => {
-    setSuccessMessage('');
-    console.log("Submitting form with data:", data);
-    
-    // Simulate API call
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Here you would send a PATCH/PUT request to your backend API
-        console.log("Profile updated successfully:", data);
-        setSuccessMessage('Your profile has been updated successfully!');
-        reset(data); // Update form with new data
-        setIsEditing(false); // Switch back to read-only mode
-        resolve();
-      }, 1500);
-    });
-  };
-
-  const handlePasswordSave = (data) => {
-    setPasswordError('');
-    setSuccessMessage('');
-    console.log("Submitting password change:", data);
-    
-    // Simulate API call to update password
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Here you would send a password change request to your backend
-        console.log("Password updated successfully.");
-        setSuccessMessage('Your password has been updated successfully!');
-        resetPassword();
-        setIsPasswordSectionOpen(false); // Close password section
-        resolve();
-      }, 1500);
-    });
-  }
-
-  const handleCancel = () => {
-    reset(mockProfileData); // Revert to original data
-    setIsEditing(false); // Switch back to read-only mode
-    setPasswordError(''); // Clear any password errors
-    setIsPasswordSectionOpen(false); // Close password section
-  };
+  useEffect(() => {
+    if (session?.admin) {
+      reset({
+        fullName: session.admin.name || '',
+        email: session.admin.email || '',
+        role: session.admin.role || '',
+        phoneNumber: session.admin.phoneNumber || '',
+        department: session.admin.department || '',
+        title: session.admin.title || '',
+        accessLevel: session.admin.accessLevel || '',
+        street: session.admin.street || '',
+        city: session.admin.city || '',
+        postalCode: session.admin.postalCode || '',
+        country: session.admin.country || '',
+      });
+    }
+  }, [session, reset]);
   
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleString();
-  };
+  const handleSaveChanges = async (data) => {
+    setSuccessMessage('');
+    setErrorMessage('');
+    
+    const userId = session?.admin?.id;
+    if (!userId) {
+      setErrorMessage("User ID not found. Unable to save changes.");
+      console.error("User ID is missing from session data.");
+      return;
+    }
 
-  // Variants for message animations
-  const messageVariants = {
-    initial: { opacity: 0, y: -20 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -20, transition: { duration: 0.2 } },
-  };
+    try {
+      const response = await fetch(`/api/adminregister/${userId}`, {
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify(data),
+      });
 
-  // Variants for section animations (staggered effect)
-  const sectionVariants = {
-    hidden: { opacity: 0, y: 20 },
-    show: { 
-      opacity: 1, 
-      y: 0,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut"
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update profile.');
       }
+      
+      const updatedProfile = await response.json();
+      
+      setSuccessMessage('Your profile has been updated successfully!');
+      
+      reset(updatedProfile); 
+      setIsEditing(false);
+      
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      setErrorMessage(error.message);
     }
   };
 
+  const handlePasswordSave = async (data) => {
+    setErrorMessage('');
+    setSuccessMessage('');
+    
+    const userId = session?.admin?.id;
+    if (!userId) {
+      setErrorMessage("User ID not found. Unable to change password.");
+      console.error("User ID is missing from session data.");
+      return;
+    }
+
+    try {
+      // Assuming you have a separate API endpoint for password changes
+      const response = await fetch(`/api/admin/change-password/${userId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newPassword: data.newPassword }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update password.');
+      }
+
+      setSuccessMessage('Your password has been updated successfully!');
+      resetPassword();
+      setIsPasswordSectionOpen(false);
+    } catch (error) {
+      console.error("Error updating password:", error);
+      setErrorMessage(error.message);
+    }
+  };
+
+  const handleCancel = () => {
+    reset({
+        fullName: session?.admin?.name || '',
+        email: session?.admin?.email || '',
+        role: session?.admin?.role || '',
+        phoneNumber: session?.admin?.phoneNumber || '',
+        department: session?.admin?.department || '',
+        title: session?.admin?.title || '',
+        accessLevel: session?.admin?.accessLevel || '',
+        street: session?.admin?.street || '',
+        city: session?.admin?.city || '',
+        postalCode: session?.admin?.postalCode || '',
+        country: session?.admin?.country || '',
+    });
+    setIsEditing(false);
+    setErrorMessage('');
+    setSuccessMessage('');
+    setIsPasswordSectionOpen(false);
+    resetPassword();
+  };
+  
+  if (status === "loading") {
+    return <div className="text-center text-gray-500 font-medium">Loading profile...</div>;
+  }
+  
   return (
-    // Main container with a fade-in animation
     <motion.div 
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="bg-white p-6 md:p-10 rounded-3xl shadow-lg border border-gray-100 w-full mx-auto"
+      className="bg-white p-6 md:p-10 rounded-3xl shadow-lg border border-gray-100 w-full mx-auto font-sans"
     >
-      {/* Header and Avatar Section */}
       <div className="flex flex-col md:flex-row items-center md:items-start justify-between mb-8">
         <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
-          <ProfileAvatar name={fullName} avatarUrl={mockProfileData.avatarUrl} />
+          <ProfileAvatar name={fullName} avatarUrl={session?.admin?.avatarUrl} />
           <div className="text-center md:text-left">
             <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900">{fullName}</h1>
             <p className="text-gray-500 text-lg">{getValues("title")}</p>
@@ -207,14 +252,12 @@ const ProfileSettings = () => {
         </div>
       </div>
 
-      {/* Success Message */}
       <AnimatePresence>
         {successMessage && (
           <motion.div
-            variants={messageVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
             className="flex items-center p-4 mb-6 text-sm text-green-800 rounded-xl bg-green-50"
           >
             <CheckCircle size={20} className="mr-2 text-green-600" />
@@ -223,30 +266,25 @@ const ProfileSettings = () => {
         )}
       </AnimatePresence>
       
-      {/* Password Error Message */}
       <AnimatePresence>
-        {passwordError && (
+        {errorMessage && (
           <motion.div
-            variants={messageVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20, transition: { duration: 0.2 } }}
             className="flex items-center p-4 mb-6 text-sm text-red-800 rounded-xl bg-red-50"
           >
             <AlertCircle size={20} className="mr-2 text-red-600" />
-            <span>{passwordError}</span>
+            <span>{errorMessage}</span>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Main Form Sections */}
-      <form onSubmit={handleSubmit(handleSave)} className="space-y-8">
-        {/* Personal Information */}
+      <form onSubmit={handleSubmit(handleSaveChanges)} className="space-y-8">
         <motion.section 
-          variants={sectionVariants}
-          initial="hidden"
-          animate="show"
-          transition={{ delay: 0.2 }} // Staggered delay
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
         >
           <h2 className="text-xl md:text-2xl font-bold text-gray-800 flex items-center gap-2 mb-4 pb-2 border-b border-gray-100">
             <User size={22} className="text-blue-600" /> Personal Information
@@ -289,12 +327,10 @@ const ProfileSettings = () => {
           </div>
         </motion.section>
 
-        {/* Security Section */}
         <motion.section
-          variants={sectionVariants}
-          initial="hidden"
-          animate="show"
-          transition={{ delay: 0.3 }} // Staggered delay
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.5, ease: "easeOut" }}
         >
           <h2 className="text-xl md:text-2xl font-bold text-gray-800 flex items-center gap-2 mb-4 pb-2 border-b border-gray-100">
             <Lock size={22} className="text-blue-600" /> Security & Access
@@ -336,7 +372,7 @@ const ProfileSettings = () => {
                   type="button"
                   onClick={() => {
                     setIsPasswordSectionOpen(!isPasswordSectionOpen);
-                    setPasswordError('');
+                    setErrorMessage('');
                   }}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -403,7 +439,7 @@ const ProfileSettings = () => {
                         })} 
                         className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
                       />
-                       <button 
+                        <button 
                         type="button" 
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
@@ -430,12 +466,10 @@ const ProfileSettings = () => {
           </AnimatePresence>
         </motion.section>
 
-        {/* Professional & Contact Information */}
         <motion.section
-          variants={sectionVariants}
-          initial="hidden"
-          animate="show"
-          transition={{ delay: 0.4 }} // Staggered delay
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.5, ease: "easeOut" }}
         >
           <h2 className="text-xl md:text-2xl font-bold text-gray-800 flex items-center gap-2 mb-4 pb-2 border-b border-gray-100">
             <Briefcase size={22} className="text-blue-600" /> Professional Details
@@ -493,12 +527,10 @@ const ProfileSettings = () => {
           </div>
         </motion.section>
         
-        {/* Address Information */}
         <motion.section
-          variants={sectionVariants}
-          initial="hidden"
-          animate="show"
-          transition={{ delay: 0.5 }} // Staggered delay
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.5, ease: "easeOut" }}
         >
           <h2 className="text-xl md:text-2xl font-bold text-gray-800 flex items-center gap-2 mb-4 pb-2 border-b border-gray-100">
             <MapPin size={22} className="text-blue-600" /> Address Details
@@ -571,51 +603,6 @@ const ProfileSettings = () => {
           </div>
         </motion.section>
 
-        {/* Metadata */}
-        <motion.section
-          variants={sectionVariants}
-          initial="hidden"
-          animate="show"
-          transition={{ delay: 0.6 }} // Staggered delay
-        >
-          <h2 className="text-xl md:text-2xl font-bold text-gray-800 flex items-center gap-2 mb-4 pb-2 border-b border-gray-100">
-            <Clock size={22} className="text-blue-600" /> Metadata
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="createdAt" className="block text-sm font-medium text-gray-700 mb-1">Created At</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
-                  <Calendar size={18} />
-                </div>
-                <input 
-                  type="text" 
-                  id="createdAt" 
-                  disabled
-                  value={formatDate(mockProfileData.createdAt)}
-                  className="w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl bg-gray-50 cursor-not-allowed"
-                />
-              </div>
-            </div>
-            <div>
-              <label htmlFor="updatedAt" className="block text-sm font-medium text-gray-700 mb-1">Last Updated</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
-                  <Calendar size={18} />
-                </div>
-                <input 
-                  type="text" 
-                  id="updatedAt" 
-                  disabled
-                  value={formatDate(mockProfileData.updatedAt)}
-                  className="w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl bg-gray-50 cursor-not-allowed"
-                />
-              </div>
-            </div>
-          </div>
-        </motion.section>
-
-        {/* Action Buttons */}
         {isEditing && (
           <div className="flex justify-end gap-4 mt-8">
             <motion.button

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   LoaderCircle,
@@ -16,6 +17,7 @@ const ResetPasswordPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
 
   // States to track password conditions
   const [hasMinLength, setHasMinLength] = useState(false);
@@ -44,8 +46,6 @@ const ResetPasswordPage = () => {
 
     // Check all conditions are met before attempting submission
     if (!hasMinLength || !hasNumber || !hasLetter || !passwordsMatch) {
-      // In a real application, you might show a toast or a message here.
-      // For this example, we rely on the visual list for feedback.
       console.log("Password conditions not met. Please check the list.");
       setLoading(false);
       return;
@@ -57,10 +57,26 @@ const ResetPasswordPage = () => {
       // Simulate a network delay
       await new Promise((resolve) => setTimeout(resolve, 2000));
       console.log("Password reset successful!");
-      setNewPassword("");
-      setConfirmPassword("");
+
+      // Retrieve the user's role from local storage
+      const userRole = localStorage.getItem('userRole');
+
+      // Check the role and redirect to the appropriate login page
+      if (userRole === 'EMPLOYER') {
+        localStorage.removeItem('userRole'); // Delete local storage key
+        router.push("/employerlogin");
+      } else if (userRole === 'STUDENT') {
+        localStorage.removeItem('userRole'); // Delete local storage key
+        router.push("/studentlogin");
+      } else {
+        // Fallback or a generic page if no role is found
+        localStorage.removeItem('userRole'); // Just in case
+        router.push("/");
+      }
+
     } catch (error) {
       console.error("Failed to reset password:", error);
+      // Handle login failure here
     } finally {
       setLoading(false);
     }
@@ -76,7 +92,6 @@ const ResetPasswordPage = () => {
     const iconClasses = condition ? "text-green-500" : "text-gray-400";
     const textClasses = condition ? "text-green-300" : "text-gray-400";
 
-    // Removed motion.li to prevent the item from "flying in" on focus/change
     return (
       <li className="flex items-center gap-2">
         {condition ? (
@@ -117,7 +132,6 @@ const ResetPasswordPage = () => {
         </motion.div>
 
         <form onSubmit={handleSubmit} className="relative z-10 space-y-6">
-          {/* We removed the motion.div around the input field to prevent it from animating on focus */}
           <div>
             <div className="relative">
               <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -139,7 +153,6 @@ const ResetPasswordPage = () => {
             </div>
           </div>
 
-          {/* Password Condition List */}
           <ul
             className="text-sm space-y-2 mt-4 p-4 rounded-xl backdrop-blur-sm bg-white/10"
           >
@@ -147,7 +160,6 @@ const ResetPasswordPage = () => {
             <ConditionItem condition={hasMinLength} text="Be at least 8 characters long" />
             <ConditionItem condition={hasNumber} text="Contain a number" />
             <ConditionItem condition={hasLetter} text="Contain a letter" />
-            {/* Removed the motion.div around this input field to prevent animation */}
             <div>
               <div className="relative mt-6">
                 <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -197,6 +209,4 @@ const ResetPasswordPage = () => {
   );
 };
 
-export default function App() {
-  return <ResetPasswordPage />;
-}
+export default ResetPasswordPage;

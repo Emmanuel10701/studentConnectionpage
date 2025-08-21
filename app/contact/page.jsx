@@ -52,16 +52,32 @@ export default function AboutUs() {
     e.preventDefault();
     setStatus("processing");
     setMessage("");
+
     if (!formData.name || !formData.email || !formData.message) {
       setStatus("error");
       setMessage("All fields are required.");
       return;
     }
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      setStatus("success");
-      setMessage("Thank you for your message! We will get back to you shortly.");
-      setFormData({ name: "", email: "", message: "" });
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setStatus("success");
+        setMessage("Thank you for your message! We will get back to you shortly.");
+        setFormData({ name: "", email: "", message: "" });
+      } else {
+        setStatus("error");
+        setMessage(data.message || "Something went wrong. Please try again later.");
+      }
     } catch (err) {
       console.error(err);
       setStatus("error");

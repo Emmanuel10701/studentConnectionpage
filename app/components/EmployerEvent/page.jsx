@@ -1,10 +1,9 @@
 'use client';
 import React, { useState, useMemo, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Search, X, Briefcase, Bell, Info, Globe, ChevronLeft, ChevronRight, Clock, Link, Calendar, MapPin, CheckCircle } from 'lucide-react';
+import { Search, X, Briefcase, Bell, Film, CheckCircle, Calendar, MapPin, ChevronLeft, ChevronRight, Clock, Link as LinkIcon, Sparkles } from 'lucide-react';
 
 // Utility function to format dates as "time ago" strings
-// This helps the user quickly see how recent a post is.
 const formatTimeAgo = (date) => {
   const now = new Date();
   const seconds = Math.floor((now - date) / 1000);
@@ -21,7 +20,7 @@ const formatTimeAgo = (date) => {
   return "just now";
 };
 
-// Component for displaying success or error messages
+// Reusable Message Box component for notifications
 const MessageBox = ({ message, type, onClose }) => {
   const color = type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
   const icon = type === 'success' ? (
@@ -29,7 +28,7 @@ const MessageBox = ({ message, type, onClose }) => {
   ) : (
     <X size={20} className="text-red-500 flex-shrink-0" />
   );
-  
+
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
@@ -48,10 +47,11 @@ const MessageBox = ({ message, type, onClose }) => {
   );
 };
 
-// Component for event registration/interest form for employers
-const EmployerRegistration = ({ postId, isRegistered, onRegister }) => {
+// Component for employer event registration
+const EmployerRegistration = ({ post, onRegister }) => {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -59,83 +59,44 @@ const EmployerRegistration = ({ postId, isRegistered, onRegister }) => {
     setIsSubmitting(true);
     // Simulate a network request
     await new Promise(resolve => setTimeout(resolve, 1000));
-    onRegister(postId, email);
+    onRegister(post.id, email);
+    setIsRegistered(true);
     setIsSubmitting(false);
   };
 
+  if (isRegistered) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex items-center justify-center p-3 rounded-xl bg-green-100 text-green-700 font-semibold"
+      >
+        <CheckCircle size={20} className="mr-2" />
+        Registered!
+      </motion.div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="mt-4">
-      {isRegistered ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex items-center justify-center p-3 rounded-xl bg-green-100 text-green-700 font-semibold"
+      <div className="flex flex-col sm:flex-row gap-2">
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Enter your email to register"
+          className="flex-1 px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          required
+        />
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="px-6 py-2 rounded-xl bg-purple-600 text-white font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <CheckCircle size={20} className="mr-2" />
-          Registered!
-        </motion.div>
-      ) : (
-        <div className="flex flex-col sm:flex-row gap-2">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your email to register"
-            className="flex-1 px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            required
-          />
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="px-6 py-2 rounded-xl bg-purple-600 text-white font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isSubmitting ? 'Registering...' : 'Register'}
-          </button>
-        </div>
-      )}
-    </form>
-  );
-};
-
-// New component for displaying post details in a modal
-const PostDetailsModal = ({ post, onClose }) => {
-  if (!post) return null;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-      onClick={onClose} // Close modal when clicking outside
-    >
-      <motion.div
-        initial={{ y: -50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: -50, opacity: 0 }}
-        className="bg-white p-8 rounded-3xl shadow-2xl max-w-lg w-full relative"
-        onClick={(e) => e.stopPropagation()} // Prevent click from bubbling to the backdrop
-      >
-        <button onClick={onClose} className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors">
-          <X size={24} className="text-gray-500" />
+          {isSubmitting ? 'Registering...' : 'Register'}
         </button>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">{post.title}</h2>
-        <p className="text-gray-600 mb-4">{post.description}</p>
-        <div className="space-y-2 text-sm text-gray-700">
-          <p className="flex items-center gap-2"><Calendar size={16} /> <strong>Date:</strong> {new Date(post.date).toLocaleDateString()}</p>
-          <p className="flex items-center gap-2"><MapPin size={16} /> <strong>Location:</strong> {post.location}</p>
-          <p className="flex items-center gap-2"><Briefcase size={16} /> <strong>Type:</strong> {post.type}</p>
-          {post.infoLink && (
-            <p className="flex items-center gap-2">
-              <Link size={16} /> <strong>Link:</strong> 
-              <a href={post.infoLink} target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:underline break-all">
-                {post.infoLink}
-              </a>
-            </p>
-          )}
-        </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </form>
   );
 };
 
@@ -144,119 +105,78 @@ export default function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPostType, setSelectedPostType] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [registeredEvents, setRegisteredEvents] = useState({});
+  const [eventsData, setEventsData] = useState([]);
+  const [newsData, setNewsData] = useState([]);
+  const [videosData, setVideosData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(null);
-  const [selectedPost, setSelectedPost] = useState(null); // New state for the modal
   const postsPerPage = 4;
 
-  // Mock data for upcoming events and news specifically for employers
-  // This data would typically be fetched from a database.
-  const mockPosts = useMemo(() => [
-    {
-      id: 1,
-      title: 'Job Fair: Fall 2025',
-      description: 'Find qualified candidates and showcase your company culture. Booth registration is now open.',
-      date: new Date('2025-09-01T10:00:00Z'),
-      location: 'Main Convention Center',
-      type: 'Job Fair',
-      infoLink: 'https://example.com/employer-info/job-fair'
-    },
-    {
-      id: 2,
-      title: 'Hiring News: Tech Sector',
-      description: 'Report highlights a 15% growth in tech job openings for Q3. Explore our resources to attract top talent.',
-      date: new Date('2025-08-28T14:00:00Z'),
-      location: 'Online',
-      type: 'News',
-      infoLink: 'https://example.com/employer-info/tech-hiring-news'
-    },
-    {
-      id: 3,
-      title: 'Recruitment Best Practices Webinar',
-      description: 'Join our webinar to learn about the latest strategies for attracting and retaining talent in a competitive market.',
-      date: new Date('2025-09-15T17:30:00Z'),
-      location: 'Virtual',
-      type: 'Webinar',
-      infoLink: 'https://example.com/employer-info/recruitment-webinar'
-    },
-    {
-      id: 4,
-      title: 'Company Info Session: Innovate Co.',
-      description: 'Innovate Co. is hosting an information session for employers interested in partnering on a new campus initiative.',
-      date: new Date('2025-10-05T11:00:00Z'),
-      location: 'Innovation Hub',
-      type: 'Information Session',
-      infoLink: 'https://example.com/employer-info/innovate-co'
-    },
-    {
-      id: 5,
-      title: 'Policy Update: Remote Work',
-      description: 'New guidelines for managing remote employees have been released. Access the full document for details.',
-      date: new Date('2025-08-20T08:00:00Z'),
-      location: 'Online',
-      type: 'News',
-      infoLink: 'https://example.com/employer-info/remote-work-policy'
-    },
-    {
-      id: 6,
-      title: 'Campus Partnership Program Launch',
-      description: 'The new Campus Partnership Program is now live, offering new ways for employers to engage with students and faculty.',
-      date: new Date('2025-08-15T09:00:00Z'),
-      location: 'Online',
-      type: 'News',
-      infoLink: 'https://example.com/employer-info/partnership-program'
-    },
-    {
-      id: 7,
-      title: 'Recruitment Session: Software Engineers',
-      description: 'A dedicated session for companies looking to hire software engineers for full-time and internship roles.',
-      date: new Date('2025-09-29T18:00:00Z'),
-      location: 'Computer Science Building',
-      type: 'Recruitment Session',
-      infoLink: 'https://example.com/employer-info/engineering-recruitment'
-    },
-    {
-      id: 8,
-      title: 'Market Analysis Report',
-      description: 'Download our latest report on market trends affecting hiring in the next year.',
-      date: new Date('2025-11-10T15:00:00Z'),
-      location: 'Online',
-      type: 'Report',
-      infoLink: 'https://example.com/employer-info/market-report'
-    },
-    {
-      id: 9,
-      title: 'Data Science Workshop',
-      description: 'A hands-on workshop for employers to learn about integrating data science into their hiring process.',
-      date: new Date('2025-10-25T12:00:00Z'),
-      location: 'Innovation Hub',
-      type: 'Workshop',
-      infoLink: 'https://example.com/employer-info/data-science-workshop'
-    },
-  ], []);
+  useEffect(() => {
+    const fetchPosts = async () => {
+      setLoading(true);
+      try {
+        // Fetching data from the specified endpoints
+        const [eventsResponse, newsResponse, videosResponse] = await Promise.all([
+          fetch('http://localhost:3000/api/events'),
+          fetch('http://localhost:3000/api/new'),
+          fetch('http://localhost:3000/api/video'),
+        ]);
 
-  // Sort events by date in descending order (latest first)
+        const events = await eventsResponse.json();
+        const news = await newsResponse.json();
+        const videos = await videosResponse.json();
+
+        setEventsData(Array.isArray(events) ? events : [events]);
+        setNewsData(Array.isArray(news) ? news : [news]);
+        setVideosData(Array.isArray(videos) ? videos : [videos]);
+      } catch (err) {
+        console.error("Failed to fetch posts:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPosts();
+  }, []);
+
+  const combinedData = useMemo(() => {
+    const formattedEvents = eventsData.map(item => ({
+      ...item,
+      type: 'Event',
+      date: new Date(item.date),
+    }));
+    const formattedNews = newsData.map(item => ({
+      ...item,
+      type: 'News',
+      date: new Date(item.date),
+    }));
+    const formattedVideos = videosData.map(item => ({
+      ...item,
+      type: 'Video',
+      date: new Date(item.createdAt),
+    }));
+
+    return [...formattedEvents, ...formattedNews, ...formattedVideos];
+  }, [eventsData, newsData, videosData]);
+
   const sortedPosts = useMemo(() => {
-    return [...mockPosts].sort((a, b) => b.date - a.date);
-  }, [mockPosts]);
-
-  // Filter posts based on search term and selected type
+    return [...combinedData].sort((a, b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt));
+  }, [combinedData]);
+  
   const filteredPosts = useMemo(() => {
     return sortedPosts.filter(post => {
-      const matchesSearchTerm = post.title.toLowerCase().includes(searchTerm.toLowerCase()) || post.description.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearchTerm = post.title?.toLowerCase().includes(searchTerm.toLowerCase()) || post.description?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesPostType = selectedPostType === '' || post.type === selectedPostType;
       return matchesSearchTerm && matchesPostType;
     });
   }, [searchTerm, selectedPostType, sortedPosts]);
 
-  // Pagination logic to display a limited number of posts per page
   const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
   const paginatedPosts = useMemo(() => {
     const startIndex = (currentPage - 1) * postsPerPage;
     return filteredPosts.slice(startIndex, startIndex + postsPerPage);
   }, [currentPage, filteredPosts, postsPerPage]);
 
-  // Reset page to 1 whenever the filters or search term changes
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, selectedPostType]);
@@ -266,26 +186,20 @@ export default function App() {
       setMessage({ type: 'error', text: 'Please enter a valid email address.' });
       return;
     }
-    setRegisteredEvents(prev => ({
-      ...prev,
-      [postId]: true,
-    }));
+    // Logic for handling registration
     setMessage({ type: 'success', text: 'You have been successfully registered for this event!' });
     setTimeout(() => setMessage(null), 3000);
   };
 
-  // Get a list of unique post types for the filter dropdown
-  const uniquePostTypes = [...new Set(mockPosts.map(post => post.type))];
-  
-  // Mapping of post types to Lucide React icons for visual appeal
+  const uniquePostTypes = useMemo(() => {
+    return [...new Set(combinedData.map(post => post.type))];
+  }, [combinedData]);
+
+  // Updated icon map for the Employer Hub
   const PostTypeIconMap = {
-    'Job Fair': Briefcase,
-    'Webinar': Globe,
-    'Workshop': Briefcase,
+    'Event': Briefcase,
     'News': Bell,
-    'Information Session': Info,
-    'Report': Briefcase,
-    'Recruitment Session': Briefcase,
+    'Video': Film,
   };
 
   return (
@@ -314,7 +228,6 @@ export default function App() {
 
       <div className="pt-28 pb-8 px-4 md:px-8">
         <div className="w-full max-w-5xl mx-auto space-y-8">
-          {/* Filters and Search Bar */}
           <div className="flex flex-col md:flex-row gap-4 p-4 rounded-3xl bg-white shadow-lg border border-gray-200">
             <select
               value={selectedPostType}
@@ -334,82 +247,95 @@ export default function App() {
             </button>
           </div>
 
-          {/* Posts Feed */}
           <AnimatePresence mode="wait">
-            <motion.div
-              key={paginatedPosts.length > 0 ? 'results' : 'no-results'}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="grid grid-cols-1 md:grid-cols-2 gap-6"
-            >
-              {paginatedPosts.length > 0 ? (
-                paginatedPosts.map(post => {
-                  const IconComponent = PostTypeIconMap[post.type] || Info;
-                  const isRegistered = registeredEvents[post.id];
-                  
-                  return (
-                    <motion.div 
-                      key={post.id} 
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.3 }}
-                      className="bg-white p-6 rounded-3xl border border-gray-200 shadow-lg flex flex-col gap-4"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="p-3 bg-purple-100 rounded-full text-purple-600 flex-shrink-0">
-                          <IconComponent size={24} />
+            {loading ? (
+              <motion.p
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="text-gray-500 text-center py-8 col-span-full"
+              >
+                Loading posts...
+              </motion.p>
+            ) : (
+              <motion.div
+                key="posts"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="grid grid-cols-1 md:grid-cols-2 gap-6"
+              >
+                {paginatedPosts.length > 0 ? (
+                  paginatedPosts.map(post => {
+                    const IconComponent = PostTypeIconMap[post.type] || Briefcase;
+                    const displayDate = post.date || post.createdAt;
+                    
+                    return (
+                      <motion.div 
+                        key={post.id} 
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3 }}
+                        className="bg-white p-6 rounded-3xl border border-gray-200 shadow-lg flex flex-col gap-4"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="p-3 bg-purple-100 rounded-full text-purple-600 flex-shrink-0">
+                            <IconComponent size={24} />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-xl text-gray-900">{post.title}</h3>
+                            <p className="text-sm text-gray-500 flex items-center gap-1">
+                              <Clock size={16} /> {formatTimeAgo(new Date(displayDate))}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="font-bold text-xl text-gray-900">{post.title}</h3>
-                          <p className="text-sm text-gray-500 flex items-center gap-1">
-                            <Clock size={16} /> {formatTimeAgo(post.date)}
-                          </p>
+                        <p className="text-gray-700">{post.description}</p>
+                        <div className="flex flex-wrap items-center text-sm text-gray-600 gap-4">
+                          {post.location && (
+                            <span className="flex items-center gap-1">
+                              <MapPin size={16} /> {post.location}
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1">
+                            <Calendar size={16} /> {new Date(displayDate).toLocaleDateString()}
+                          </span>
                         </div>
-                      </div>
-                      <p className="text-gray-700">{post.description}</p>
-                      <div className="flex flex-wrap items-center text-sm text-gray-600 gap-4">
-                        <span className="flex items-center gap-1">
-                          <Calendar size={16} /> {new Date(post.date).toLocaleDateString()}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <MapPin size={16} /> {post.location}
-                        </span>
-                      </div>
-                      
-                      {(post.type !== 'News' && post.type !== 'Report') && (
-                        <EmployerRegistration 
-                          postId={post.id} 
-                          isRegistered={isRegistered} 
-                          onRegister={handleRegistration}
-                        />
-                      )}
-                      
-                      {/* Changed from <a> to <button> to trigger the modal */}
-                      {post.infoLink && (
-                         <button 
-                           onClick={() => setSelectedPost(post)}
-                           className="mt-4 px-6 py-2 rounded-xl bg-purple-600 text-white font-semibold hover:bg-purple-700 transition-colors text-center"
-                         >
-                           View Details
-                         </button>
-                      )}
-                    </motion.div>
-                  );
-                })
-              ) : (
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="text-gray-500 col-span-full text-center py-8"
-                >
-                  No posts match your search criteria.
-                </motion.p>
-              )}
-            </motion.div>
+                        
+                        {/* Only render registration for events */}
+                        {post.type === 'Event' && (
+                          <EmployerRegistration 
+                            post={post}
+                            onRegister={handleRegistration}
+                          />
+                        )}
+
+                        {post.type !== 'Event' && post.url && (
+                            <a 
+                                href={post.url} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="mt-4 px-6 py-2 rounded-xl bg-purple-600 text-white font-semibold hover:bg-purple-700 transition-colors text-center inline-block"
+                            >
+                                View Details
+                            </a>
+                        )}
+                      </motion.div>
+                    );
+                  })
+                ) : (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-gray-500 col-span-full text-center py-8"
+                  >
+                    No posts match your search criteria.
+                  </motion.p>
+                )}
+              </motion.div>
+            )}
           </AnimatePresence>
 
-          {/* Pagination Controls */}
           {totalPages > 1 && (
             <div className="flex justify-center items-center gap-2 mt-8">
               <button
@@ -444,7 +370,6 @@ export default function App() {
       
       <AnimatePresence>
         {message && <MessageBox message={message.text} type={message.type} onClose={() => setMessage(null)} />}
-        {selectedPost && <PostDetailsModal post={selectedPost} onClose={() => setSelectedPost(null)} />}
       </AnimatePresence>
     </div>
   );

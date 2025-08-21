@@ -291,28 +291,65 @@ const HomeDashboard = () => (
             <Sparkles size={20} className="mr-2 text-indigo-500" />
             Quick Links
           </h3>
+             {/* Updated Quick Links Card */}
+        <div className="bg-white p-6 rounded-xl shadow-lg">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <Sparkles size={20} className="mr-2 text-indigo-500" />
+            Quick Links
+          </h3>
           <ul className="space-y-3 text-indigo-600">
             <li>
-              <a href="#" className="flex items-center hover:underline">
-                View Transcript <ChevronRight size={16} className="ml-1" />
+              <a href="https://www.ecitizen.go.ke/" target="_blank" rel="noopener noreferrer" className="flex items-center hover:underline">
+                eCitizen <ChevronRight size={16} className="ml-1" />
               </a>
+              <p className="text-xs text-gray-500 mt-1 ml-2">Government services portal.</p>
             </li>
             <li>
-              <a href="#" className="flex items-center hover:underline">
-                Update Skills <ChevronRight size={16} className="ml-1" />
+              <a href="https://www.youthfund.go.ke/" target="_blank" rel="noopener noreferrer" className="flex items-center hover:underline">
+                Youth Empowerment Fund <ChevronRight size={16} className="ml-1" />
               </a>
+              <p className="text-xs text-gray-500 mt-1 ml-2">Access business and training loans.</p>
             </li>
             <li>
-              <a href="#" className="flex items-center hover:underline">
-                Find Mentors <ChevronRight size={16} className="ml-1" />
+              <a href="https://diasporajobs.go.ke/" target="_blank" rel="noopener noreferrer" className="flex items-center hover:underline">
+                Diaspora Jobs by Government <ChevronRight size={16} className="ml-1" />
               </a>
+              <p className="text-xs text-gray-500 mt-1 ml-2">Job opportunities for Kenyans abroad.</p>
             </li>
             <li>
-              <a href="#" className="flex items-center hover:underline">
-                Career Resources <ChevronRight size={16} className="ml-1" />
+              <a href="https://ajiradigital.go.ke/" target="_blank" rel="noopener noreferrer" className="flex items-center hover:underline">
+                Ajira Digital <ChevronRight size={16} className="ml-1" />
               </a>
+              <p className="text-xs text-gray-500 mt-1 ml-2">Learn digital skills and find online work.</p>
             </li>
           </ul>
+        </div>
+
+        {/* New WhatsApp Connect Card */}
+        <div className="bg-white p-6 rounded-xl shadow-lg">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-green-500">
+                <path d="M12 2C6.477 2 2 6.477 2 12c0 1.5.343 2.9.957 4.183L2 22l6.183-1.957A9.952 9.952 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm-1.5 15.5h-1a.5.5 0 0 1-.5-.5V14a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5zm4.5-5.5a.5.5 0 0 1-.5.5H12a.5.5 0 0 1-.5-.5V9.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5V12z"/>
+                <path d="M16 11.5a.5.5 0 0 0-.5-.5h-2a.5.5 0 0 0-.5.5v3.5a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5v-3.5z"/>
+                <path d="M11.5 14h-1a.5.5 0 0 1-.5-.5V10.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5z"/>
+                <path d="M11 10.5h2.5a.5.5 0 0 0 .5-.5V9a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0-.5.5v1.5z"/>
+                <path d="M11 12v2.5a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5V12"/>
+                <path d="M12 11h2.5a.5.5 0 0 0 .5-.5V9.5a.5.5 0 0 0-.5-.5H12.5a.5.5 0 0 0-.5.5v1z"/>
+            </svg>
+            Connect with Students
+          </h3>
+          <p className="text-gray-600 mb-4">
+            Join our official WhatsApp group to network with fellow students, share insights, and get real-time updates on jobs and events.
+          </p>
+          <a
+            href="https://chat.whatsapp.com/your-group-invite-link"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full flex items-center justify-center py-3 rounded-lg text-white font-semibold bg-green-500 hover:bg-green-600 transition-colors"
+          >
+            Join the WhatsApp Group
+          </a>
+        </div>
         </div>
       </div>
     </div>

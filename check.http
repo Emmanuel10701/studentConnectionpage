@@ -1,58 +1,897 @@
-### POST Create a New Student Profile
+### POST Create a New Student Profile for Alice Mwangi
 POST http://localhost:3000/api/studententireprofile
 Content-Type: multipart/form-data; boundary=myboundary
 
 --myboundary
 Content-Disposition: form-data; name="userId"
 
-68a744d91ffc2a29d16e167f
+68a8c852e4222a5d2ab76066
 --myboundary
 Content-Disposition: form-data; name="name"
 
-Alex Emmanuel
+Alice Mwangi
 --myboundary
 Content-Disposition: form-data; name="bio"
 
-A passionate software engineering student with a focus on web development and data science.
+A passionate Computer Science student from the University of Nairobi, specializing in web development and data analytics.
 --myboundary
 Content-Disposition: form-data; name="summary"
 
-Seeking a challenging internship opportunity to apply my skills in JavaScript, Python, and cloud computing.
+Seeking a challenging internship to apply my skills in Python, JavaScript, and cloud computing.
 --myboundary
 Content-Disposition: form-data; name="skills"
 
-["django", "Python", "React", "Node.js", "MongoDB", "Prisma"]
+["Python", "JavaScript", "SQL", "React", "Node.js", "MongoDB"]
 --myboundary
 Content-Disposition: form-data; name="address"
 
-{"county": "Kirinyanga", "subCounty": "Westlands", "ward": "Kileleshwa", "details": "123 Main Street, Apt 4"}
+{"county": "Nairobi", "subCounty": "Westlands", "ward": "Kangemi", "details": "123 Park Avenue"}
 --myboundary
 Content-Disposition: form-data; name="education"
 
-[{"school": "Harvard University", "degree": "Bachelor of Science", "fieldOfStudy": "Software Engineering", "graduationYear": 2025, "isCurrent": true}]
+[{"school": "University of Nairobi", "degree": "Bachelor of Science", "fieldOfStudy": "Computer Science", "graduationYear": 2026, "isCurrent": true}]
 --myboundary
 Content-Disposition: form-data; name="experience"
 
-[{"title": "Junior Developer Intern", "company": "Upnxy Solutions Inc.", "startDate": "2024-06-01T00:00:00.000Z", "endDate": null, "isCurrent": true, "description": "Developed and maintained front-end components for various client projects using React and Tailwind CSS."}]
+[{"title": "Data Analyst Intern", "company": "Tech Solutions Ltd.", "startDate": "2024-06-01T00:00:00.000Z", "endDate": null, "isCurrent": true, "description": "Assisted in data collection and analysis for various projects, creating reports and dashboards."}]
 --myboundary
 Content-Disposition: form-data; name="achievements"
 
-["Top 10 in the National Science Fair (2020)", "Dean's List for Academic Excellence (2022, 2023)"]
+["Dean's List for Academic Excellence (2024)"]
 --myboundary
 Content-Disposition: form-data; name="certifications"
 
-["AWS Certified Cloud Practitioner", "ScrumMaster Certification"]
+["Google Data Analytics Professional Certificate"]
 --myboundary
 Content-Disposition: form-data; name="resume"; filename="resume.pdf"
 Content-Type: application/pdf
 
-< file:///C:/Users/ADMIN/OneDrive/Desktop/commonapp/MyResume.pdf
+< your_local_file_path/alice_mwangi_resume.pdf
+--myboundary--
+
+### POST Create a New Student Profile for Brian Otieno
+POST http://localhost:3000/api/studententireprofile
+Content-Type: multipart/form-data; boundary=myboundary
+
+--myboundary
+Content-Disposition: form-data; name="userId"
+
+68a8c861e4222a5d2ab76068
+--myboundary
+Content-Disposition: form-data; name="name"
+
+Brian Otieno
+--myboundary
+Content-Disposition: form-data; name="bio"
+
+A Business Administration student at Kenyatta University with a focus on marketing and management.
+--myboundary
+Content-Disposition: form-data; name="summary"
+
+A proactive and detail-oriented individual looking for an internship in a dynamic business environment.
+--myboundary
+Content-Disposition: form-data; name="skills"
+
+["Marketing", "Project Management", "Financial Analysis", "Microsoft Office Suite"]
+--myboundary
+Content-Disposition: form-data; name="address"
+
+{"county": "Nairobi", "subCounty": "Kasarani", "ward": "Mwiki", "details": "456 Riverside Drive"}
+--myboundary
+Content-Disposition: form-data; name="education"
+
+[{"school": "Kenyatta University", "degree": "Bachelor of Commerce", "fieldOfStudy": "Business Administration", "graduationYear": 2025, "isCurrent": true}]
+--myboundary
+Content-Disposition: form-data; name="experience"
+
+[{"title": "Marketing Intern", "company": "Innovate Marketing Group", "startDate": "2024-05-01T00:00:00.000Z", "endDate": null, "isCurrent": true, "description": "Supported the marketing team in campaign planning and social media content creation."}]
+--myboundary
+Content-Disposition: form-data; name="achievements"
+
+["Kenyatta University Business Club President"]
+--myboundary
+Content-Disposition: form-data; name="certifications"
+
+["Digital Marketing Fundamentals"]
+--myboundary
+Content-Disposition: form-data; name="resume"; filename="resume.pdf"
+Content-Type: application/pdf
+
+< your_local_file_path/brian_otieno_resume.pdf
+--myboundary--
+
+### POST Create a New Student Profile for Cynthia Njeri
+POST http://localhost:3000/api/studententireprofile
+Content-Type: multipart/form-data; boundary=myboundary
+
+--myboundary
+Content-Disposition: form-data; name="userId"
+
+68a8c8a5e4222a5d2ab7606a
+--myboundary
+Content-Disposition: form-data; name="name"
+
+Cynthia Njeri
+--myboundary
+Content-Disposition: form-data; name="bio"
+
+A dedicated Civil Engineering student at Jomo Kenyatta University of Agriculture and Technology.
+--myboundary
+Content-Disposition: form-data; name="summary"
+
+Seeking a structural engineering internship to gain hands-on experience in design and project execution.
+--myboundary
+Content-Disposition: form-data; name="skills"
+
+["AutoCAD", "Civil 3D", "Structural Analysis", "Project Planning"]
+--myboundary
+Content-Disposition: form-data; name="address"
+
+{"county": "Kiambu", "subCounty": "Thika Town", "ward": "Hospital", "details": "789 Thika Road"}
+--myboundary
+Content-Disposition: form-data; name="education"
+
+[{"school": "JKUAT", "degree": "Bachelor of Science", "fieldOfStudy": "Civil Engineering", "graduationYear": 2024, "isCurrent": true}]
+--myboundary
+Content-Disposition: form-data; name="experience"
+
+[{"title": "Engineering Assistant", "company": "BuildRight Construction Co.", "startDate": "2023-08-01T00:00:00.000Z", "endDate": "2023-12-31T00:00:00.000Z", "isCurrent": false, "description": "Assisted senior engineers with site inspections, material testing, and blueprint reviews."}]
+--myboundary
+Content-Disposition: form-data; name="achievements"
+
+["First Place in the JKUAT Engineering Challenge"]
+--myboundary
+Content-Disposition: form-data; name="certifications"
+
+["Certified in AutoCAD"]
+--myboundary
+Content-Disposition: form-data; name="resume"; filename="resume.pdf"
+Content-Type: application/pdf
+
+< your_local_file_path/cynthia_njeri_resume.pdf
+--myboundary--
+
+### POST Create a New Student Profile for David Kamau
+POST http://localhost:3000/api/studententireprofile
+Content-Type: multipart/form-data; boundary=myboundary
+
+--myboundary
+Content-Disposition: form-data; name="userId"
+
+68a8c8aee4222a5d2ab7606c
+--myboundary
+Content-Disposition: form-data; name="name"
+
+David Kamau
+--myboundary
+Content-Disposition: form-data; name="bio"
+
+A first-year Agricultural Economics student at Egerton University with a passion for sustainable farming practices.
+--myboundary
+Content-Disposition: form-data; name="summary"
+
+Eager to learn and contribute to projects focused on food security and agricultural policy.
+--myboundary
+Content-Disposition: form-data; name="skills"
+
+["Research", "Data Entry", "Agronomy", "GIS Software"]
+--myboundary
+Content-Disposition: form-data; name="address"
+
+{"county": "Nakuru", "subCounty": "Nakuru Town East", "ward": "Flamingo", "details": "101 Flamingo Street"}
+--myboundary
+Content-Disposition: form-data; name="education"
+
+[{"school": "Egerton University", "degree": "Bachelor of Science", "fieldOfStudy": "Agricultural Economics", "graduationYear": 2028, "isCurrent": true}]
+--myboundary
+Content-Disposition: form-data; name="experience"
+
+[]
+--myboundary
+Content-Disposition: form-data; name="achievements"
+
+["Organized a community garden project in my hometown."]
+--myboundary
+Content-Disposition: form-data; name="certifications"
+
+[]
+--myboundary
+Content-Disposition: form-data; name="resume"; filename="resume.pdf"
+Content-Type: application/pdf
+
+< your_local_file_path/david_kamau_resume.pdf
+--myboundary--
+
+### POST Create a New Student Profile for Esther Wambui
+POST http://localhost:3000/api/studententireprofile
+Content-Type: multipart/form-data; boundary=myboundary
+
+--myboundary
+Content-Disposition: form-data; name="userId"
+
+68a8c8b8e4222a5d2ab7606e
+--myboundary
+Content-Disposition: form-data; name="name"
+
+Esther Wambui
+--myboundary
+Content-Disposition: form-data; name="bio"
+
+An aspiring educator currently studying at Moi University, dedicated to creating engaging learning environments.
+--myboundary
+Content-Disposition: form-data; name="summary"
+
+Seeking a teaching practicum to gain experience in curriculum development and classroom management.
+--myboundary
+Content-Disposition: form-data; name="skills"
+
+["Lesson Planning", "Public Speaking", "Child Psychology", "Microsoft PowerPoint"]
+--myboundary
+Content-Disposition: form-data; name="address"
+
+{"county": "Uasin Gishu", "subCounty": "Eldoret East", "ward": "Moiben", "details": "202 Moi Avenue"}
+--myboundary
+Content-Disposition: form-data; name="education"
+
+[{"school": "Moi University", "degree": "Bachelor of Education (Arts)", "fieldOfStudy": "Education", "graduationYear": 2026, "isCurrent": true}]
+--myboundary
+Content-Disposition: form-data; name="experience"
+
+[]
+--myboundary
+Content-Disposition: form-data; name="achievements"
+
+["Volunteered as a tutor at a local primary school."]
+--myboundary
+Content-Disposition: form-data; name="certifications"
+
+["First Aid Certified"]
+--myboundary
+Content-Disposition: form-data; name="resume"; filename="resume.pdf"
+Content-Type: application/pdf
+
+< your_local_file_path/esther_wambui_resume.pdf
+--myboundary--
+
+### POST Create a New Student Profile for Felix Kiptoo
+POST http://localhost:3000/api/studententireprofile
+Content-Type: multipart/form-data; boundary=myboundary
+
+--myboundary
+Content-Disposition: form-data; name="userId"
+
+68a8c8c5e4222a5d2ab76070
+--myboundary
+Content-Disposition: form-data; name="name"
+
+Felix Kiptoo
+--myboundary
+Content-Disposition: form-data; name="bio"
+
+An IT student at Maseno University with a strong interest in network security and system administration.
+--myboundary
+Content-Disposition: form-data; name="summary"
+
+Looking for a technical support or cybersecurity internship to apply my troubleshooting skills.
+--myboundary
+Content-Disposition: form-data; name="skills"
+
+["Network Configuration", "Linux", "Cybersecurity", "Technical Support"]
+--myboundary
+Content-Disposition: form-data; name="address"
+
+{"county": "Nandi", "subCounty": "Kapsabet", "ward": "Chepkumia", "details": "303 Kapsabet Street"}
+--myboundary
+Content-Disposition: form-data; name="education"
+
+[{"school": "Maseno University", "degree": "Bachelor of Science", "fieldOfStudy": "Information Technology", "graduationYear": 2025, "isCurrent": true}]
+--myboundary
+Content-Disposition: form-data; name="experience"
+
+[{"title": "IT Support Intern", "company": "NetSys Solutions", "startDate": "2024-03-01T00:00:00.000Z", "endDate": "2024-08-31T00:00:00.000Z", "isCurrent": false, "description": "Provided technical support to employees, resolving hardware and software issues."}]
+--myboundary
+Content-Disposition: form-data; name="achievements"
+
+["Built a personal home network lab."]
+--myboundary
+Content-Disposition: form-data; name="certifications"
+
+["CompTIA A+"]
+--myboundary
+Content-Disposition: form-data; name="resume"; filename="resume.pdf"
+Content-Type: application/pdf
+
+< your_local_file_path/felix_kiptoo_resume.pdf
+--myboundary--
+
+### POST Create a New Student Profile for Grace Achieng
+POST http://localhost:3000/api/studententireprofile
+Content-Type: multipart/form-data; boundary=myboundary
+
+--myboundary
+Content-Disposition: form-data; name="userId"
+
+68a8c8cfe4222a5d2ab76072
+--myboundary
+Content-Disposition: form-data; name="name"
+
+Grace Achieng
+--myboundary
+Content-Disposition: form-data; name="bio"
+
+A first-year Nursing student at Masinde Muliro University of Science and Technology, committed to patient care.
+--myboundary
+Content-Disposition: form-data; name="summary"
+
+Eager to participate in a clinical attachment to gain practical experience in a hospital setting.
+--myboundary
+Content-Disposition: form-data; name="skills"
+
+["First Aid", "Patient Care", "Communication", "Anatomy"]
+--myboundary
+Content-Disposition: form-data; name="address"
+
+{"county": "Kakamega", "subCounty": "Kakamega Town", "ward": "Shieywe", "details": "404 MMUST Road"}
+--myboundary
+Content-Disposition: form-data; name="education"
+
+[{"school": "MMUST", "degree": "Bachelor of Science", "fieldOfStudy": "Nursing", "graduationYear": 2029, "isCurrent": true}]
+--myboundary
+Content-Disposition: form-data; name="experience"
+
+[]
+--myboundary
+Content-Disposition: form-data; name="achievements"
+
+["Volunteer at a local medical camp."]
+--myboundary
+Content-Disposition: form-data; name="certifications"
+
+[]
+--myboundary
+Content-Disposition: form-data; name="resume"; filename="resume.pdf"
+Content-Type: application/pdf
+
+< your_local_file_path/grace_achieng_resume.pdf
+--myboundary--
+
+### POST Create a New Student Profile for Hassan Abdi
+POST http://localhost:3000/api/studententireprofile
+Content-Type: multipart/form-data; boundary=myboundary
+
+--myboundary
+Content-Disposition: form-data; name="userId"
+
+68a8c8e2e4222a5d2ab76074
+--myboundary
+Content-Disposition: form-data; name="name"
+
+Hassan Abdi
+--myboundary
+Content-Disposition: form-data; name="bio"
+
+A dedicated Education student specializing in Arts at Garissa University, with a focus on history and social studies.
+--myboundary
+Content-Disposition: form-data; name="summary"
+
+Seeking a teaching placement to develop my skills in classroom instruction and student engagement.
+--myboundary
+Content-Disposition: form-data; name="skills"
+
+["History", "Curriculum Design", "Research", "Teamwork"]
+--myboundary
+Content-Disposition: form-data; name="address"
+
+{"county": "Garissa", "subCounty": "Garissa Township", "ward": "Waberi", "details": "505 Waberi Street"}
+--myboundary
+Content-Disposition: form-data; name="education"
+
+[{"school": "Garissa University", "degree": "Bachelor of Education (Arts)", "fieldOfStudy": "Education (Arts)", "graduationYear": 2026, "isCurrent": true}]
+--myboundary
+Content-Disposition: form-data; name="experience"
+
+[]
+--myboundary
+Content-Disposition: form-data; name="achievements"
+
+["Participated in the annual Garissa University debate competition."]
+--myboundary
+Content-Disposition: form-data; name="certifications"
+
+[]
+--myboundary
+Content-Disposition: form-data; name="resume"; filename="resume.pdf"
+Content-Type: application/pdf
+
+< your_local_file_path/hassan_abdi_resume.pdf
+--myboundary--
+
+### POST Create a New Student Profile for Ivy Chebet
+POST http://localhost:3000/api/studententireprofile
+Content-Type: multipart/form-data; boundary=myboundary
+
+--myboundary
+Content-Disposition: form-data; name="userId"
+
+68a8c8eee4222a5d2ab76076
+--myboundary
+Content-Disposition: form-data; name="name"
+
+Ivy Chebet
+--myboundary
+Content-Disposition: form-data; name="bio"
+
+A final-year Law student at Kisii University with a keen interest in corporate law and human rights.
+--myboundary
+Content-Disposition: form-data; name="summary"
+
+A motivated and articulate individual seeking a pupillage to gain practical legal experience.
+--myboundary
+Content-Disposition: form-data; name="skills"
+
+["Legal Research", "Public Speaking", "Moot Court", "Legal Writing"]
+--myboundary
+Content-Disposition: form-data; name="address"
+
+{"county": "Kisii", "subCounty": "Kisii Central", "ward": "Mwembe", "details": "606 Law Street"}
+--myboundary
+Content-Disposition: form-data; name="education"
+
+[{"school": "Kisii University", "degree": "Bachelor of Laws (LL.B)", "fieldOfStudy": "Law", "graduationYear": 2025, "isCurrent": true}]
+--myboundary
+Content-Disposition: form-data; name="experience"
+
+[{"title": "Legal Clerk Intern", "company": "Lex Chambers", "startDate": "2024-01-01T00:00:00.000Z", "endDate": "2024-04-30T00:00:00.000Z", "isCurrent": false, "description": "Assisted in drafting legal documents, conducting case research, and attending court sessions."}]
+--myboundary
+Content-Disposition: form-data; name="achievements"
+
+["Won the Kisii University Moot Court Competition."]
+--myboundary
+Content-Disposition: form-data; name="certifications"
+
+["Certified Paralegal"]
+--myboundary
+Content-Disposition: form-data; name="resume"; filename="resume.pdf"
+Content-Type: application/pdf
+
+< your_local_file_path/ivy_chebet_resume.pdf
+--myboundary--
+
+### POST Create a New Student Profile for John Maina
+POST http://localhost:3000/api/studententireprofile
+Content-Type: multipart/form-data; boundary=myboundary
+
+--myboundary
+Content-Disposition: form-data; name="userId"
+
+68a8c8fae4222a5d2ab76078
+--myboundary
+Content-Disposition: form-data; name="name"
+
+John Maina
+--myboundary
+Content-Disposition: form-data; name="bio"
+
+A Pharmacy student at Mount Kenya University, committed to patient health and medication management.
+--myboundary
+Content-Disposition: form-data; name="summary"
+
+Eager to undertake an internship to gain practical experience in a retail or hospital pharmacy setting.
+--myboundary
+Content-Disposition: form-data; name="skills"
+
+["Pharmacology", "Dispensing", "Patient Counseling", "Inventory Management"]
+--myboundary
+Content-Disposition: form-data; name="address"
+
+{"county": "Kiambu", "subCounty": "Kiambu Town", "ward": "Ting’ang’a", "details": "707 Pharmacy Road"}
+--myboundary
+Content-Disposition: form-data; name="education"
+
+[{"school": "Mount Kenya University", "degree": "Bachelor of Pharmacy", "fieldOfStudy": "Pharmacy", "graduationYear": 2025, "isCurrent": true}]
+--myboundary
+Content-Disposition: form-data; name="experience"
+
+[{"title": "Pharmacy Assistant Intern", "company": "MedCare Pharmacy", "startDate": "2024-06-01T00:00:00.000Z", "endDate": null, "isCurrent": true, "description": "Assisted the pharmacist in dispensing medications and advising customers."}]
+--myboundary
+Content-Disposition: form-data; name="achievements"
+
+["Active member of the MKU Pharmacy Students Association."]
+--myboundary
+Content-Disposition: form-data; name="certifications"
+
+["Good Manufacturing Practices (GMP) Certificate"]
+--myboundary
+Content-Disposition: form-data; name="resume"; filename="resume.pdf"
+Content-Type: application/pdf
+
+< your_local_file_path/john_maina_resume.pdf
 --myboundary--
 
 ### GET Student Profile
-GET http://localhost:3000/api/studententireprofile/68a744d91ffc2a29d16e167f
+GET http://localhost:3000/api/studententireprofile/
 Content-Type: application/json
 
-### DELETE Student Profile
-DELETE http://localhost:3000/api/studententireprofile/68a21ce552b4b2a5451368ac
+
+
+
+
+
+
+
+
+
+### POST Create a New Student Profile for David Kamau
+POST http://localhost:3000/api/studententireprofile
+Content-Type: multipart/form-data; boundary=myboundary
+
+--myboundary
+Content-Disposition: form-data; name="userId"
+
+68a8c8aee4222a5d2ab7606c
+--myboundary
+Content-Disposition: form-data; name="name"
+
+David Kamau
+--myboundary
+Content-Disposition: form-data; name="bio"
+
+A first-year Agricultural Economics student at Egerton University with a passion for sustainable farming practices.
+--myboundary
+Content-Disposition: form-data; name="summary"
+
+Eager to learn and contribute to projects focused on food security and agricultural policy.
+--myboundary
+Content-Disposition: form-data; name="skills"
+
+["Research", "Data Entry", "Agronomy", "GIS Software"]
+--myboundary
+Content-Disposition: form-data; name="address"
+
+{"county": "Nakuru", "subCounty": "Nakuru Town East", "ward": "Flamingo", "details": "101 Flamingo Street"}
+--myboundary
+Content-Disposition: form-data; name="education"
+
+[{"school": "Egerton University", "degree": "Bachelor of Science", "fieldOfStudy": "Agricultural Economics", "graduationYear": 2028, "isCurrent": true}]
+--myboundary
+Content-Disposition: form-data; name="experience"
+
+[{"title": "Farm Volunteer", "company": "Local Community Farm", "startDate": "2024-01-01T00:00:00.000Z", "endDate": "2024-05-31T00:00:00.000Z", "isCurrent": false, "description": "Assisted with planting, harvesting, and crop management."}]
+--myboundary
+Content-Disposition: form-data; name="achievements"
+
+["Organized a community garden project in my hometown."]
+--myboundary
+Content-Disposition: form-data; name="certifications"
+
+["Certificate in Sustainable Agriculture"]
+--myboundary
+Content-Disposition: form-data; name="resume"; filename="resume.pdf"
+Content-Type: application/pdf
+
+< your_local_file_path/david_kamau_resume.pdf
+--myboundary--
+
+---
+
+### POST Create a New Student Profile for Esther Wambui
+POST http://localhost:3000/api/studententireprofile
+Content-Type: multipart/form-data; boundary=myboundary
+
+--myboundary
+Content-Disposition: form-data; name="userId"
+
+68a8c8b8e4222a5d2ab7606e
+--myboundary
+Content-Disposition: form-data; name="name"
+
+Esther Wambui
+--myboundary
+Content-Disposition: form-data; name="bio"
+
+An aspiring educator currently studying at Moi University, dedicated to creating engaging learning environments.
+--myboundary
+Content-Disposition: form-data; name="summary"
+
+Seeking a teaching practicum to gain experience in curriculum development and classroom management.
+--myboundary
+Content-Disposition: form-data; name="skills"
+
+["Lesson Planning", "Public Speaking", "Child Psychology", "Microsoft PowerPoint"]
+--myboundary
+Content-Disposition: form-data; name="address"
+
+{"county": "Uasin Gishu", "subCounty": "Eldoret East", "ward": "Moiben", "details": "202 Moi Avenue"}
+--myboundary
+Content-Disposition: form-data; name="education"
+
+[{"school": "Moi University", "degree": "Bachelor of Education (Arts)", "fieldOfStudy": "Education", "graduationYear": 2026, "isCurrent": true}]
+--myboundary
+Content-Disposition: form-data; name="experience"
+
+[{"title": "Student Teacher", "company": "Local Primary School", "startDate": "2024-09-01T00:00:00.000Z", "endDate": null, "isCurrent": true, "description": "Assisting with classroom activities and lesson preparation."}]
+--myboundary
+Content-Disposition: form-data; name="achievements"
+
+["Volunteered as a tutor at a local primary school."]
+--myboundary
+Content-Disposition: form-data; name="certifications"
+
+["First Aid Certified"]
+--myboundary
+Content-Disposition: form-data; name="resume"; filename="resume.pdf"
+Content-Type: application/pdf
+
+< your_local_file_path/esther_wambui_resume.pdf
+--myboundary--
+
+---
+
+### POST Create a New Student Profile for Felix Kiptoo
+POST http://localhost:3000/api/studententireprofile
+Content-Type: multipart/form-data; boundary=myboundary
+
+--myboundary
+Content-Disposition: form-data; name="userId"
+
+68a8c8c5e4222a5d2ab76070
+--myboundary
+Content-Disposition: form-data; name="name"
+
+Felix Kiptoo
+--myboundary
+Content-Disposition: form-data; name="bio"
+
+An IT student at Maseno University with a strong interest in network security and system administration.
+--myboundary
+Content-Disposition: form-data; name="summary"
+
+Looking for a technical support or cybersecurity internship to apply my troubleshooting skills.
+--myboundary
+Content-Disposition: form-data; name="skills"
+
+["Network Configuration", "Linux", "Cybersecurity", "Technical Support"]
+--myboundary
+Content-Disposition: form-data; name="address"
+
+{"county": "Nandi", "subCounty": "Kapsabet", "ward": "Chepkumia", "details": "303 Kapsabet Street"}
+--myboundary
+Content-Disposition: form-data; name="education"
+
+[{"school": "Maseno University", "degree": "Bachelor of Science", "fieldOfStudy": "Information Technology", "graduationYear": 2025, "isCurrent": true}]
+--myboundary
+Content-Disposition: form-data; name="experience"
+
+[{"title": "IT Support Intern", "company": "NetSys Solutions", "startDate": "2024-03-01T00:00:00.000Z", "endDate": "2024-08-31T00:00:00.000Z", "isCurrent": false, "description": "Provided technical support to employees, resolving hardware and software issues."}]
+--myboundary
+Content-Disposition: form-data; name="achievements"
+
+["Built a personal home network lab."]
+--myboundary
+Content-Disposition: form-data; name="certifications"
+
+["CompTIA A+"]
+--myboundary
+Content-Disposition: form-data; name="resume"; filename="resume.pdf"
+Content-Type: application/pdf
+
+< your_local_file_path/felix_kiptoo_resume.pdf
+--myboundary--
+
+---
+
+### POST Create a New Student Profile for Grace Achieng
+POST http://localhost:3000/api/studententireprofile
+Content-Type: multipart/form-data; boundary=myboundary
+
+--myboundary
+Content-Disposition: form-data; name="userId"
+
+68a8c8cfe4222a5d2ab76072
+--myboundary
+Content-Disposition: form-data; name="name"
+
+Grace Achieng
+--myboundary
+Content-Disposition: form-data; name="bio"
+
+A first-year Nursing student at Masinde Muliro University of Science and Technology, committed to patient care.
+--myboundary
+Content-Disposition: form-data; name="summary"
+
+Eager to participate in a clinical attachment to gain practical experience in a hospital setting.
+--myboundary
+Content-Disposition: form-data; name="skills"
+
+["First Aid", "Patient Care", "Communication", "Anatomy"]
+--myboundary
+Content-Disposition: form-data; name="address"
+
+{"county": "Kakamega", "subCounty": "Kakamega Town", "ward": "Shieywe", "details": "404 MMUST Road"}
+--myboundary
+Content-Disposition: form-data; name="education"
+
+[{"school": "MMUST", "degree": "Bachelor of Science", "fieldOfStudy": "Nursing", "graduationYear": 2029, "isCurrent": true}]
+--myboundary
+Content-Disposition: form-data; name="experience"
+
+[{"title": "Hospital Volunteer", "company": "Kakamega County General Hospital", "startDate": "2024-03-01T00:00:00.000Z", "endDate": null, "isCurrent": true, "description": "Assisted nurses with patient comfort and non-medical support."}]
+--myboundary
+Content-Disposition: form-data; name="achievements"
+
+["Volunteer at a local medical camp."]
+--myboundary
+Content-Disposition: form-data; name="certifications"
+
+["Basic Life Support (BLS) Certification"]
+--myboundary
+Content-Disposition: form-data; name="resume"; filename="resume.pdf"
+Content-Type: application/pdf
+
+< your_local_file_path/grace_achieng_resume.pdf
+--myboundary--
+
+---
+
+### POST Create a New Student Profile for Hassan Abdi
+POST http://localhost:3000/api/studententireprofile
+Content-Type: multipart/form-data; boundary=myboundary
+
+--myboundary
+Content-Disposition: form-data; name="userId"
+
+68a8c8e2e4222a5d2ab76074
+--myboundary
+Content-Disposition: form-data; name="name"
+
+Hassan Abdi
+--myboundary
+Content-Disposition: form-data; name="bio"
+
+A dedicated Education student specializing in Arts at Garissa University, with a focus on history and social studies.
+--myboundary
+Content-Disposition: form-data; name="summary"
+
+Seeking a teaching placement to develop my skills in classroom instruction and student engagement.
+--myboundary
+Content-Disposition: form-data; name="skills"
+
+["History", "Curriculum Design", "Research", "Teamwork"]
+--myboundary
+Content-Disposition: form-data; name="address"
+
+{"county": "Garissa", "subCounty": "Garissa Township", "ward": "Waberi", "details": "505 Waberi Street"}
+--myboundary
+Content-Disposition: form-data; name="education"
+
+[{"school": "Garissa University", "degree": "Bachelor of Education (Arts)", "fieldOfStudy": "Education (Arts)", "graduationYear": 2026, "isCurrent": true}]
+--myboundary
+Content-Disposition: form-data; name="experience"
+
+[{"title": "Tutor", "company": "Garissa Community Center", "startDate": "2023-09-01T00:00:00.000Z", "endDate": "2024-02-28T00:00:00.000Z", "isCurrent": false, "description": "Provided tutoring in history and social studies to high school students."}]
+--myboundary
+Content-Disposition: form-data; name="achievements"
+
+["Participated in the annual Garissa University debate competition."]
+--myboundary
+Content-Disposition: form-data; name="certifications"
+
+["Teaching Assistant Certificate"]
+--myboundary
+Content-Disposition: form-data; name="resume"; filename="resume.pdf"
+Content-Type: application/pdf
+
+< your_local_file_path/hassan_abdi_resume.pdf
+--myboundary--
+
+---
+
+### POST Create a New Student Profile for Ivy Chebet
+POST http://localhost:3000/api/studententireprofile
+Content-Type: multipart/form-data; boundary=myboundary
+
+--myboundary
+Content-Disposition: form-data; name="userId"
+
+68a8c8eee4222a5d2ab76076
+--myboundary
+Content-Disposition: form-data; name="name"
+
+Ivy Chebet
+--myboundary
+Content-Disposition: form-data; name="bio"
+
+A final-year Law student at Kisii University with a keen interest in corporate law and human rights.
+--myboundary
+Content-Disposition: form-data; name="summary"
+
+A motivated and articulate individual seeking a pupillage to gain practical legal experience.
+--myboundary
+Content-Disposition: form-data; name="skills"
+
+["Legal Research", "Public Speaking", "Moot Court", "Legal Writing"]
+--myboundary
+Content-Disposition: form-data; name="address"
+
+{"county": "Kisii", "subCounty": "Kisii Central", "ward": "Mwembe", "details": "606 Law Street"}
+--myboundary
+Content-Disposition: form-data; name="education"
+
+[{"school": "Kisii University", "degree": "Bachelor of Laws (LL.B)", "fieldOfStudy": "Law", "graduationYear": 2025, "isCurrent": true}]
+--myboundary
+Content-Disposition: form-data; name="experience"
+
+[{"title": "Legal Clerk Intern", "company": "Lex Chambers", "startDate": "2024-01-01T00:00:00.000Z", "endDate": "2024-04-30T00:00:00.000Z", "isCurrent": false, "description": "Assisted in drafting legal documents, conducting case research, and attending court sessions."}]
+--myboundary
+Content-Disposition: form-data; name="achievements"
+
+["Won the Kisii University Moot Court Competition."]
+--myboundary
+Content-Disposition: form-data; name="certifications"
+
+["Certified Paralegal"]
+--myboundary
+Content-Disposition: form-data; name="resume"; filename="resume.pdf"
+Content-Type: application/pdf
+
+< your_local_file_path/ivy_chebet_resume.pdf
+--myboundary--
+
+---
+
+### POST Create a New Student Profile for John Maina
+POST http://localhost:3000/api/studententireprofile
+Content-Type: multipart/form-data; boundary=myboundary
+
+--myboundary
+Content-Disposition: form-data; name="userId"
+
+68a8c8fae4222a5d2ab76078
+--myboundary
+Content-Disposition: form-data; name="name"
+
+John Maina
+--myboundary
+Content-Disposition: form-data; name="bio"
+
+A Pharmacy student at Mount Kenya University, committed to patient health and medication management.
+--myboundary
+Content-Disposition: form-data; name="summary"
+
+Eager to undertake an internship to gain practical experience in a retail or hospital pharmacy setting.
+--myboundary
+Content-Disposition: form-data; name="skills"
+
+["Pharmacology", "Dispensing", "Patient Counseling", "Inventory Management"]
+--myboundary
+Content-Disposition: form-data; name="address"
+
+{"county": "Kiambu", "subCounty": "Kiambu Town", "ward": "Ting’ang’a", "details": "707 Pharmacy Road"}
+--myboundary
+Content-Disposition: form-data; name="education"
+
+[{"school": "Mount Kenya University", "degree": "Bachelor of Pharmacy", "fieldOfStudy": "Pharmacy", "graduationYear": 2025, "isCurrent": true}]
+--myboundary
+Content-Disposition: form-data; name="experience"
+
+[{"title": "Pharmacy Assistant Intern", "company": "MedCare Pharmacy", "startDate": "2024-06-01T00:00:00.000Z", "endDate": null, "isCurrent": true, "description": "Assisted the pharmacist in dispensing medications and advising customers."}]
+--myboundary
+Content-Disposition: form-data; name="achievements"
+
+["Active member of the MKU Pharmacy Students Association."]
+--myboundary
+Content-Disposition: form-data; name="certifications"
+
+["Good Manufacturing Practices (GMP) Certificate"]
+--myboundary
+Content-Disposition: form-data; name="resume"; filename="resume.pdf"
+Content-Type: application/pdf
+
+< your_local_file_path/john_maina_resume.pdf
+--myboundary--
+
+---
+
+### GET Student Profile
+GET http://localhost:3000/api/studententireprofile/
 Content-Type: application/json

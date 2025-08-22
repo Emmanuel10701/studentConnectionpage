@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Search, X, Briefcase, Bell, Film, CheckCircle, Calendar, MapPin, ChevronLeft, ChevronRight, Clock, Link as LinkIcon, Sparkles } from 'lucide-react';
+import { Search, X, Briefcase, Bell, Film, CheckCircle, ChevronDown, Calendar, MapPin, ChevronLeft, ChevronRight, Clock, Link as LinkIcon, Sparkles } from 'lucide-react';
 import { CircularProgress } from '@mui/material';
 
 // --- Utility Functions ---

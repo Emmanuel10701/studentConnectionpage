@@ -2,6 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Search, X, CheckCircle, Calendar, MapPin, Users, BookOpen, Mic, Newspaper, Youtube, ChevronLeft, ChevronRight, Clock, Link as LinkIcon, Sparkles } from 'lucide-react';
+import { CircularProgress, Backdrop } from '@mui/material';
 
 // Utility function to format dates as "time ago" strings
 const formatTimeAgo = (date) => {
@@ -47,6 +48,27 @@ const MessageBox = ({ message, type, onClose }) => {
   );
 };
 
+// Custom Loading Spinner Component
+const LoadingSpinner = () => (
+  <Backdrop
+    open={true}
+    sx={{ 
+      color: '#fff', 
+      zIndex: (theme) => theme.zIndex.drawer + 1,
+      backgroundColor: 'rgba(255, 255, 255, 0.9)'
+    }}
+  >
+    <div className="flex flex-col items-center justify-center gap-4">
+      <CircularProgress 
+        size={60} 
+        thickness={4}
+        sx={{ color: '#7c3aed' }} 
+      />
+      <p className="text-lg font-medium text-gray-800">Loading content...</p>
+    </div>
+  </Backdrop>
+);
+
 // Main App component
 export default function App() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -67,6 +89,9 @@ export default function App() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
+        // Simulate a delay to show the spinner (remove in production)
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
         const [eventsRes, newsRes, videosRes] = await Promise.all([
           fetch('http://localhost:3000/api/events'),
           fetch('http://localhost:3000/api/new'),
@@ -151,11 +176,14 @@ export default function App() {
 
   return (
     <div className="min-h-screen w-full bg-slate-50 font-sans antialiased text-gray-800">
+      {/* Loading Spinner */}
+      {isLoading && <LoadingSpinner />}
+      
       <div className="fixed top-0 left-0 w-full z-10 bg-white shadow-md">
-        <div className="w-full max-w-5xl mx-auto px-4 py-6 md:px-8">
+        <div className="w-full max-w-5xl mx-auto px-4 py-4 md:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex-1">
-              <h1 className="text-3xl font-extrabold text-gray-900 drop-shadow-sm md:text-left text-center">Student Hub</h1>
+              <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 drop-shadow-sm md:text-left text-center">Student Hub</h1>
             </div>
             <div className="flex-1 w-full md:w-auto">
               <div className="relative">
@@ -173,7 +201,7 @@ export default function App() {
         </div>
       </div>
 
-      <div className="pt-28 pb-8 px-4 md:px-8">
+      <div className="pt-24 pb-8 px-4 md:px-8">
         <div className="w-full max-w-5xl mx-auto space-y-8">
           {/* Combined Filters and Search Bar */}
           <div className="flex flex-col sm:flex-row gap-4 p-4 rounded-3xl bg-white shadow-lg border border-gray-200">
@@ -199,9 +227,7 @@ export default function App() {
           </div>
 
           {/* Events Feed */}
-          {isLoading ? (
-            <p className="text-center text-gray-500">Loading content...</p>
-          ) : error ? (
+          {error ? (
             <p className="text-center text-red-500">Error: {error}</p>
           ) : (
             <AnimatePresence mode="wait">
@@ -222,20 +248,20 @@ export default function App() {
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.3 }}
-                        className="bg-white p-6 rounded-3xl border border-gray-200 shadow-lg flex flex-col gap-4"
+                        className="bg-white p-6 rounded-3xl border border-gray-200 shadow-lg flex flex-col gap-4 hover:shadow-xl transition-shadow"
                       >
                         <div className="flex items-center gap-4">
                           <div className="p-3 bg-purple-100 rounded-full text-purple-600 flex-shrink-0">
                             <IconComponent size={24} />
                           </div>
                           <div>
-                            <h3 className="font-bold text-xl text-gray-900">{item.title}</h3>
+                            <h3 className="font-bold text-xl text-gray-900 line-clamp-1">{item.title}</h3>
                             <p className="text-sm text-gray-500 flex items-center gap-1">
                               <Clock size={16} /> {formatTimeAgo(item.date)}
                             </p>
                           </div>
                         </div>
-                        <p className="text-gray-700">{item.description}</p>
+                        <p className="text-gray-700 line-clamp-3">{item.description}</p>
                         <div className="flex flex-wrap items-center text-sm text-gray-600 gap-4">
                           {item.type === 'Event' && (
                             <>
@@ -268,13 +294,17 @@ export default function App() {
                     );
                   })
                 ) : (
-                  <motion.p
+                  <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="text-gray-500 col-span-full text-center py-8"
+                    className="col-span-full text-center py-12"
                   >
-                    No upcoming events, news, or videos match your search criteria.
-                  </motion.p>
+                    <div className="mx-auto w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                      <Search size={40} className="text-gray-400" />
+                    </div>
+                    <h3 className="text-xl font-medium text-gray-700 mb-2">No results found</h3>
+                    <p className="text-gray-500">Try adjusting your search or filter criteria</p>
+                  </motion.div>
                 )}
               </motion.div>
             </AnimatePresence>

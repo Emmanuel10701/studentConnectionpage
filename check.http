@@ -1,0 +1,58 @@
+### POST Create a New Student Profile
+POST http://localhost:3000/api/studententireprofile
+Content-Type: multipart/form-data; boundary=myboundary
+
+--myboundary
+Content-Disposition: form-data; name="userId"
+
+68a744d91ffc2a29d16e167f
+--myboundary
+Content-Disposition: form-data; name="name"
+
+Alex Emmanuel
+--myboundary
+Content-Disposition: form-data; name="bio"
+
+A passionate software engineering student with a focus on web development and data science.
+--myboundary
+Content-Disposition: form-data; name="summary"
+
+Seeking a challenging internship opportunity to apply my skills in JavaScript, Python, and cloud computing.
+--myboundary
+Content-Disposition: form-data; name="skills"
+
+["django", "Python", "React", "Node.js", "MongoDB", "Prisma"]
+--myboundary
+Content-Disposition: form-data; name="address"
+
+{"county": "Kirinyanga", "subCounty": "Westlands", "ward": "Kileleshwa", "details": "123 Main Street, Apt 4"}
+--myboundary
+Content-Disposition: form-data; name="education"
+
+[{"school": "Harvard University", "degree": "Bachelor of Science", "fieldOfStudy": "Software Engineering", "graduationYear": 2025, "isCurrent": true}]
+--myboundary
+Content-Disposition: form-data; name="experience"
+
+[{"title": "Junior Developer Intern", "company": "Upnxy Solutions Inc.", "startDate": "2024-06-01T00:00:00.000Z", "endDate": null, "isCurrent": true, "description": "Developed and maintained front-end components for various client projects using React and Tailwind CSS."}]
+--myboundary
+Content-Disposition: form-data; name="achievements"
+
+["Top 10 in the National Science Fair (2020)", "Dean's List for Academic Excellence (2022, 2023)"]
+--myboundary
+Content-Disposition: form-data; name="certifications"
+
+["AWS Certified Cloud Practitioner", "ScrumMaster Certification"]
+--myboundary
+Content-Disposition: form-data; name="resume"; filename="resume.pdf"
+Content-Type: application/pdf
+
+< file:///C:/Users/ADMIN/OneDrive/Desktop/commonapp/MyResume.pdf
+--myboundary--
+
+### GET Student Profile
+GET http://localhost:3000/api/studententireprofile/68a744d91ffc2a29d16e167f
+Content-Type: application/json
+
+### DELETE Student Profile
+DELETE http://localhost:3000/api/studententireprofile/68a21ce552b4b2a5451368ac
+Content-Type: application/json

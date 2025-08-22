@@ -1,4 +1,4 @@
-// prisma/schema.prisma
+// file: /prisma/schema.prisma
 
 // ================== DATASOURCE & CLIENT ==================
 datasource db {
@@ -19,26 +19,29 @@ enum Role {
 
 // ================== USER & AUTH ==================
 model User {
-  id              String           @id @default(auto()) @map("_id") @db.ObjectId
+  id              String          @id @default(auto()) @map("_id") @db.ObjectId
   name            String?
-  email           String?          @unique
+  email           String?         @unique
   password        String?
   emailVerified   DateTime?
   image           String?
-  role            Role             @default(STUDENT)
+  role            Role            @default(STUDENT)
 
   // Relations
-  employerProfile EmployerProfile?
-  studentProfile  StudentProfile?
-  Admin    Admin?
+  employerProfile   EmployerProfile?
+  studentProfile    StudentProfile?
+  Admin             Admin?
+  company           Company? // 👈 Added this one-to-one relation
 
-  newsletters     Newsletter[]
-  accounts        Account[]
-  sessions        Session[]
-  passwordResets  PasswordReset[]
+  newsletters       Newsletter[]
+  accounts          Account[]
+  sessions          Session[]
+  passwordResets    PasswordReset[]
 
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  StudentEntireProfile StudentEntireProfile? // 👈 This is the back-relation field
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 }
 
 model Account {
@@ -95,12 +98,12 @@ model Subscriber {
 }
 
 model Newsletter {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  subject    String
-  content    String
-  sentAt     DateTime @default(now())
-  sentById   String   @db.ObjectId
-  sentBy     User     @relation(fields: [sentById], references: [id])
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  subject   String
+  content   String
+  sentAt    DateTime @default(now())
+  sentById  String   @db.ObjectId
+  sentBy    User     @relation(fields: [sentById], references: [id])
   recipients String[]
 }
 
@@ -108,109 +111,114 @@ model Newsletter {
 
 // Minimal student info (on registration)
 model StudentProfile {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId       String   @unique @db.ObjectId
-  user         User     @relation(fields: [userId], references: [id])
-  institution  String
-  course       String
-  yearOfStudy  Int
-  constituency String
-  ward         String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String   @unique @db.ObjectId
+  user          User     @relation(fields: [userId], references: [id])
+  institution   String
+  course        String
+  yearOfStudy   Int
+  constituency  String
+  ward          String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
-
 
 // file: /prisma/schema.prisma
 
 
 model StudentEntireProfile {
-  id             String         @id @default(auto()) @map("_id") @db.ObjectId
-  userId         String         @unique
-  name           String
-  bio            String?
-  summary        String?
-  resumePath     String?
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  skills         String[]       // <-- Add this line for skills array
+  id                 String          @id @default(auto()) @map("_id") @db.ObjectId
+  userId             String          @unique @db.ObjectId // Foreign key to User
+  user               User            @relation(fields: [userId], references: [id])
+
+  name               String
+  bio                String?
+  summary            String?
+  resumePath         String?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  skills             String[]        // <-- Add this line for skills array
 
 
   // One-to-one relationship with Address
-  address        Address?       @relation(fields: [addressId], references: [id])
-  addressId      String?        @unique @db.ObjectId
+  address            Address?        @relation(fields: [addressId], references: [id])
+  addressId          String?         @unique @db.ObjectId
 
   // One-to-many relationships (multiple items in an array)
-  education      Education[]
-  experience     Experience[]
-  achievements   Achievement[]
-  certifications Certification[]
-  jobs           JobApplication[] // <-- Add this line for job applications
+  education          Education[]
+  experience         Experience[]
+  achievements       Achievement[]
+  certifications     Certification[]
+  jobs               JobApplication[] // <-- Add this line for job applications
 }
 
 model Address {
-  id               String                 @id @default(auto()) @map("_id") @db.ObjectId
-  county           String
-  subCounty        String
-  ward             String?
-  details          String?
-  studentProfile   StudentEntireProfile?
+  id             String                @id @default(auto()) @map("_id") @db.ObjectId
+  county         String
+  subCounty      String
+  ward           String?
+  details        String?
+  studentProfile StudentEntireProfile?
 }
 
 model Education {
-  id                String                 @id @default(auto()) @map("_id") @db.ObjectId
-  school            String
-  degree            String
-  fieldOfStudy      String?
-  graduationYear    Int?
-  studentProfileId  String                 @db.ObjectId
-  studentProfile    StudentEntireProfile   @relation(fields: [studentProfileId], references: [id])
+  id               String               @id @default(auto()) @map("_id") @db.ObjectId
+  school           String
+  degree           String
+  fieldOfStudy     String?
+  graduationYear   Int?
+  isCurrent        Boolean? // Added this line to match your input data
+  studentProfileId String               @db.ObjectId
+  studentProfile   StudentEntireProfile @relation(fields: [studentProfileId], references: [id])
 }
 
 model Experience {
-  id                String                 @id @default(auto()) @map("_id") @db.ObjectId
-  title             String
-  company           String
-  startDate         DateTime
-  endDate           DateTime
-  description       String?
-  studentProfileId  String                 @db.ObjectId
-  studentProfile    StudentEntireProfile   @relation(fields: [studentProfileId], references: [id])
+  id          String               @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  company     String
+  startDate   DateTime
+  endDate     DateTime? //endDate can be null
+  isCurrent   Boolean // Add this line
+  description String
+  profileId   String               @db.ObjectId
+  profile     StudentEntireProfile @relation(fields: [profileId], references: [id])
 }
 
 model Achievement {
-  id                String                 @id @default(auto()) @map("_id") @db.ObjectId
-  name              String
-  studentProfileId  String                 @db.ObjectId
-  studentProfile    StudentEntireProfile   @relation(fields: [studentProfileId], references: [id])
+  id               String               @id @default(auto()) @map("_id") @db.ObjectId
+  name             String
+  studentProfileId String               @db.ObjectId
+  studentProfile   StudentEntireProfile @relation(fields: [studentProfileId], references: [id])
 }
 
 model Certification {
-  id                String                 @id @default(auto()) @map("_id") @db.ObjectId
-  name              String
-  issuingBody       String?
-  studentProfileId  String                 @db.ObjectId
-  studentProfile    StudentEntireProfile   @relation(fields: [studentProfileId], references: [id])
+  id               String               @id @default(auto()) @map("_id") @db.ObjectId
+  name             String
+  issuingBody      String?
+  studentProfileId String               @db.ObjectId
+  studentProfile   StudentEntireProfile @relation(fields: [studentProfileId], references: [id])
 }
 // Extended student info (resume/CV builder)
 model EmployerProfile {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId      String   @unique @db.ObjectId
-  user        User     @relation(fields: [userId], references: [id])
-  companyId   String?  @db.ObjectId  // <-- make it optional
-  company     Company? @relation(fields: [companyId], references: [id])
-  companyName String
-  companySize String?
-  industry    String?
-  phone       String?
-  website     String?
-  position    String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String   @unique @db.ObjectId
+  user          User     @relation(fields: [userId], references: [id])
+  companyId     String?  @db.ObjectId  // <-- make it optional
+  company       Company? @relation(fields: [companyId], references: [id])
+  companyName   String
+  companySize   String?
+  industry      String?
+  phone         String?
+  website       String?
+  position      String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Company {
-  id                         String            @id @default(auto()) @map("_id") @db.ObjectId
+  id                         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId                     String   @unique @db.ObjectId // 👈 Added this one-to-one relation
+  user                       User     @relation(fields: [userId], references: [id]) // 👈 Added this one-to-one relation
   name                       String
   industry                   String
   description                String
@@ -218,7 +226,7 @@ model Company {
   companySize                String
   logoUrl                    String
   email                      String
-  jobs      Job[]       // <-- add this line to establish reverse relation
+  jobs                       Job[]  // <-- add this line to establish reverse relation
 
   phone                      String
   website                    String?
@@ -279,42 +287,42 @@ model Video {
   createdAt   DateTime @default(now())
 }
 model Event {
-  id               String    @id @default(auto()) @map("_id") @db.ObjectId
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
   title            String
   date             DateTime
   time             String
   location         String
   registrationLink String?
-  description      String?   // Add this line
-  createdAt        DateTime  @default(now())
+  description      String? // Add this line
+  createdAt        DateTime @default(now())
 }
 
 model Job {
-  id            String           @id @default(auto()) @map("_id") @db.ObjectId
-  companyId     String?          @db.ObjectId   // 👈 make optional
-  company       Company?         @relation(fields: [companyId], references: [id])
-  title         String
-  description   String
-  location      String
-  officeType    String
-  salaryRange   String?   // 👈 make it optional
-  type          String
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  companyId   String?  @db.ObjectId  // 👈 make optional
+  company     Company? @relation(fields: [companyId], references: [id])
+  title       String
+  description String
+  location    String
+  officeType  String
+  salaryRange String?  // 👈 make it optional
+  type        String
   qualifications String?
-  skills        String?
-  benefits      String?
-  applications  JobApplication[]
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
+  skills      String?
+  benefits    String?
+  applications JobApplication[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model JobApplication {
-  id        String               @id @default(auto()) @map("_id") @db.ObjectId
-  jobId     String               @db.ObjectId
-  job       Job                  @relation(fields: [jobId], references: [id])
-  studentId String?              @db.ObjectId   // <-- optional
-  student   StudentEntireProfile? @relation(fields: [studentId], references: [id])
+  id          String               @id @default(auto()) @map("_id") @db.ObjectId
+  jobId       String               @db.ObjectId
+  job         Job                  @relation(fields: [jobId], references: [id])
+  studentId   String?              @db.ObjectId  // <-- optional
+  student     StudentEntireProfile? @relation(fields: [studentId], references: [id])
   coverLetter String?
-  status    String   @default("APPLIED")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  status      String               @default("APPLIED")
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
 }

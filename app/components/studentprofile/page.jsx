@@ -1,45 +1,45 @@
+
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
 import { Loader2, User, FileText, Upload, ChevronLeft, CheckCircle, PlusCircle, MinusCircle, Briefcase, GraduationCap, Trophy, MapPin, ChevronDown, Edit } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 
-// Helper function to get initials for the avatar fallback
+// Helper Functions
 const getInitials = (name) => {
-    if (!name) return "S"; // Default for empty name
+    if (!name) return "S";
     const nameParts = name.split(" ");
     return nameParts.map(part => part[0]).join("").toUpperCase();
 };
 
-// --- Mock Select Component Implementation ---
-// Re-written to manage state and pass props down without useContext
+const kirinyagaLocations = {
+    Mwea: ["Mutithi", "Kangai", "Wamumu", "Nyangati", "Murinduko", "Gathigiriri", "Tebere", "Thiba"],
+    Gichugu: ["Kabare", "Baragwi", "Njukiini", "Ngariama", "Karumandi"],
+    Ndia: ["Mukure", "Kiine", "Kariti"],
+    "Kirinyaga Central": ["Mutira", "Kanyekini", "Kerugoya", "Inoi"]
+};
+
+// Mock Components
 const Select = ({ value, onValueChange, children, disabled, placeholder }) => {
     const [open, setOpen] = useState(false);
     const containerRef = useRef(null);
-
-    // Filter children to find SelectContent and its items
     const selectContent = React.Children.toArray(children).find(child => child.type === SelectContent);
     const items = selectContent ? React.Children.toArray(selectContent.props.children) : [];
-    
-    // Create a map to find the display label for the selected value
     const itemMap = items.reduce((acc, item) => {
         acc[item.props.value] = item.props.children;
         return acc;
     }, {});
-
     const handleSelectClick = (newValue) => {
         onValueChange(newValue);
         setOpen(false);
     };
-
     const toggleOpen = () => {
         if (!disabled) {
             setOpen(!open);
         }
     };
-    
-    // Effect to close dropdown when clicking outside
-    React.useEffect(() => {
+    useEffect(() => {
         const handleClickOutside = (event) => {
             if (containerRef.current && !containerRef.current.contains(event.target)) {
                 setOpen(false);
@@ -50,9 +50,7 @@ const Select = ({ value, onValueChange, children, disabled, placeholder }) => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
-
     const displayText = value ? itemMap[value] : placeholder;
-
     return (
         <div ref={containerRef} className="relative">
             <button
@@ -83,23 +81,17 @@ const Select = ({ value, onValueChange, children, disabled, placeholder }) => {
     );
 };
 
-const SelectContent = ({ children }) => {
-    return children;
-};
+const SelectContent = ({ children }) => children;
+const SelectItem = ({ value, children, onClick, isSelected }) => (
+    <div
+        className={`relative flex w-full cursor-pointer select-none items-center rounded-md py-2 pl-4 pr-8 text-base outline-none hover:bg-gray-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 ${isSelected ? 'bg-blue-50 text-blue-700 font-medium' : ''}`}
+        onClick={onClick}
+    >
+        {children}
+        {isSelected && <span className="absolute right-3 flex h-4 w-4 items-center justify-center"><CheckCircle className="h-5 w-5" /></span>}
+    </div>
+);
 
-const SelectItem = ({ value, children, onClick, isSelected }) => {
-    return (
-        <div
-            className={`relative flex w-full cursor-pointer select-none items-center rounded-md py-2 pl-4 pr-8 text-base outline-none hover:bg-gray-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 ${isSelected ? 'bg-blue-50 text-blue-700 font-medium' : ''}`}
-            onClick={onClick}
-        >
-            {children}
-            {isSelected && <span className="absolute right-3 flex h-4 w-4 items-center justify-center"><CheckCircle className="h-5 w-5" /></span>}
-        </div>
-    );
-};
-
-// Mock components to make the code self-contained and runnable
 const components = {
     Button: ({ children, className, variant, ...props }) => {
         const baseStyle = "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-base font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-12 px-6 py-3 shadow-lg";
@@ -126,70 +118,121 @@ const components = {
     AvatarFallback: ({ children, className, ...props }) => <div className={`flex h-full w-full items-center justify-center rounded-full bg-blue-500 text-white font-extrabold text-4xl ${className}`} {...props}>{children}</div>,
 };
 
-// Data for Kirinyaga locations
-const kirinyagaLocations = {
-    Mwea: ["Mutithi", "Kangai", "Wamumu", "Nyangati", "Murinduko", "Gathigiriri", "Tebere", "Thiba"],
-    Gichugu: ["Kabare", "Baragwi", "Njukiini", "Ngariama", "Karumandi"],
-    Ndia: ["Mukure", "Kiine", "Kariti"],
-    "Kirinyaga Central": ["Mutira", "Kanyekini", "Kerugoya", "Inoi"]
-};
-
-// The main App component that handles state and profile data
+// Main App Component
 export default function App() {
+    const { data: session, status } = useSession();
+    
     const [profile, setProfile] = useState({});
-    const [isEditing, setIsEditing] = useState(true);
-    const [resumeFile, setResumeFile] = useState(null);
+    const [isEditing, setIsEditing] = useState(false);
+    const [hasProfile, setHasProfile] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            if (status !== 'authenticated') {
+                setIsLoading(false);
+                setIsEditing(false);
+                return;
+            }
+            setIsLoading(true);
+            try {
+                const response = await fetch(`/api/studententireprofile/${session.user.id}`); 
+                if (response.status === 404) {
+                    setHasProfile(false);
+                    setIsEditing(true); // Automatically go to edit mode if no profile exists
+                    setProfile({});
+                } else if (!response.ok) {
+                    toast.error("Failed to fetch profile data.");
+                    setHasProfile(false);
+                    setIsEditing(true);
+                    setProfile({});
+                } else {
+                    const data = await response.json();
+                    setProfile(data);
+                    setHasProfile(true);
+                    setIsEditing(false);
+                }
+            } catch (error) {
+                console.error("Error fetching profile:", error);
+                toast.error("Network error. Could not load profile.");
+                setHasProfile(false);
+                setIsEditing(true);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchProfile();
+    }, [session?.user?.id, status]); 
 
     const handleSaveProfile = (newProfile) => {
         setProfile(newProfile);
+        setHasProfile(true); 
+        setIsEditing(false);
     };
+
+    if (status === 'loading' || isLoading) {
+        return <div className="min-h-screen flex items-center justify-center bg-gray-100"><p>Loading...</p></div>;
+    }
+    if (status === 'unauthenticated') {
+        return <div className="min-h-screen flex items-center justify-center bg-gray-100"><p>Please log in to view and manage your profile.</p></div>;
+    }
 
     return (
         <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4 sm:p-8">
             <Toaster position="top-center" reverseOrder={false} />
             <components.Card className="w-full max-w-4xl">
-                <StudentProfile
+                <StudentProfileContent
                     profile={profile}
-                    setProfile={setProfile}
                     isEditing={isEditing}
                     setIsEditing={setIsEditing}
+                    hasProfile={hasProfile}
                     onSaveProfile={handleSaveProfile}
-                    resumeFile={resumeFile}
-                    setResumeFile={setResumeFile}
+                    session={session}
                 />
             </components.Card>
         </div>
     );
 }
 
-// The main StudentProfile component, now without react-hook-form and framer-motion
-const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSaveProfile, resumeFile, setResumeFile }) => {
-    const [formData, setFormData] = useState(profile);
+// StudentProfileContent Component
+const StudentProfileContent = ({ profile, isEditing, setIsEditing, hasProfile, onSaveProfile, session }) => {
+    
+    // Initialize formData with proper structure for address - ADD COUNTY FIELD
+    const [formData, setFormData] = useState({
+        userId: session?.user?.id,
+        name: profile?.name ?? session?.user?.name ?? '',
+        email: profile?.email ?? session?.user?.email ?? '',
+        bio: profile?.bio ?? '',
+        summary: profile?.summary ?? '',
+        resumePath: profile?.resumePath ?? '',
+        skills: profile?.skills ?? [],
+        address: profile?.address ?? { 
+            county: "Kirinyaga", // ADD THIS FIELD
+            subCounty: '', 
+            ward: '', 
+            details: '' 
+        },
+        education: profile?.education ?? [],
+        experience: profile?.experience ?? [],
+        achievements: profile?.achievements ?? [],
+        certifications: profile?.certifications ?? [],
+    });
+    
     const [isUpdating, setIsUpdating] = useState(false);
     const resumeInputRef = useRef(null);
-    const [avatarBgColor, setAvatarBgColor] = useState(profile.avatarColor || '#1e40af');
     const [skillInput, setSkillInput] = useState('');
     const [errors, setErrors] = useState({});
+    const [resumeFile, setResumeFile] = useState(null);
 
-    const avatarColors = [
-        '#1e40af', // blue
-        '#dc2626', // red
-        '#713f12', // brown
-        '#4b5563', // gray
-        '#059669', // green
-        '#9333ea'  // purple
-    ];
-
-    const selectedSubCounty = formData.address?.subCounty;
+    // Fix the error by safely accessing address properties
+    const selectedSubCounty = formData.address?.subCounty || '';
     const wards = kirinyagaLocations[selectedSubCounty] || [];
 
-    // Manually handle form field changes
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         const [section, index, field] = name.split('.');
-
+        
         if (section && index && field) {
-            // This is a dynamic field
             const newArray = [...(formData[section] || [])];
             if (newArray[index]) {
                 if (type === 'checkbox') {
@@ -211,32 +254,55 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
                 }
             }));
         } else {
-            // This is a top-level field
             setFormData(prev => ({ ...prev, [name]: value }));
         }
     };
     
-    // Manually handle select changes
     const handleSelectChange = (section, field, value) => {
-        setFormData(prev => ({
-            ...prev,
-            [section]: {
-                ...prev[section],
-                [field]: value
-            }
-        }));
+        if (section === 'address') {
+            setFormData(prev => ({
+                ...prev,
+                address: {
+                    ...prev.address,
+                    [field]: value
+                }
+            }));
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [section]: {
+                    ...prev[section],
+                    [field]: value
+                }
+            }));
+        }
     };
 
-    // Reset form data to the profile when entering edit mode
-    React.useEffect(() => {
+    useEffect(() => {
         if (isEditing) {
-            setFormData(profile);
-            setAvatarBgColor(profile.avatarColor || '#1e40af');
+            setFormData({
+                userId: session?.user?.id,
+                name: profile?.name ?? session?.user?.name ?? '',
+                email: profile?.email ?? session?.user?.email ?? '',
+                bio: profile?.bio ?? '',
+                summary: profile?.summary ?? '',
+                resumePath: profile?.resumePath ?? '',
+                skills: profile?.skills ?? [],
+                address: profile?.address ?? { 
+                    county: "Kirinyaga", // ADD THIS FIELD HERE TOO
+                    subCounty: '', 
+                    ward: '', 
+                    details: '' 
+                },
+                education: profile?.education ?? [],
+                experience: profile?.experience ?? [],
+                achievements: profile?.achievements ?? [],
+                certifications: profile?.certifications ?? [],
+            });
         }
-    }, [isEditing, profile]);
+    }, [isEditing, profile, session]);
     
-    // Reset ward if sub-county changes when in editing mode
-    React.useEffect(() => {
+    useEffect(() => {
         if (isEditing && selectedSubCounty && wards.length > 0 && !wards.includes(formData.address?.ward)) {
             setFormData(prev => ({
                 ...prev,
@@ -246,28 +312,20 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
                 }
             }));
         }
-    }, [selectedSubCounty, wards, isEditing]);
-
+    }, [selectedSubCounty, wards, isEditing, formData.address?.ward]);
 
     const validateForm = () => {
         const newErrors = {};
         let isValid = true;
         
-        // Basic personal info validation
         if (!formData.name) {
             newErrors.name = "Full Name is required";
-            isValid = false;
-        }
-        if (!formData.email) {
-            newErrors.email = "Email Address is required";
             isValid = false;
         }
         if (!formData.summary) {
             newErrors.summary = "A professional summary is required";
             isValid = false;
         }
-
-        // Validate education entries
         if (formData.education) {
             formData.education.forEach((edu, index) => {
                 if (!edu.school || !edu.degree || !edu.fieldOfStudy) {
@@ -276,8 +334,6 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
                 }
             });
         }
-        
-        // Validate experience entries
         if (formData.experience) {
             formData.experience.forEach((exp, index) => {
                 if (!exp.title || !exp.company || !exp.startDate) {
@@ -286,7 +342,6 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
                 }
             });
         }
-
         setErrors(newErrors);
         return isValid;
     };
@@ -299,13 +354,70 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
         }
 
         setIsUpdating(true);
+        
+        // Determine if we're creating or updating
+        let url = '/api/studententireprofile';
+        let method = 'POST';
+        
+        // If we think we have a profile, try to update it
+        if (hasProfile && session?.user?.id) {
+            url = `/api/studententireprofile/${session.user.id}`;
+            method = 'PUT';
+        }
+
+        const formDataToSend = new FormData();
+        
+        if (session?.user?.id) {
+            formDataToSend.append("userId", session.user.id);
+        }
+        formDataToSend.append("name", formData.name || "");
+        formDataToSend.append("bio", formData.bio || "");
+        formDataToSend.append("summary", formData.summary || "");
+        formDataToSend.append("address", JSON.stringify(formData.address || {}));
+        formDataToSend.append("education", JSON.stringify(formData.education || []));
+        formDataToSend.append("experience", JSON.stringify(formData.experience || []));
+        formDataToSend.append("achievements", JSON.stringify(formData.achievements || []));
+        formDataToSend.append("certifications", JSON.stringify(formData.certifications || []));
+        formDataToSend.append("skills", JSON.stringify(formData.skills || []));
+
+        if (resumeFile) {
+            formDataToSend.append("resume", resumeFile);
+        }
+
         try {
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            onSaveProfile({ ...formData, avatarColor: avatarBgColor });
-            toast.success('Profile saved successfully!');
-            setIsEditing(false); // Switch to view mode after saving
+            const response = await fetch(url, {
+                method: method,
+                body: formDataToSend,
+            });
+
+            // If we got a 404 when trying to update, try creating instead
+            if (response.status === 404 && method === 'PUT') {
+                const createResponse = await fetch('/api/studententireprofile', {
+                    method: 'POST',
+                    body: formDataToSend,
+                });
+                
+                if (!createResponse.ok) {
+                    const errorData = await createResponse.json();
+                    throw new Error(errorData.message || 'Failed to create profile.');
+                }
+                
+                const savedProfile = await createResponse.json();
+                onSaveProfile(savedProfile.profile || savedProfile);
+                toast.success('Profile created successfully!');
+            } 
+            else if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `Failed to ${method === 'POST' ? 'create' : 'update'} profile.`);
+            }
+            else {
+                const savedProfile = await response.json();
+                onSaveProfile(savedProfile.profile || savedProfile);
+                toast.success(`Profile ${method === 'POST' ? 'created' : 'updated'} successfully!`);
+            }
+
         } catch (error) {
-            toast.error('Failed to save profile. Please try again.');
+            toast.error(error.message || 'Failed to save profile. Please try again.');
             console.error('Submission Error:', error);
         } finally {
             setIsUpdating(false);
@@ -316,7 +428,7 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
         const file = resumeInputRef.current.files[0];
         if (file) {
             setResumeFile(file);
-            toast.success(`Resume '${file.name}' uploaded successfully!`);
+            toast.success(`Resume '${file.name}' ready for upload!`);
         } else {
             toast.error('Please select a file to upload.');
         }
@@ -326,7 +438,6 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
         const newEntry = {};
         if (sectionName === 'education') newEntry.isCurrent = false;
         if (sectionName === 'experience') newEntry.isCurrent = false;
-
         const updatedArray = [...(formData[sectionName] || []), newEntry];
         setFormData(prev => ({ ...prev, [sectionName]: updatedArray }));
     };
@@ -337,34 +448,30 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
         setFormData(prev => ({ ...prev, [sectionName]: updatedArray }));
     };
 
-    // New function to handle adding a skill
     const handleAddSkill = () => {
-      const trimmedSkill = skillInput.trim();
-      const currentSkills = formData.skills || [];
-      const hasSkill = currentSkills.some(s => s.name.toLowerCase() === trimmedSkill.toLowerCase());
-
-      if (trimmedSkill === '') {
-        toast.error("Skill cannot be empty.");
-        return;
-      }
-      if (hasSkill) {
-        toast.error("Skill already added.");
-        return;
-      }
-      if (currentSkills.length >= 10) {
-        toast.error("You can add a maximum of 10 skills.");
-        return;
-      }
-
-      const updatedSkills = [...currentSkills, { name: trimmedSkill }];
-      setFormData(prev => ({ ...prev, skills: updatedSkills }));
-      setSkillInput(''); // Clear the input field
+        const trimmedSkill = skillInput.trim();
+        const currentSkills = formData.skills || [];
+        const hasSkill = currentSkills.some(s => s.name.toLowerCase() === trimmedSkill.toLowerCase());
+        if (trimmedSkill === '') {
+            toast.error("Skill cannot be empty.");
+            return;
+        }
+        if (hasSkill) {
+            toast.error("Skill already added.");
+            return;
+        }
+        if (currentSkills.length >= 10) {
+            toast.error("You can add a maximum of 10 skills.");
+            return;
+        }
+        const updatedSkills = [...currentSkills, { name: trimmedSkill }];
+        setFormData(prev => ({ ...prev, skills: updatedSkills }));
+        setSkillInput('');
     };
 
-    const renderField = (label, name, type, placeholder, isRequired = false, isReadOnly = false) => {
+    const renderField = (label, name, type, placeholder, isReadOnly = false) => {
         const [section, index, field] = name.split('.');
         const value = section && index && field ? formData[section]?.[index]?.[field] : formData[name];
-        
         return (
             <div>
                 <components.Label htmlFor={name}>{label}</components.Label>
@@ -381,7 +488,7 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
                 ) : (
                     <p className="mt-2 text-gray-800 font-medium">{value || "Not provided"}</p>
                 )}
-                {isEditing && errors[name] && <p className="mt-1 text-xs text-red-500">{errors[name].message}</p>}
+                {isEditing && errors[name] && <p className="mt-1 text-xs text-red-500">{errors[name]}</p>}
             </div>
         );
     };
@@ -412,7 +519,6 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
                                 </components.Button>
                             )}
                             {renderItems(field, index)}
-                            {/* Display a single error for the whole dynamic block */}
                             {isEditing && errors[`${sectionName}.${index}`] && (
                                 <p className="col-span-2 mt-1 text-xs text-red-500">{errors[`${sectionName}.${index}`]}</p>
                             )}
@@ -428,15 +534,20 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
     return (
         <div className="p-4 sm:p-8">
             <components.CardHeader className="relative p-4 sm:p-8">
-                {/* Conditionally render Edit button as an icon at the top left */}
-                {!isEditing && Object.keys(profile).length > 0 && (
+                {hasProfile && !isEditing && (
                     <components.Button variant="ghost" className="absolute top-4 left-4 sm:top-8 sm:left-8 p-0 h-10 w-10" onClick={() => setIsEditing(true)}>
                         <Edit className="h-6 w-6 text-gray-600" />
                     </components.Button>
                 )}
                 <div className="flex flex-col space-y-1 mt-4 sm:mt-0">
-                    <components.CardTitle className="text-gray-900">{isEditing ? "Edit Profile" : "My Profile"}</components.CardTitle>
-                    <components.CardDescription>{isEditing ? "Update your details and save to finalize." : "Your profile information visible to employers."}</components.CardDescription>
+                    <components.CardTitle className="text-gray-900">
+                        {isEditing ? (hasProfile ? "Edit Profile" : "Create Profile") : "My Profile"}
+                    </components.CardTitle>
+                    <components.CardDescription>
+                        {isEditing 
+                            ? (hasProfile ? "Update your details and save to finalize." : "Create your profile to showcase your skills to employers.") 
+                            : "Your profile information visible to employers."}
+                    </components.CardDescription>
                 </div>
             </components.CardHeader>
             <components.CardContent className="p-4 sm:p-8 pt-0">
@@ -449,23 +560,10 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
                         <div className="flex flex-col sm:flex-row items-center sm:space-x-12 space-y-6 sm:space-y-0">
                             <div className="flex flex-col items-center">
                                 <components.Avatar className="w-32 h-32 text-6xl font-extrabold text-white mb-4">
-                                    <components.AvatarFallback style={{ backgroundColor: avatarBgColor }}>
-                                        {getInitials(profile.name || formData.name || "")}
+                                    <components.AvatarFallback style={{ backgroundColor: '#1e40af' }}>
+                                        {getInitials(profile?.name || formData.name || "")}
                                     </components.AvatarFallback>
                                 </components.Avatar>
-                                {isEditing && (
-                                    <div className="flex space-x-3">
-                                        {avatarColors.map(color => (
-                                            <button
-                                                key={color}
-                                                type="button"
-                                                onClick={() => setAvatarBgColor(color)}
-                                                className="w-8 h-8 rounded-full border-4 border-white shadow-lg"
-                                                style={{ backgroundColor: color, outline: avatarBgColor === color ? '2px solid #3b82f6' : 'none', outlineOffset: '2px' }}
-                                            />
-                                        ))}
-                                    </div>
-                                )}
                             </div>
                             <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
@@ -480,7 +578,7 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
                                             placeholder="Your full name"
                                         />
                                     ) : (
-                                        <p className="mt-2 text-gray-800 font-medium">{profile.name}</p>
+                                        <p className="mt-2 text-gray-800 font-medium">{profile?.name || "Not provided"}</p>
                                     )}
                                     {isEditing && errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
                                 </div>
@@ -496,7 +594,7 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
                                             placeholder="your-email@example.com"
                                         />
                                     ) : (
-                                        <p className="mt-2 text-gray-800 font-medium">{profile.email}</p>
+                                        <p className="mt-2 text-gray-800 font-medium">{profile?.email || "Not provided"}</p>
                                     )}
                                     {isEditing && errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
                                 </div>
@@ -512,7 +610,7 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
                                             placeholder="Briefly describe your professional goals and skills for employers."
                                         />
                                     ) : (
-                                        <p className="mt-2 text-gray-800 font-medium whitespace-pre-wrap">{profile.summary}</p>
+                                        <p className="mt-2 text-gray-800 font-medium whitespace-pre-wrap">{profile?.summary || "Not provided"}</p>
                                     )}
                                     {isEditing && errors.summary && <p className="mt-1 text-xs text-red-500">{errors.summary}</p>}
                                 </div>
@@ -532,7 +630,7 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
                                     {isEditing ? (
                                         <components.Input id={`education.${index}.school`} name={`education.${index}.school`} value={field.school || ""} onChange={handleChange} placeholder="e.g., University of Technology" />
                                     ) : (
-                                        <p className="mt-2 text-gray-800 font-medium">{field.school}</p>
+                                        <p className="mt-2 text-gray-800 font-medium">{field.school || "Not provided"}</p>
                                     )}
                                 </div>
                                 <div>
@@ -540,7 +638,7 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
                                     {isEditing ? (
                                         <components.Input id={`education.${index}.degree`} name={`education.${index}.degree`} value={field.degree || ""} onChange={handleChange} placeholder="e.g., Bachelor of Science" />
                                     ) : (
-                                        <p className="mt-2 text-gray-800 font-medium">{field.degree}</p>
+                                        <p className="mt-2 text-gray-800 font-medium">{field.degree || "Not provided"}</p>
                                     )}
                                 </div>
                                 <div>
@@ -548,7 +646,7 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
                                     {isEditing ? (
                                         <components.Input id={`education.${index}.fieldOfStudy`} name={`education.${index}.fieldOfStudy`} value={field.fieldOfStudy || ""} onChange={handleChange} placeholder="e.g., Computer Science" />
                                     ) : (
-                                        <p className="mt-2 text-gray-800 font-medium">{field.fieldOfStudy}</p>
+                                        <p className="mt-2 text-gray-800 font-medium">{field.fieldOfStudy || "Not provided"}</p>
                                     )}
                                 </div>
                                 <div>
@@ -564,7 +662,7 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
                                     {isEditing ? (
                                         <components.Input type="number" id={`education.${index}.graduationYear`} name={`education.${index}.graduationYear`} value={field.graduationYear || ""} onChange={handleChange} placeholder="e.g., 2025" disabled={isCurrent} />
                                     ) : (
-                                        <p className="mt-2 text-gray-800 font-medium">{field.isCurrent ? "Present" : field.graduationYear}</p>
+                                        <p className="mt-2 text-gray-800 font-medium">{field.isCurrent ? "Present" : (field.graduationYear || "Not provided")}</p>
                                     )}
                                 </div>
                             </>
@@ -583,7 +681,7 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
                                     {isEditing ? (
                                         <components.Input id={`experience.${index}.title`} name={`experience.${index}.title`} value={field.title || ""} onChange={handleChange} placeholder="e.g., Junior Developer" />
                                     ) : (
-                                        <p className="mt-2 text-gray-800 font-medium">{field.title}</p>
+                                        <p className="mt-2 text-gray-800 font-medium">{field.title || "Not provided"}</p>
                                     )}
                                 </div>
                                 <div>
@@ -591,7 +689,7 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
                                     {isEditing ? (
                                         <components.Input id={`experience.${index}.company`} name={`experience.${index}.company`} value={field.company || ""} onChange={handleChange} placeholder="e.g., Tech Solutions Inc." />
                                     ) : (
-                                        <p className="mt-2 text-gray-800 font-medium">{field.company}</p>
+                                        <p className="mt-2 text-gray-800 font-medium">{field.company || "Not provided"}</p>
                                     )}
                                 </div>
                                 <div>
@@ -599,7 +697,7 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
                                     {isEditing ? (
                                         <components.Input type="date" id={`experience.${index}.startDate`} name={`experience.${index}.startDate`} value={field.startDate || ""} onChange={handleChange} />
                                     ) : (
-                                        <p className="mt-2 text-gray-800 font-medium">{field.startDate}</p>
+                                        <p className="mt-2 text-gray-800 font-medium">{field.startDate || "Not provided"}</p>
                                     )}
                                 </div>
                                 <div>
@@ -615,15 +713,15 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
                                     {isEditing ? (
                                         <components.Input type="date" id={`experience.${index}.endDate`} name={`experience.${index}.endDate`} value={field.endDate || ""} onChange={handleChange} disabled={isCurrent} />
                                     ) : (
-                                        <p className="mt-2 text-gray-800 font-medium">{field.isCurrent ? "Present" : field.endDate}</p>
+                                        <p className="mt-2 text-gray-800 font-medium">{field.isCurrent ? "Present" : (field.endDate || "Not provided")}</p>
                                     )}
                                 </div>
-                                <div className="col-span-2">
-                                    <components.Label htmlFor={`experience.${index}.description`}>Job Description</components.Label>
+                                <div className="col-span-1 md:col-span-2">
+                                    <components.Label htmlFor={`experience.${index}.description`}>Description</components.Label>
                                     {isEditing ? (
-                                        <components.Textarea id={`experience.${index}.description`} name={`experience.${index}.description`} rows="3" value={field.description || ""} onChange={handleChange} placeholder="Key responsibilities and achievements..." />
+                                        <components.Textarea id={`experience.${index}.description`} name={`experience.${index}.description`} rows="3" value={field.description || ""} onChange={handleChange} placeholder="Describe your responsibilities and achievements." />
                                     ) : (
-                                        <p className="mt-2 text-gray-800 font-medium whitespace-pre-wrap">{field.description}</p>
+                                        <p className="mt-2 text-gray-800 font-medium whitespace-pre-wrap">{field.description || "Not provided"}</p>
                                     )}
                                 </div>
                             </>
@@ -632,76 +730,95 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
 
                     <components.Separator />
 
-                    {/* Skills Section - NEW */}
+                    {/* Skills Section */}
                     <div className="space-y-4">
                         <h3 className="flex items-center text-2xl font-bold text-gray-900">
-                            <Briefcase className="mr-3 h-6 w-6 text-indigo-600" /> Skills
+                            <Trophy className="mr-3 h-6 w-6 text-amber-600" /> Skills
                         </h3>
                         {isEditing ? (
-                            <>
-                                <div className="flex flex-col sm:flex-row items-end gap-2">
-                                    <div className="flex-1 w-full">
-                                        <components.Label htmlFor="skillInput">Add a skill</components.Label>
-                                        <components.Input
-                                            id="skillInput"
-                                            type="text"
-                                            value={skillInput}
-                                            onChange={(e) => setSkillInput(e.target.value)}
-                                            placeholder="e.g., JavaScript, Python, React"
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter') {
-                                                    e.preventDefault();
-                                                    handleAddSkill();
-                                                }
-                                            }}
-                                        />
-                                    </div>
-                                    <components.Button type="button" variant="secondary" onClick={handleAddSkill} className="shadow-none">
-                                        <PlusCircle className="mr-2 h-4 w-4" /> Add
-                                    </components.Button>
-                                </div>
-                                <div className="flex flex-wrap gap-2">
-                                    {(formData.skills || []).map((skill, index) => (
-                                        <div key={index} className="flex items-center gap-2 rounded-full bg-gray-200 px-3 py-1 text-sm font-medium text-gray-800">
-                                            <span>{skill.name}</span>
-                                            <button type="button" onClick={() => handleRemoveDynamicField('skills', index)} className="p-1 rounded-full hover:bg-gray-300">
-                                                <MinusCircle className="h-4 w-4 text-red-500" />
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </>
-                        ) : (
-                            <div className="flex flex-wrap gap-2">
-                                {(profile.skills || []).length > 0 ? (
-                                    (profile.skills || []).map((skill, index) => (
-                                        <span key={index} className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
-                                            {skill.name}
-                                        </span>
-                                    ))
-                                ) : (
-                                    <p className="text-gray-500 italic">No skills added yet.</p>
-                                )}
+                            <div className="flex space-x-2">
+                                <components.Input
+                                    type="text"
+                                    placeholder="Enter a skill"
+                                    value={skillInput}
+                                    onChange={(e) => setSkillInput(e.target.value)}
+                                    className="flex-1"
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            handleAddSkill();
+                                        }
+                                    }}
+                                />
+                                <components.Button type="button" variant="secondary" className="px-4" onClick={handleAddSkill}>
+                                    <PlusCircle className="mr-2 h-4 w-4" /> Add
+                                </components.Button>
                             </div>
-                        )}
+                        ) : null}
+                        <div className="flex flex-wrap gap-2">
+                            {(formData.skills || []).length > 0 ? (
+                                (formData.skills || []).map((skill, index) => (
+                                    <div
+                                        key={index}
+                                        className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800"
+                                    >
+                                        {skill.name}
+                                        {isEditing && (
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveDynamicField('skills', index)}
+                                                className="ml-2 -mr-1 text-gray-400 hover:text-gray-600"
+                                            >
+                                                <span className="sr-only">Remove skill</span>
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 20 20"
+                                                    fill="currentColor"
+                                                    className="h-4 w-4"
+                                                >
+                                                    <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+                                                </svg>
+                                            </button>
+                                        )}
+                                    </div>
+                                ))
+                            ) : (
+                                !isEditing && <p className="text-gray-500 italic">No skills added yet.</p>
+                            )}
+                        </div>
                     </div>
-
                     <components.Separator />
 
-                    {/* Resume Upload and Location Section */}
+                    {/* Location Section */}
                     <div className="space-y-4">
                         <h3 className="flex items-center text-2xl font-bold text-gray-900">
-                            <MapPin className="mr-3 h-6 w-6 text-green-600" /> Location & Resume
+                            <MapPin className="mr-3 h-6 w-6 text-red-600" /> Location
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Add County Field */}
                             <div>
-                                <components.Label htmlFor="subCounty">Sub County</components.Label>
+                                <components.Label htmlFor="address.county">County</components.Label>
+                                {isEditing ? (
+                                    <components.Input
+                                        id="address.county"
+                                        name="address.county"
+                                        value={formData.address?.county || "Kirinyaga"}
+                                        onChange={handleChange}
+                                        placeholder="County"
+                                        readOnly // Make it read-only since it's always Kirinyaga
+                                    />
+                                ) : (
+                                    <p className="mt-2 text-gray-800 font-medium">{profile?.address?.county || "Kirinyaga"}</p>
+                                )}
+                            </div>
+                            
+                            <div>
+                                <components.Label htmlFor="address.subCounty">Sub-County</components.Label>
                                 {isEditing ? (
                                     <Select
                                         value={formData.address?.subCounty || ""}
-                                        onValueChange={(val) => handleSelectChange('address', 'subCounty', val)}
-                                        placeholder="Select Sub County"
-                                        disabled={!isEditing}
+                                        onValueChange={(value) => handleSelectChange('address', 'subCounty', value)}
+                                        placeholder="Select a sub-county"
                                     >
                                         <SelectContent>
                                             {Object.keys(kirinyagaLocations).map((subCounty) => (
@@ -712,70 +829,131 @@ const StudentProfile = ({ profile, setProfile, isEditing, setIsEditing, onSavePr
                                         </SelectContent>
                                     </Select>
                                 ) : (
-                                    <p className="mt-2 text-gray-800 font-medium">{profile.address?.subCounty || "Not provided"}</p>
+                                    <p className="mt-2 text-gray-800 font-medium">{profile?.address?.subCounty || "Not provided"}</p>
                                 )}
                             </div>
                             <div>
-                                <components.Label htmlFor="ward">Ward</components.Label>
+                                <components.Label htmlFor="address.ward">Ward</components.Label>
                                 {isEditing ? (
                                     <Select
                                         value={formData.address?.ward || ""}
-                                        onValueChange={(val) => handleSelectChange('address', 'ward', val)}
-                                        placeholder="Select Ward"
-                                        disabled={!selectedSubCounty || !isEditing}
+                                        onValueChange={(value) => handleSelectChange('address', 'ward', value)}
+                                        disabled={!selectedSubCounty}
+                                        placeholder="Select a ward"
                                     >
                                         <SelectContent>
-                                            {wards.map((ward) => (
-                                                <SelectItem key={ward} value={ward}>
-                                                    {ward}
-                                                </SelectItem>
-                                            ))}
+                                            {wards.length > 0 ? (
+                                                wards.map((ward) => (
+                                                    <SelectItem key={ward} value={ward}>
+                                                        {ward}
+                                                    </SelectItem>
+                                                ))
+                                            ) : (
+                                                <SelectItem value="" disabled>No wards available</SelectItem>
+                                            )}
                                         </SelectContent>
                                     </Select>
                                 ) : (
-                                    <p className="mt-2 text-gray-800 font-medium">{profile.address?.ward || "Not provided"}</p>
+                                    <p className="mt-2 text-gray-800 font-medium">{profile?.address?.ward || "Not provided"}</p>
+                                )}
+                            </div>
+                            <div className="col-span-1 md:col-span-2">
+                                <components.Label htmlFor="address.details">Address Details</components.Label>
+                                {isEditing ? (
+                                    <components.Input
+                                        id="address.details"
+                                        name="address.details"
+                                        value={formData.address?.details || ""}
+                                        onChange={handleChange}
+                                        placeholder="e.g., Mutithi Road, House No. 123"
+                                    />
+                                ) : (
+                                    <p className="mt-2 text-gray-800 font-medium">{profile?.address?.details || "Not provided"}</p>
                                 )}
                             </div>
                         </div>
                     </div>
-
+                    <components.Separator />
+                    
+                    {/* Resume Upload Section */}
                     <div className="space-y-4">
                         <h3 className="flex items-center text-2xl font-bold text-gray-900">
-                            <FileText className="mr-3 h-6 w-6 text-gray-600" /> Resume
+                            <FileText className="mr-3 h-6 w-6 text-green-600" /> Resume
                         </h3>
                         {isEditing ? (
-                            <div className="flex flex-col sm:flex-row items-end gap-2">
-                                <div className="flex-1 w-full">
-                                    <components.Label htmlFor="resumeFile">Upload Resume (PDF, DOCX)</components.Label>
-                                    <components.Input
-                                        id="resumeFile"
+                            <div className="flex items-center space-x-4">
+                                <components.Label htmlFor="resume" className="cursor-pointer">
+                                    <span className="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+                                        <Upload className="mr-2 h-5 w-5" /> Choose File
+                                    </span>
+                                    <input
                                         type="file"
-                                        accept=".pdf,.docx"
+                                        id="resume"
+                                        name="resume"
                                         ref={resumeInputRef}
+                                        onChange={handleResumeUpload}
+                                        className="hidden"
+                                        accept=".pdf"
                                     />
-                                </div>
-                                <components.Button type="button" onClick={handleResumeUpload} variant="secondary" className="shadow-none">
-                                    <Upload className="mr-2 h-4 w-4" /> Upload
-                                </components.Button>
+                                </components.Label>
+                                {resumeFile && (
+                                    <span className="text-sm font-medium text-gray-500">
+                                        {resumeFile.name}
+                                    </span>
+                                )}
                             </div>
                         ) : (
-                            <p className="mt-2 text-gray-800 font-medium">{resumeFile ? `Resume: ${resumeFile.name}` : "No resume uploaded"}</p>
-                        )}
-                    </div>
+                           <p className="text-gray-500 italic">
+    {profile?.resumePath ? (
+        <a href={profile.resumePath} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
+            View Resume
+        </a>
+    ) : "No resume uploaded yet."}
+</p>
+)}
+</div>
 
-                    {isEditing && (
-                        <div className="flex justify-end gap-4">
-                            <components.Button type="button" variant="secondary" onClick={() => setIsEditing(false)} disabled={isUpdating}>
-                                <ChevronLeft className="mr-2 h-4 w-4" /> Cancel
-                            </components.Button>
-                            <components.Button type="submit" variant="gradient" disabled={isUpdating}>
-                                {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {isUpdating ? 'Saving...' : 'Save Profile'}
-                            </components.Button>
-                        </div>
-                    )}
-                </form>
-            </components.CardContent>
-        </div>
-    );
+{/* Action Buttons - Only show in edit mode */}
+{isEditing && (
+    <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-4 mt-8">
+        {hasProfile && (
+            <components.Button
+                type="button"
+                variant="secondary"
+                onClick={() => setIsEditing(false)}
+                disabled={isUpdating}
+            >
+                Cancel
+            </components.Button>
+        )}
+        <components.Button
+            type="submit"
+            variant="gradient"
+            disabled={isUpdating}
+        >
+            {isUpdating ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {hasProfile ? "Updating..." : "Creating..."}</>
+            ) : (
+                hasProfile ? "Save Changes" : "Create Profile"
+            )}
+        </components.Button>
+    </div>
+)}
+</form>
+
+{/* Show Edit Button when not in edit mode and profile exists */}
+{!isEditing && hasProfile && (
+    <div className="flex justify-end mt-8">
+        <components.Button
+            type="button"
+            variant="gradient"
+            onClick={() => setIsEditing(true)}
+        >
+            <Edit className="mr-2 h-4 w-4" /> Edit Profile
+        </components.Button>
+    </div>
+)}
+</components.CardContent>
+</div>
+);
 };

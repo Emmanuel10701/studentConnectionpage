@@ -1,7 +1,10 @@
+
 'use client';
 import React, { useState, useMemo, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Briefcase, Search, Mail, X, CheckCircle, ArrowLeft, Code, DollarSign, Megaphone, Leaf, HeartPulse, ListChecks, Calendar, Building2, MapPin, NotebookPen, CircleDollarSign, Fingerprint, LucideBriefcase, User, Users, ClipboardList, CheckSquare } from 'lucide-react';
+import { Briefcase, Search, Mail, X, CheckCircle, ArrowLeft, Code, DollarSign, Megaphone, Leaf, HeartPulse, ListChecks, Calendar, Building2, MapPin, NotebookPen, CircleDollarSign, Fingerprint, LucideBriefcase, User, Users, ClipboardList, CheckSquare, FileText } from 'lucide-react';
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
 
 // Utility function to format the time since a job was posted
 const formatTimeAgo = (date) => {
@@ -76,6 +79,14 @@ const MessageBox = ({ message, type, onClose }) => {
     </motion.div>
   );
 };
+
+// Loading component with Material-UI spinner
+const LoadingSpinner = ({ message = "Loading..." }) => (
+  <div className="flex flex-col items-center justify-center py-12">
+    <CircularProgress size={40} className="text-purple-600 mb-4" />
+    <p className="text-gray-600">{message}</p>
+  </div>
+);
 
 // Component to display the list of applied jobs
 const AppliedJobs = ({ appliedJobs }) => {
@@ -183,7 +194,7 @@ const JobPostings = ({ onApply, activeTab, setActiveTab, appliedJobIds, jobs, is
 
   const renderJobs = () => {
     if (isLoading) {
-      return <p className="text-center py-8 text-gray-500">Loading jobs...</p>;
+      return <LoadingSpinner message="Loading jobs..." />;
     }
     if (error) {
       return <p className="text-center py-8 text-red-500">Error: {error}</p>;
@@ -352,12 +363,16 @@ const JobPostings = ({ onApply, activeTab, setActiveTab, appliedJobIds, jobs, is
 };
 
 // Component that displays the detailed view of a single job
-const JobDetails = ({ job, profile, onGoBack, onJobApplied }) => {
+const JobDetails = ({ job, profile, onGoBack, onJobApplied, studentProfile }) => {
   const [isApplying, setIsApplying] = useState(false);
   const [message, setMessage] = useState(null);
   const [applicantCount, setApplicantCount] = useState(0);
   const [showCoverLetterModal, setShowCoverLetterModal] = useState(false);
+  const [showCompleteProfileModal, setShowCompleteProfileModal] = useState(false);
   const [applicantsLoading, setApplicantsLoading] = useState(true);
+
+  // Check if user has a resume
+  const hasResume = studentProfile?.resumePath;
 
   useEffect(() => {
     const fetchApplicantCount = async () => {
@@ -381,6 +396,10 @@ const JobDetails = ({ job, profile, onGoBack, onJobApplied }) => {
   }, [job]);
 
   const handleApplyClick = () => {
+    if (!hasResume) {
+      setShowCompleteProfileModal(true);
+      return;
+    }
     setShowCoverLetterModal(true);
   };
 
@@ -389,7 +408,7 @@ const JobDetails = ({ job, profile, onGoBack, onJobApplied }) => {
     setShowCoverLetterModal(false);
 
     try {
-      const response = await fetch(`http://localhost:3000/api/applications`, {
+      const response = await fetch(`http://localhost:3000/api/applicantsapi`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -398,7 +417,8 @@ const JobDetails = ({ job, profile, onGoBack, onJobApplied }) => {
           jobId: job.id,
           applicantName: profile.name,
           email: profile.email,
-          coverLetter: coverLetter
+          coverLetter: coverLetter,
+          resumePath: studentProfile.resumePath // Include resume path
         }),
       });
 
@@ -491,15 +511,40 @@ const JobDetails = ({ job, profile, onGoBack, onJobApplied }) => {
           <h4 className="text-lg font-semibold text-purple-800">Your Profile</h4>
           <p className="text-purple-700">Name: <span className="font-medium">{profile.name}</span></p>
           <p className="text-purple-700">Institution: <span className="font-medium">{profile.institution}</span></p>
+          <p className="text-purple-700 flex items-center gap-2">
+            Resume: 
+            {hasResume ? (
+              <span className="text-green-600 font-medium flex items-center gap-1">
+                <CheckCircle size={16} /> Uploaded
+              </span>
+            ) : (
+              <span className="text-red-600 font-medium flex items-center gap-1">
+                <X size={16} /> Not Available
+              </span>
+            )}
+          </p>
         </div>
         <motion.button
           onClick={handleApplyClick}
           disabled={isApplying}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="ml-auto w-full md:w-auto px-8 py-3 bg-purple-600 text-white rounded-full font-bold shadow-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          whileHover={{ scale: hasResume ? 1.05 : 1 }}
+          whileTap={{ scale: hasResume ? 0.95 : 1 }}
+          className={`ml-auto w-full md:w-auto px-8 py-3 rounded-full font-bold shadow-lg transition-colors ${
+            hasResume 
+              ? 'bg-purple-600 text-white hover:bg-purple-700'
+              : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+          } disabled:opacity-50 disabled:cursor-not-allowed`}
         >
-          {isApplying ? 'Applying...' : 'Apply Now'}
+          {isApplying ? (
+            <div className="flex items-center justify-center gap-2">
+              <CircularProgress size={16} className="text-white" />
+              Applying...
+            </div>
+          ) : hasResume ? (
+            'Apply Now'
+          ) : (
+            'Complete Profile to Apply'
+          )}
         </motion.button>
       </div>
 
@@ -522,6 +567,76 @@ const JobDetails = ({ job, profile, onGoBack, onJobApplied }) => {
           onApply={handleFinalApplication}
         />
       )}
+
+      {showCompleteProfileModal && (
+        <CompleteProfileModal
+          onClose={() => setShowCompleteProfileModal(false)}
+        />
+      )}
+    </motion.div>
+  );
+};
+
+// New modal component for prompting user to complete their profile
+const CompleteProfileModal = ({ onClose }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 z-50"
+    >
+      <motion.div
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 50, opacity: 0 }}
+        className="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md relative"
+      >
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
+          <X size={24} />
+        </button>
+        
+        <div className="text-center mb-6">
+          <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+            <X size={32} className="text-red-600" />
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900 mb-2">Profile Incomplete</h3>
+          <p className="text-gray-600">You need to upload a resume before applying for jobs.</p>
+        </div>
+
+        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6">
+          <h4 className="font-semibold text-yellow-800 mb-2">Required to apply:</h4>
+          <ul className="text-sm text-yellow-700 space-y-1">
+            <li className="flex items-center gap-2">
+              <ClipboardList size={16} />
+              Complete your profile information
+            </li>
+            <li className="flex items-center gap-2">
+              <CheckSquare size={16} />
+              Upload your resume/CV
+            </li>
+            <li className="flex items-center gap-2">
+              <User size={16} />
+              Add your skills and experience
+            </li>
+          </ul>
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <a
+            href="/profile" // Link to profile page
+            className="w-full px-6 py-3 text-center font-semibold rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-colors shadow-md"
+          >
+            Complete My Profile
+          </a>
+          <button
+            onClick={onClose}
+            className="w-full px-6 py-3 text-sm font-semibold rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
+          >
+            I'll Do It Later
+          </button>
+        </div>
+      </motion.div>
     </motion.div>
   );
 };
@@ -529,10 +644,13 @@ const JobDetails = ({ job, profile, onGoBack, onJobApplied }) => {
 // Component for the cover letter modal
 const CoverLetterModal = ({ profile, job, onClose, onApply }) => {
   const [coverLetter, setCoverLetter] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onApply(coverLetter);
+    setIsSubmitting(true);
+    await onApply(coverLetter);
+    setIsSubmitting(false);
   };
 
   return (
@@ -585,9 +703,17 @@ const CoverLetterModal = ({ profile, job, onClose, onApply }) => {
             </button>
             <button
               type="submit"
-              className="px-6 py-3 text-sm font-semibold rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-colors shadow-md"
+              disabled={isSubmitting}
+              className="px-6 py-3 text-sm font-semibold rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              Submit Application
+              {isSubmitting ? (
+                <>
+                  <CircularProgress size={16} className="text-white" />
+                  Submitting...
+                </>
+              ) : (
+                'Submit Application'
+              )}
             </button>
           </div>
         </form>
@@ -611,6 +737,8 @@ export default function App() {
   const [apiJobs, setApiJobs] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [studentProfile, setStudentProfile] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(true);
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -646,6 +774,30 @@ export default function App() {
     fetchJobs();
   }, []);
 
+  // Fetch student profile to check for resume
+  useEffect(() => {
+    const fetchStudentProfile = async () => {
+      setProfileLoading(true);
+      try {
+        // Replace with actual user ID from your authentication system
+        const userId = 'current-user-id'; 
+        const response = await fetch(`/api/studententireprofile/${userId}`);
+        if (response.ok) {
+          const profileData = await response.json();
+          setStudentProfile(profileData);
+        } else if (response.status === 404) {
+          // Profile doesn't exist yet, that's okay
+          setStudentProfile(null);
+        }
+      } catch (err) {
+        console.error('Error fetching student profile:', err);
+      } finally {
+        setProfileLoading(false);
+      }
+    };
+    fetchStudentProfile();
+  }, []);
+
   const handleApplyClick = (job) => {
     setSelectedJob(job);
     setCurrentPage('job-details');
@@ -670,12 +822,13 @@ export default function App() {
             error={error}
           />
         )}
-        {currentPage === 'job-details' && (
+        {currentPage === 'job-details' && selectedJob && (
           <JobDetails
             job={selectedJob}
             profile={profile}
             onGoBack={() => setCurrentPage('job-postings')}
             onJobApplied={handleJobApplied}
+            studentProfile={studentProfile}
           />
         )}
       </div>

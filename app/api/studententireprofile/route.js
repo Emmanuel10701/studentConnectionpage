@@ -3,7 +3,7 @@ import fs from "fs/promises";
 import path from "path";
 import { NextResponse } from "next/server";
 
-// Helper function to save the file (optional)
+// Helper function to save the file
 async function saveResumeFile(file) {
   if (!file) return null;
 
@@ -28,43 +28,83 @@ export async function POST(req) {
   try {
     const formData = await req.formData();
 
-    // Extract fields and file
+    // Extract simple fields
     const userId = formData.get("userId");
     const name = formData.get("name");
-    const bio = formData.get("bio");
-    const summary = formData.get("summary");
-    const skills = formData.get("skills"); // <-- new
-    const resumeFile = formData.get("resume"); // Optional
-    const address = formData.get("address");
-    const education = formData.get("education");
-    const experience = formData.get("experience");
-    const achievements = formData.get("achievements");
-    const certifications = formData.get("certifications");
+    const bio = formData.get("bio") || null;
+    const summary = formData.get("summary") || null;
+    const resumeFile = formData.get("resume");
 
-    // Save resume only if provided
+    // Parse complex fields as JSON
+    const skills = formData.get("skills") ? JSON.parse(formData.get("skills")) : [];
+    const addressData = formData.get("address") ? JSON.parse(formData.get("address")) : null;
+    const educationData = formData.get("education") ? JSON.parse(formData.get("education")) : [];
+    const experienceData = formData.get("experience") ? JSON.parse(formData.get("experience")) : [];
+    const achievementsData = formData.get("achievements") ? JSON.parse(formData.get("achievements")) : [];
+    const certificationsData = formData.get("certifications") ? JSON.parse(formData.get("certifications")) : [];
+
+    // Save resume file and get path
     const resumePath = resumeFile ? await saveResumeFile(resumeFile) : null;
 
-    // Create profile in DB
-    const profile = await prisma.studentEntireProfile.create({
-      data: {
-        userId,
-        name,
-        bio,
-        summary,
-        resumePath,
-        skills: skills ? JSON.parse(skills) : [], // <-- store as array
-        address: address ? { create: JSON.parse(address) } : undefined,
-        education: education ? { create: JSON.parse(education) } : undefined,
-        experience: experience
-          ? { create: JSON.parse(experience).map(exp => ({
-              ...exp,
-              startDate: new Date(exp.startDate),
-              endDate: new Date(exp.endDate),
-            })) }
-          : undefined,
-        achievements: achievements ? { create: JSON.parse(achievements) } : undefined,
-        certifications: certifications ? { create: JSON.parse(certifications) } : undefined,
+    // --- NEW: Handle Address creation separately ---
+    let addressId = null;
+    if (addressData) {
+      const newAddress = await prisma.address.create({
+        data: addressData,
+      });
+      addressId = newAddress.id;
+    }
+
+    // Build the data object for Prisma create
+    const profileData = {
+      userId,
+      name,
+      bio,
+      summary,
+      skills,
+      resumePath,
+      addressId, // Now we link the profile using the ID
+      
+      // Use 'createMany' for the one-to-many 'education' relation
+      education: {
+        createMany: {
+          data: educationData,
+        },
       },
+      
+      // Use 'createMany' for the one-to-many 'experience' relation
+      experience: {
+        createMany: {
+          data: experienceData.map(exp => ({
+            ...exp,
+            startDate: new Date(exp.startDate),
+            endDate: exp.isCurrent ? null : new Date(exp.endDate),
+          })),
+        },
+      },
+      
+      // Use 'createMany' for the one-to-many 'achievements' relation
+      achievements: {
+        createMany: {
+          data: achievementsData.map(achievement => ({
+            name: achievement,
+          })),
+        },
+      },
+      
+      // Use 'createMany' for the one-to-many 'certifications' relation
+      certifications: {
+        createMany: {
+          data: certificationsData.map(certification => ({
+            name: certification,
+          })),
+        },
+      },
+    };
+
+    // Create a new profile in the database with all relations
+    const profile = await prisma.studentEntireProfile.create({
+      data: profileData,
       include: {
         address: true,
         education: true,

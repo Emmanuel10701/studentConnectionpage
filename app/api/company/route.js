@@ -1,6 +1,9 @@
+// File: /api/company/route.js
 import prisma from '../../../libs/prisma';
 
-// CREATE Company and require employerId
+// =============================
+// POST: Create Company (NO userId required)
+// =============================
 export async function POST(request) {
   try {
     const body = await request.json();
@@ -9,30 +12,30 @@ export async function POST(request) {
       logoUrl, email, phone, website, street, city, county,
       country, postalCode, businessRegistrationNumber, kraPin,
       businessPermitNumber, licenseExpiryDate, vatNumber, legalName,
-      linkedin, twitter, facebook, instagram, employerId
+      linkedin, twitter, facebook, instagram
     } = body;
 
-    // Validate required fields
-    if (!employerId) {
+    // ✅ Validate required fields
+    if (!name || !email) {
       return new Response(
-        JSON.stringify({ success: false, message: 'employerId is required' }),
+        JSON.stringify({ success: false, message: 'Company name and email are required' }),
         { status: 400 }
       );
     }
 
-    // Check if the employer exists
-    const employerExists = await prisma.employerProfile.findUnique({
-      where: { id: employerId }
+    // ✅ Check if a company already exists with this email
+    const existingCompany = await prisma.company.findUnique({
+      where: { email }
     });
 
-    if (!employerExists) {
+    if (existingCompany) {
       return new Response(
-        JSON.stringify({ success: false, message: 'Employer not found with this ID' }),
-        { status: 400 }
+        JSON.stringify({ success: false, message: 'A company already exists with this email' }),
+        { status: 409 }
       );
     }
 
-    // Create company and link to employer
+    // ✅ Create company (no link to userId anymore)
     const newCompany = await prisma.company.create({
       data: {
         name,
@@ -58,33 +61,32 @@ export async function POST(request) {
         linkedin,
         twitter,
         facebook,
-        instagram,
-        employers: {
-          connect: { id: employerId } // safe connect
-        }
+        instagram
       },
-      include: { employers: true } // include linked employer(s)
     });
 
     return new Response(JSON.stringify({ success: true, company: newCompany }), { status: 201 });
   } catch (error) {
     console.error('Failed to create company:', error);
     return new Response(
-      JSON.stringify({ success: false, message: 'Internal Server Error', error }),
+      JSON.stringify({ success: false, message: 'Internal Server Error', error: error.message }),
       { status: 500 }
     );
   }
 }
 
-// GET all companies
+// =============================
+// GET: All Companies
+// =============================
 export async function GET() {
   try {
-    const companies = await prisma.company.findMany({ include: { employers: true } });
+    const companies = await prisma.company.findMany();
+
     return new Response(JSON.stringify({ success: true, companies }), { status: 200 });
   } catch (error) {
     console.error('Failed to fetch companies:', error);
     return new Response(
-      JSON.stringify({ success: false, message: 'Internal Server Error', error }),
+      JSON.stringify({ success: false, message: 'Internal Server Error', error: error.message }),
       { status: 500 }
     );
   }

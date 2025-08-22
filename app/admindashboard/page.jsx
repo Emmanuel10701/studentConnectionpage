@@ -569,14 +569,25 @@ export default function CareerConnectApp() {
   const [newsItems, setNewsItems] = useState(initialNews);
   const [events, setEvents] = useState(initialEvents);
 
-  const { data: session, status } = useSession();
-  const router = useRouter();
+const { data: session, status } = useSession();
+const router = useRouter();
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/adminlogin');
-    }
-  }, [status, router]);
+useEffect(() => {
+  // If the session data is still loading, do nothing and wait.
+  if (status === 'loading') {
+    return;
+  }
+
+  // If the user is not authenticated, redirect them to the login page.
+  if (status === 'unauthenticated') {
+    router.push('/adminlogin');
+  } 
+  // If the user is authenticated but their role isn't 'Administrator',
+  // redirect them to the login page as they don't have access.
+  else if (session?.user?.role !== 'ADMIN') {
+    router.push('/adminlogin');
+  }
+}, [status, router, session]);
 
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -595,6 +606,7 @@ export default function CareerConnectApp() {
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
         </div>
       );
+      
     }
     
     switch(view) {

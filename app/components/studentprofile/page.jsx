@@ -1,9 +1,8 @@
-
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
-import { Loader2, User, FileText, Upload, ChevronLeft, CheckCircle, PlusCircle, MinusCircle, Briefcase, GraduationCap, Trophy, MapPin, ChevronDown, Edit } from 'lucide-react';
+import { Loader2, User, FileText, Upload, ChevronLeft, CheckCircle, PlusCircle, MinusCircle, Briefcase, GraduationCap, Trophy, MapPin, ChevronDown, Edit, Mail, Calendar, Award, BookOpen, Map } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 
 // Helper Functions
@@ -20,7 +19,7 @@ const kirinyagaLocations = {
     "Kirinyaga Central": ["Mutira", "Kanyekini", "Kerugoya", "Inoi"]
 };
 
-// Mock Components
+// Modern Select Component
 const Select = ({ value, onValueChange, children, disabled, placeholder }) => {
     const [open, setOpen] = useState(false);
     const containerRef = useRef(null);
@@ -55,7 +54,7 @@ const Select = ({ value, onValueChange, children, disabled, placeholder }) => {
         <div ref={containerRef} className="relative">
             <button
                 type="button"
-                className={`flex h-12 w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-2 text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${disabled ? 'cursor-not-allowed opacity-50 bg-gray-100' : ''}`}
+                className={`flex h-12 w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-2 text-base shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${disabled ? 'cursor-not-allowed opacity-50 bg-gray-100' : 'hover:border-gray-300'}`}
                 onClick={toggleOpen}
                 disabled={disabled}
             >
@@ -65,7 +64,7 @@ const Select = ({ value, onValueChange, children, disabled, placeholder }) => {
                 <ChevronDown className={`h-5 w-5 shrink-0 opacity-50 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
             </button>
             {open && (
-                <div className="absolute z-50 w-full min-w-[8rem] overflow-hidden rounded-lg border border-gray-200 bg-white text-gray-800 shadow-xl mt-1">
+                <div className="absolute z-50 w-full min-w-[8rem] overflow-hidden rounded-xl border border-gray-200 bg-white text-gray-800 shadow-xl mt-1">
                     <div className="max-h-60 overflow-y-auto">
                         {items.map((item, index) =>
                             React.cloneElement(item, {
@@ -84,38 +83,39 @@ const Select = ({ value, onValueChange, children, disabled, placeholder }) => {
 const SelectContent = ({ children }) => children;
 const SelectItem = ({ value, children, onClick, isSelected }) => (
     <div
-        className={`relative flex w-full cursor-pointer select-none items-center rounded-md py-2 pl-4 pr-8 text-base outline-none hover:bg-gray-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 ${isSelected ? 'bg-blue-50 text-blue-700 font-medium' : ''}`}
+        className={`relative flex w-full cursor-pointer select-none items-center rounded-md py-3 pl-4 pr-8 text-base outline-none transition-colors duration-150 ${isSelected ? 'bg-blue-50 text-blue-700 font-medium' : 'hover:bg-gray-50'}`}
         onClick={onClick}
     >
         {children}
-        {isSelected && <span className="absolute right-3 flex h-4 w-4 items-center justify-center"><CheckCircle className="h-5 w-5" /></span>}
+        {isSelected && <span className="absolute right-3 flex h-4 w-4 items-center justify-center"><CheckCircle className="h-5 w-5 text-blue-600" /></span>}
     </div>
 );
 
+// Modern UI Components
 const components = {
     Button: ({ children, className, variant, ...props }) => {
-        const baseStyle = "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-base font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-12 px-6 py-3 shadow-lg";
+        const baseStyle = "inline-flex items-center justify-center whitespace-nowrap rounded-xl text-base font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-12 px-6 py-3";
         const variants = {
-            primary: "bg-blue-600 text-white hover:bg-blue-700 focus-visible:ring-blue-500",
-            secondary: "bg-gray-200 text-gray-800 hover:bg-gray-300 focus-visible:ring-gray-500",
-            ghost: "bg-transparent text-gray-600 hover:bg-gray-100 shadow-none",
+            primary: "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl",
+            secondary: "bg-white text-gray-800 border border-gray-300 hover:bg-gray-50 shadow-sm hover:shadow-md",
+            ghost: "bg-transparent text-gray-600 hover:bg-gray-100",
             icon: "h-10 w-10 p-0",
-            gradient: "bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800 focus-visible:ring-indigo-500"
+            outline: "border-2 border-blue-600 text-blue-600 bg-transparent hover:bg-blue-600 hover:text-white"
         };
         const finalClassName = `${baseStyle} ${variants[variant] || variants.primary} ${className || ''}`;
         return <button {...props} className={finalClassName}>{children}</button>;
     },
-    Input: (props) => <input {...props} className="flex h-12 w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-base shadow-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100" />,
-    Label: (props) => <label {...props} className="text-sm font-medium leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70" />,
-    Textarea: (props) => <textarea {...props} className="flex min-h-[120px] w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-base shadow-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100" />,
-    Card: ({ children, className, ...props }) => <div className={`rounded-none sm:rounded-3xl border-0 sm:border border-gray-200 bg-white text-gray-900 shadow-none sm:shadow-2xl ${className}`} {...props}>{children}</div>,
-    CardHeader: ({ children, ...props }) => <div className="flex flex-col space-y-2 p-4 sm:p-8" {...props}>{children}</div>,
-    CardTitle: ({ children, ...props }) => <h3 className="text-3xl font-extrabold leading-none tracking-tight" {...props}>{children}</h3>,
-    CardDescription: ({ children, ...props }) => <p className="text-lg text-gray-500" {...props}>{children}</p>,
-    CardContent: ({ children, ...props }) => <div className="p-4 sm:p-8 pt-0" {...props}>{children}</div>,
-    Separator: () => <div className="shrink-0 bg-gray-200 h-[2px] w-full"></div>,
+    Input: (props) => <input {...props} className="flex h-12 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base shadow-sm transition-all duration-200 file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 hover:border-gray-300" />,
+    Label: (props) => <label {...props} className="text-sm font-medium leading-none text-gray-700 mb-2 block peer-disabled:cursor-not-allowed peer-disabled:opacity-70" />,
+    Textarea: (props) => <textarea {...props} className="flex min-h-[120px] w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-base shadow-sm transition-all duration-200 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-100 hover:border-gray-300" />,
+    Card: ({ children, className, ...props }) => <div className={`rounded-2xl border-0 bg-white text-gray-900 shadow-lg ${className}`} {...props}>{children}</div>,
+    CardHeader: ({ children, ...props }) => <div className="flex flex-col space-y-2 p-6" {...props}>{children}</div>,
+    CardTitle: ({ children, ...props }) => <h3 className="text-2xl font-bold tracking-tight" {...props}>{children}</h3>,
+    CardDescription: ({ children, ...props }) => <p className="text-gray-500" {...props}>{children}</p>,
+    CardContent: ({ children, ...props }) => <div className="p-6 pt-0" {...props}>{children}</div>,
+    Separator: () => <div className="shrink-0 bg-gradient-to-r from-transparent via-gray-200 to-transparent h-[1px] w-full my-6"></div>,
     Avatar: ({ children, className }) => <div className={`relative flex h-24 w-24 shrink-0 overflow-hidden rounded-full ${className}`}>{children}</div>,
-    AvatarFallback: ({ children, className, ...props }) => <div className={`flex h-full w-full items-center justify-center rounded-full bg-blue-500 text-white font-extrabold text-4xl ${className}`} {...props}>{children}</div>,
+    AvatarFallback: ({ children, className, ...props }) => <div className={`flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold text-3xl ${className}`} {...props}>{children}</div>,
 };
 
 // Main App Component
@@ -139,7 +139,7 @@ export default function App() {
                 const response = await fetch(`/api/studententireprofile/${session.user.id}`); 
                 if (response.status === 404) {
                     setHasProfile(false);
-                    setIsEditing(true); // Automatically go to edit mode if no profile exists
+                    setIsEditing(true);
                     setProfile({});
                 } else if (!response.ok) {
                     toast.error("Failed to fetch profile data.");
@@ -171,14 +171,29 @@ export default function App() {
     };
 
     if (status === 'loading' || isLoading) {
-        return <div className="min-h-screen flex items-center justify-center bg-gray-100"><p>Loading...</p></div>;
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+                <div className="flex flex-col items-center">
+                    <Loader2 className="h-12 w-12 text-blue-600 animate-spin mb-4" />
+                    <p className="text-gray-600">Loading your profile...</p>
+                </div>
+            </div>
+        );
     }
     if (status === 'unauthenticated') {
-        return <div className="min-h-screen flex items-center justify-center bg-gray-100"><p>Please log in to view and manage your profile.</p></div>;
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+                <div className="text-center p-8 bg-white rounded-2xl shadow-lg max-w-md">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Access Required</h2>
+                    <p className="text-gray-600 mb-6">Please log in to view and manage your profile.</p>
+                    <components.Button variant="primary">Sign In</components.Button>
+                </div>
+            </div>
+        );
     }
 
     return (
-        <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4 sm:p-8">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-4">
             <Toaster position="top-center" reverseOrder={false} />
             <components.Card className="w-full max-w-4xl">
                 <StudentProfileContent
@@ -197,7 +212,6 @@ export default function App() {
 // StudentProfileContent Component
 const StudentProfileContent = ({ profile, isEditing, setIsEditing, hasProfile, onSaveProfile, session }) => {
     
-    // Initialize formData with proper structure for address - ADD COUNTY FIELD
     const [formData, setFormData] = useState({
         userId: session?.user?.id,
         name: profile?.name ?? session?.user?.name ?? '',
@@ -207,7 +221,7 @@ const StudentProfileContent = ({ profile, isEditing, setIsEditing, hasProfile, o
         resumePath: profile?.resumePath ?? '',
         skills: profile?.skills ?? [],
         address: profile?.address ?? { 
-            county: "Kirinyaga", // ADD THIS FIELD
+            county: "Kirinyaga",
             subCounty: '', 
             ward: '', 
             details: '' 
@@ -224,7 +238,6 @@ const StudentProfileContent = ({ profile, isEditing, setIsEditing, hasProfile, o
     const [errors, setErrors] = useState({});
     const [resumeFile, setResumeFile] = useState(null);
 
-    // Fix the error by safely accessing address properties
     const selectedSubCounty = formData.address?.subCounty || '';
     const wards = kirinyagaLocations[selectedSubCounty] || [];
 
@@ -289,7 +302,7 @@ const StudentProfileContent = ({ profile, isEditing, setIsEditing, hasProfile, o
                 resumePath: profile?.resumePath ?? '',
                 skills: profile?.skills ?? [],
                 address: profile?.address ?? { 
-                    county: "Kirinyaga", // ADD THIS FIELD HERE TOO
+                    county: "Kirinyaga",
                     subCounty: '', 
                     ward: '', 
                     details: '' 
@@ -355,11 +368,9 @@ const StudentProfileContent = ({ profile, isEditing, setIsEditing, hasProfile, o
 
         setIsUpdating(true);
         
-        // Determine if we're creating or updating
         let url = '/api/studententireprofile';
         let method = 'POST';
         
-        // If we think we have a profile, try to update it
         if (hasProfile && session?.user?.id) {
             url = `/api/studententireprofile/${session.user.id}`;
             method = 'PUT';
@@ -390,7 +401,6 @@ const StudentProfileContent = ({ profile, isEditing, setIsEditing, hasProfile, o
                 body: formDataToSend,
             });
 
-            // If we got a 404 when trying to update, try creating instead
             if (response.status === 404 && method === 'PUT') {
                 const createResponse = await fetch('/api/studententireprofile', {
                     method: 'POST',
@@ -496,13 +506,13 @@ const StudentProfileContent = ({ profile, isEditing, setIsEditing, hasProfile, o
     const renderDynamicSection = (sectionName, icon, title, renderItems) => {
         const fields = formData[sectionName] || [];
         return (
-            <div className="space-y-4">
+            <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                    <h3 className="flex items-center text-2xl font-bold text-gray-900">
+                    <h3 className="flex items-center text-xl font-bold text-gray-900">
                         {icon} {title}
                     </h3>
                     {isEditing && (sectionName !== 'skills') && (
-                        <components.Button type="button" variant="secondary" onClick={() => handleAddDynamicField(sectionName)} className="shadow-none">
+                        <components.Button type="button" variant="outline" onClick={() => handleAddDynamicField(sectionName)} className="text-sm">
                             <PlusCircle className="mr-2 h-4 w-4" /> Add
                         </components.Button>
                     )}
@@ -511,11 +521,11 @@ const StudentProfileContent = ({ profile, isEditing, setIsEditing, hasProfile, o
                     fields.map((field, index) => (
                         <div
                             key={index}
-                            className="relative grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg shadow-inner"
+                            className="relative grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-6 rounded-xl border border-gray-100"
                         >
                             {isEditing && (sectionName !== 'skills') && (
-                                <components.Button type="button" variant="ghost" onClick={() => handleRemoveDynamicField(sectionName, index)} className="absolute top-2 right-2 p-2">
-                                    <MinusCircle className="h-5 w-5 text-red-500" />
+                                <components.Button type="button" variant="ghost" onClick={() => handleRemoveDynamicField(sectionName, index)} className="absolute top-3 right-3 p-1">
+                                    <MinusCircle className="h-4 w-4 text-red-500" />
                                 </components.Button>
                             )}
                             {renderItems(field, index)}
@@ -525,42 +535,42 @@ const StudentProfileContent = ({ profile, isEditing, setIsEditing, hasProfile, o
                         </div>
                     ))
                 ) : (
-                    !isEditing && <p className="text-gray-500 italic">No {title.toLowerCase()} added yet.</p>
+                    !isEditing && <p className="text-gray-500 italic text-center py-4">No {title.toLowerCase()} added yet.</p>
                 )}
             </div>
         );
     };
 
     return (
-        <div className="p-4 sm:p-8">
-            <components.CardHeader className="relative p-4 sm:p-8">
+        <div className="p-6">
+            <components.CardHeader className="relative p-6">
                 {hasProfile && !isEditing && (
-                    <components.Button variant="ghost" className="absolute top-4 left-4 sm:top-8 sm:left-8 p-0 h-10 w-10" onClick={() => setIsEditing(true)}>
-                        <Edit className="h-6 w-6 text-gray-600" />
+                    <components.Button variant="ghost" className="absolute top-6 left-6 p-0 h-10 w-10" onClick={() => setIsEditing(true)}>
+                        <Edit className="h-5 w-5 text-gray-600" />
                     </components.Button>
                 )}
-                <div className="flex flex-col space-y-1 mt-4 sm:mt-0">
-                    <components.CardTitle className="text-gray-900">
+                <div className="flex flex-col space-y-2 mt-4">
+                    <components.CardTitle className="text-gray-900 text-3xl font-extrabold">
                         {isEditing ? (hasProfile ? "Edit Profile" : "Create Profile") : "My Profile"}
                     </components.CardTitle>
-                    <components.CardDescription>
+                    <components.CardDescription className="text-lg">
                         {isEditing 
                             ? (hasProfile ? "Update your details and save to finalize." : "Create your profile to showcase your skills to employers.") 
                             : "Your profile information visible to employers."}
                     </components.CardDescription>
                 </div>
             </components.CardHeader>
-            <components.CardContent className="p-4 sm:p-8 pt-0">
-                <form onSubmit={onSubmit} className="space-y-12">
+            <components.CardContent className="p-6 pt-0">
+                <form onSubmit={onSubmit} className="space-y-8">
                     {/* Personal Information Section */}
-                    <div className="space-y-8">
-                        <h3 className="flex items-center text-2xl font-bold text-gray-900">
-                            <User className="mr-3 h-6 w-6 text-blue-600" /> Personal Information
+                    <div className="space-y-6">
+                        <h3 className="flex items-center text-xl font-bold text-gray-900">
+                            <User className="mr-3 h-5 w-5 text-blue-600" /> Personal Information
                         </h3>
-                        <div className="flex flex-col sm:flex-row items-center sm:space-x-12 space-y-6 sm:space-y-0">
+                        <div className="flex flex-col md:flex-row items-center md:space-x-8 space-y-6 md:space-y-0">
                             <div className="flex flex-col items-center">
-                                <components.Avatar className="w-32 h-32 text-6xl font-extrabold text-white mb-4">
-                                    <components.AvatarFallback style={{ backgroundColor: '#1e40af' }}>
+                                <components.Avatar className="w-28 h-28 text-4xl font-bold text-white mb-4">
+                                    <components.AvatarFallback>
                                         {getInitials(profile?.name || formData.name || "")}
                                     </components.AvatarFallback>
                                 </components.Avatar>
@@ -621,7 +631,7 @@ const StudentProfileContent = ({ profile, isEditing, setIsEditing, hasProfile, o
                     <components.Separator />
 
                     {/* Education Section */}
-                    {renderDynamicSection("education", <GraduationCap className="mr-3 h-6 w-6 text-purple-600" />, "Education", (field, index) => {
+                    {renderDynamicSection("education", <GraduationCap className="mr-3 h-5 w-5 text-purple-600" />, "Education", (field, index) => {
                         const isCurrent = formData.education?.[index]?.isCurrent || false;
                         return (
                             <>
@@ -672,7 +682,7 @@ const StudentProfileContent = ({ profile, isEditing, setIsEditing, hasProfile, o
                     <components.Separator />
 
                     {/* Work Experience Section */}
-                    {renderDynamicSection("experience", <Briefcase className="mr-3 h-6 w-6 text-cyan-600" />, "Work Experience", (field, index) => {
+                    {renderDynamicSection("experience", <Briefcase className="mr-3 h-5 w-5 text-cyan-600" />, "Work Experience", (field, index) => {
                         const isCurrent = formData.experience?.[index]?.isCurrent || false;
                         return (
                             <>
@@ -732,8 +742,8 @@ const StudentProfileContent = ({ profile, isEditing, setIsEditing, hasProfile, o
 
                     {/* Skills Section */}
                     <div className="space-y-4">
-                        <h3 className="flex items-center text-2xl font-bold text-gray-900">
-                            <Trophy className="mr-3 h-6 w-6 text-amber-600" /> Skills
+                        <h3 className="flex items-center text-xl font-bold text-gray-900">
+                            <Trophy className="mr-3 h-5 w-5 text-amber-600" /> Skills
                         </h3>
                         {isEditing ? (
                             <div className="flex space-x-2">
@@ -760,7 +770,7 @@ const StudentProfileContent = ({ profile, isEditing, setIsEditing, hasProfile, o
                                 (formData.skills || []).map((skill, index) => (
                                     <div
                                         key={index}
-                                        className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800"
+                                        className="inline-flex items-center rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 px-3 py-1 text-sm font-medium text-blue-800"
                                     >
                                         {skill.name}
                                         {isEditing && (
@@ -783,7 +793,7 @@ const StudentProfileContent = ({ profile, isEditing, setIsEditing, hasProfile, o
                                     </div>
                                 ))
                             ) : (
-                                !isEditing && <p className="text-gray-500 italic">No skills added yet.</p>
+                                !isEditing && <p className="text-gray-500 italic text-center py-4">No skills added yet.</p>
                             )}
                         </div>
                     </div>
@@ -791,11 +801,10 @@ const StudentProfileContent = ({ profile, isEditing, setIsEditing, hasProfile, o
 
                     {/* Location Section */}
                     <div className="space-y-4">
-                        <h3 className="flex items-center text-2xl font-bold text-gray-900">
-                            <MapPin className="mr-3 h-6 w-6 text-red-600" /> Location
+                        <h3 className="flex items-center text-xl font-bold text-gray-900">
+                            <MapPin className="mr-3 h-5 w-5 text-red-600" /> Location
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Add County Field */}
                             <div>
                                 <components.Label htmlFor="address.county">County</components.Label>
                                 {isEditing ? (
@@ -805,7 +814,7 @@ const StudentProfileContent = ({ profile, isEditing, setIsEditing, hasProfile, o
                                         value={formData.address?.county || "Kirinyaga"}
                                         onChange={handleChange}
                                         placeholder="County"
-                                        readOnly // Make it read-only since it's always Kirinyaga
+                                        readOnly
                                     />
                                 ) : (
                                     <p className="mt-2 text-gray-800 font-medium">{profile?.address?.county || "Kirinyaga"}</p>
@@ -877,13 +886,13 @@ const StudentProfileContent = ({ profile, isEditing, setIsEditing, hasProfile, o
                     
                     {/* Resume Upload Section */}
                     <div className="space-y-4">
-                        <h3 className="flex items-center text-2xl font-bold text-gray-900">
-                            <FileText className="mr-3 h-6 w-6 text-green-600" /> Resume
+                        <h3 className="flex items-center text-xl font-bold text-gray-900">
+                            <FileText className="mr-3 h-5 w-5 text-green-600" /> Resume
                         </h3>
                         {isEditing ? (
                             <div className="flex items-center space-x-4">
                                 <components.Label htmlFor="resume" className="cursor-pointer">
-                                    <span className="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+                                    <span className="inline-flex items-center rounded-xl border border-gray-200 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 hover:shadow-md">
                                         <Upload className="mr-2 h-5 w-5" /> Choose File
                                     </span>
                                     <input
@@ -904,56 +913,57 @@ const StudentProfileContent = ({ profile, isEditing, setIsEditing, hasProfile, o
                             </div>
                         ) : (
                            <p className="text-gray-500 italic">
-    {profile?.resumePath ? (
-        <a href={profile.resumePath} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">
-            View Resume
-        </a>
-    ) : "No resume uploaded yet."}
-</p>
-)}
-</div>
+                                {profile?.resumePath ? (
+                                    <a href={profile.resumePath} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800 transition-colors duration-200">
+                                        View Resume
+                                    </a>
+                                ) : "No resume uploaded yet."}
+                            </p>
+                        )}
+                    </div>
 
-{/* Action Buttons - Only show in edit mode */}
-{isEditing && (
-    <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-4 mt-8">
-        {hasProfile && (
-            <components.Button
-                type="button"
-                variant="secondary"
-                onClick={() => setIsEditing(false)}
-                disabled={isUpdating}
-            >
-                Cancel
-            </components.Button>
-        )}
-        <components.Button
-            type="submit"
-            variant="gradient"
-            disabled={isUpdating}
-        >
-            {isUpdating ? (
-                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {hasProfile ? "Updating..." : "Creating..."}</>
-            ) : (
-                hasProfile ? "Save Changes" : "Create Profile"
-            )}
-        </components.Button>
-    </div>
-)}
-</form>
+                    {/* Action Buttons - Only show in edit mode */}
+                    {isEditing && (
+                        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-4 mt-8">
+                            {hasProfile && (
+                                <components.Button
+                                    type="button"
+                                    variant="secondary"
+                                    onClick={() => setIsEditing(false)}
+                                    disabled={isUpdating}
+                                >
+                                    Cancel
+                                </components.Button>
+                            )}
+                            <components.Button
+                                type="submit"
+                                variant="primary"
+                                disabled={isUpdating}
+                                className="min-w-[140px]"
+                            >
+                                {isUpdating ? (
+                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {hasProfile ? "Updating..." : "Creating..."}</>
+                                ) : (
+                                    hasProfile ? "Save Changes" : "Create Profile"
+                                )}
+                            </components.Button>
+                        </div>
+                    )}
+                </form>
 
-{/* Show Edit Button when not in edit mode and profile exists */}
-{!isEditing && hasProfile && (
-    <div className="flex justify-end mt-8">
-        <components.Button
-            type="button"
-            variant="gradient"
-            onClick={() => setIsEditing(true)}
-        >
-            <Edit className="mr-2 h-4 w-4" /> Edit Profile
-        </components.Button>
-    </div>
-)}
-</components.CardContent>
-</div>
-);
+                {/* Show Edit Button when not in edit mode and profile exists */}
+                {!isEditing && hasProfile && (
+                    <div className="flex justify-end mt-8">
+                        <components.Button
+                            type="button"
+                            variant="primary"
+                            onClick={() => setIsEditing(true)}
+                        >
+                            <Edit className="mr-2 h-4 w-4" /> Edit Profile
+                        </components.Button>
+                    </div>
+                )}
+            </components.CardContent>
+        </div>
+    );
 };

@@ -2,209 +2,346 @@
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import CircularProgress from '@mui/material/CircularProgress';
-import Box from '@mui/material/Box';
-import LinearProgress from '@mui/material/LinearProgress';
-
 import {
   Home,
   Briefcase,
   User,
   Menu,
   X,
-  Building2,
-  Layers,
-  Sparkles,
-  ChevronRight,
   GraduationCap,
   Award,
-  BookOpen,
-  Send,
   CheckCircle,
   BriefcaseBusiness,
-  Mail,
-  Phone,
-  MapPin,
-  Calendar,
   Download,
-  ExternalLink,
-  Users,
-  MessageCircle
+  MessageCircle,
+  Rocket,
+  Zap,
+  HeartHandshake,
+  Star,
+  Calendar,
+  PlusCircle,
+  ArrowRight
 } from 'lucide-react';
 import Profile from "../components/studentprofile/page.jsx";
 import Jobistings from "../components/studentjobs/page.jsx";
 import EventsandNews from "../components/EventsandNews/page.jsx";
 
-// Sidebar component
-const Sidebar = ({ isSidebarOpen, toggleSidebar, setPage, session, activePage }) => {
-  const menuItems = [
-    { id: 'home', label: 'Dashboard', icon: Home },
-    { id: 'jobs', label: 'Job Listings', icon: Briefcase },
-    { id: 'events', label: 'Events', icon: Calendar },
-    { id: 'profile', label: 'My Profile', icon: User }
-  ];
+// Modern Loading Components
+const CircularLoader = () => (
+  <div className="relative w-14 h-14">
+    <div className="absolute inset-0 rounded-full border-4 border-indigo-100"></div>
+    <div className="absolute inset-0 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin"></div>
+  </div>
+);
+
+// Glassmorphism Card Component
+const GlassCard = ({ children, className = '' }) => (
+  <div className={`bg-white/80 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl shadow-gray-200 ${className}`}>
+    {children}
+  </div>
+);
+
+// Profile Creation Modal Component
+const CreateProfileModal = ({ isOpen, onClose, onCreateProfile }) => {
+  if (!isOpen) return null;
 
   return (
-    <div
-      className={`fixed inset-y-0 left-0 z-50 transform ${
-        isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } lg:translate-x-0 transition-transform duration-300 ease-in-out bg-gradient-to-b from-gray-900 to-gray-800 text-white w-64 lg:w-72 p-5 flex flex-col`}
-    >
-      {/* Sidebar Header */}
-      <div className="flex justify-between items-center mb-8">
-        <div className="flex items-center">
-          <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center mr-3">
-            <Briefcase size={20} />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <GlassCard className="w-full max-w-md p-8 mx-4">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <PlusCircle size={32} className="text-white" />
           </div>
-          <h1 className="text-xl font-bold text-white">CareerHub</h1>
-        </div>
-        <button
-          onClick={toggleSidebar}
-          className="lg:hidden text-gray-400 p-2 rounded-full hover:bg-gray-800 transition-colors"
-          aria-label="Close sidebar"
-        >
-          <X size={20} />
-        </button>
-      </div>
-      
-      {/* User Profile Summary */}
-      <div className="mb-8 p-4 bg-gray-800 rounded-lg">
-        <div className="flex items-center mb-3">
-          <div className="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center text-white font-semibold">
-            {session?.user?.name?.charAt(0) || 'U'}
-          </div>
-          <div className="ml-3">
-            <p className="font-semibold text-white">{session?.user?.name || 'User'}</p>
-            <p className="text-sm text-gray-400">{session?.user?.email}</p>
-          </div>
-        </div>
-      </div>
-      
-      {/* Navigation Links */}
-      <nav className="flex-grow">
-        <ul className="space-y-2">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <li key={item.id}>
-                <button
-                  onClick={() => setPage(item.id)}
-                  className={`w-full flex items-center p-3 rounded-lg transition-all duration-200 ${
-                    activePage === item.id
-                      ? 'bg-indigo-600 text-white shadow-lg'
-                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                  }`}
-                >
-                  <Icon size={20} className="mr-3" />
-                  <span className="font-medium">{item.label}</span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
 
-      {/* Footer */}
-      <div className="mt-auto pt-6 border-t border-gray-700">
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-400">© 2024 CareerHub</span>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Create Your Profile</h2>
+          <p className="text-gray-600 mb-6">
+            You need to create a profile to access all features of CareerHub. Let's get started!
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={onCreateProfile}
+              className="flex-1 flex items-center justify-center px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-600 transition-all shadow-lg"
+            >
+              Create Profile
+              <ArrowRight size={18} className="ml-2" />
+            </button>
+            <button
+              onClick={onClose}
+              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-all"
+            >
+              Later
+            </button>
+          </div>
         </div>
-      </div>
+      </GlassCard>
     </div>
   );
 };
 
+// Modern Sidebar Component
+const Sidebar = ({ isSidebarOpen, toggleSidebar, setPage, session, activePage, hasProfile }) => {
+  const menuItems = [
+    { id: 'home', label: 'Dashboard', icon: Home, color: 'text-indigo-500' },
+    { id: 'jobs', label: 'Job Listings', icon: Briefcase, color: 'text-blue-500' },
+    { id: 'events', label: 'Events', icon: HeartHandshake, color: 'text-green-500' },
+    { id: 'profile', label: 'My Profile', icon: User, color: 'text-purple-500' }
+  ];
+
+  const handleMenuItemClick = (id) => {
+    setPage(id);
+    toggleSidebar(); // Close sidebar on click
+  };
+
+  return (
+    <>
+      {/* Mobile Overlay */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 lg:hidden"
+          onClick={toggleSidebar}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`
+        fixed inset-y-0 left-0 z-50 transform 
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:translate-x-0 transition-all duration-300 ease-in-out 
+        w-80 p-6 flex flex-col
+        bg-gray-900 
+        border-r border-gray-700/50
+        shadow-2xl
+      `}>
+        {/* Sidebar Header */}
+        <div className="flex justify-between items-center mb-10">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
+              <Rocket size={22} className="text-white" />
+            </div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+              CareerHub
+            </h1>
+          </div>
+          <button
+            onClick={toggleSidebar}
+            className="lg:hidden p-2 rounded-xl hover:bg-gray-700/50 transition-all"
+          >
+            <X size={20} className="text-gray-400" />
+          </button>
+        </div>
+
+        {/* User Profile */}
+        <div className="p-5 mb-8 bg-gray-800 rounded-2xl shadow-xl shadow-gray-700">
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <div className="w-14 h-14 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                {session?.user?.name?.charAt(0) || 'U'}
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-gray-900"></div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-white truncate">{session?.user?.name || 'User'}</p>
+              <p className="text-sm text-gray-400 truncate">{session?.user?.email}</p>
+              <div className="flex items-center mt-1">
+                <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                <span className="text-xs text-gray-400">Online</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-grow space-y-2">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleMenuItemClick(item.id)}
+                disabled={!hasProfile && item.id !== 'profile'}
+                className={`
+                  w-full flex items-center p-4 rounded-xl transition-all duration-200
+                  ${activePage === item.id
+                    ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg'
+                    : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                  }
+                  ${!hasProfile && item.id !== 'profile' ? 'opacity-50 cursor-not-allowed' : ''}
+                `}
+              >
+                <Icon size={22} className={`${activePage === item.id ? 'text-white' : item.color} mr-4`} />
+                <span className="font-medium">{item.label}</span>
+                {activePage === item.id && (
+                  <div className="ml-auto w-2 h-2 bg-white rounded-full"></div>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Footer */}
+        <div className="mt-auto pt-6 border-t border-gray-700/50">
+          <div className="text-center">
+            <span className="text-xs text-gray-500">CareerHub v2.0</span>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+// Modern Header Component
 const Header = ({ toggleSidebar, studentProfile }) => {
   return (
-    <header className="sticky top-0 z-40 bg-white p-4 shadow-sm lg:shadow-md lg:px-6 flex items-center justify-between">
-      <div className="flex items-center">
-        <button onClick={toggleSidebar} className="lg:hidden p-2 rounded-full hover:bg-gray-100 mr-3" aria-label="Open sidebar">
-          <Menu size={24} />
+    <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-200/50 p-4 lg:px-8 flex items-center justify-between">
+      <div className="flex items-center space-x-4">
+        <button
+          onClick={toggleSidebar}
+          className="p-2 rounded-xl hover:bg-gray-100 transition-all lg:hidden"
+        >
+          <Menu size={24} className="text-gray-600" />
         </button>
+
         <h1 className="text-xl font-bold text-gray-800">Student Dashboard</h1>
       </div>
-      {studentProfile && (
-        <div className="hidden md:flex items-center space-x-4">
-          {studentProfile.resumePath && (
-            <a
-              href={studentProfile.resumePath}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-            >
-              <Download size={16} className="mr-2" />
-              Resume
-            </a>
-          )}
+
+      <div className="flex items-center space-x-4">
+        {/* Resume Download - Only show if profile exists */}
+        {studentProfile?.resumePath && (
+          <a
+            href={studentProfile.resumePath}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center px-5 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl hover:from-indigo-600 hover:to-purple-600 transition-all shadow-lg hover:shadow-xl"
+          >
+            <Download size={18} className="mr-2" />
+            Resume
+          </a>
+        )}
+
+        {/* User Quick Menu */}
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-xl flex items-center justify-center text-white font-semibold shadow-lg">
+            {studentProfile?.name?.charAt(0) || 'U'}
+          </div>
         </div>
-      )}
+      </div>
     </header>
   );
 };
 
+// Modern Stat Card Component
 const StatCard = ({ title, value, icon: Icon, color }) => (
-  <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
+  <div className="p-6 bg-white rounded-2xl shadow-xl shadow-gray-200 hover:scale-[1.02] transition-transform duration-200">
     <div className="flex items-center justify-between">
       <div>
-        <p className="text-sm text-gray-600">{title}</p>
-        <p className="text-2xl font-bold text-gray-800">{value}</p>
+        <p className="text-sm text-gray-600 font-medium mb-2">{title}</p>
+        <p className="text-3xl font-bold text-gray-800">{value}</p>
       </div>
-      <div className={`p-3 rounded-full ${color}`}>
+      <div className={`p-4 rounded-xl ${color} shadow-lg`}>
         <Icon size={24} className="text-white" />
       </div>
     </div>
   </div>
 );
 
-const InfoCard = ({ title, icon: Icon, children, className = '' }) => (
-  <div className={`bg-white p-6 rounded-xl shadow-lg border border-gray-100 ${className}`}>
-    <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-      <Icon size={20} className="mr-2 text-indigo-500" />
-      {title}
-    </h3>
+// Modern Info Card Component
+const InfoCard = ({ title, icon: Icon, children, className = '', action }) => (
+  <div className={`p-6 bg-white rounded-2xl shadow-xl shadow-gray-200 ${className}`}>
+    <div className="flex items-center justify-between mb-6">
+      <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+        <Icon size={20} className="mr-3 text-indigo-500" />
+        {title}
+      </h3>
+      {action && (
+        <button className="text-indigo-500 hover:text-indigo-600 transition-colors">
+          <ArrowRight size={18} />
+        </button>
+      )}
+    </div>
     {children}
   </div>
 );
 
-// Loading component with Material-UI spinner
+// Modern Loading Component
 const ProfileLoading = () => (
-  <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-    <CircularProgress size={60} thickness={4} className="text-indigo-600" />
-    <div className="text-center">
-      <p className="text-lg font-semibold text-gray-700">Loading your profile</p>
-      <p className="text-sm text-gray-500 mt-1">Please wait while we fetch your information</p>
+  <div className="flex flex-col items-center justify-center min-h-[400px] space-y-6">
+    <CircularLoader />
+    <div className="text-center space-y-2">
+      <p className="text-lg font-semibold text-gray-700">Loading your career dashboard</p>
+      <p className="text-sm text-gray-500">Preparing your personalized experience</p>
     </div>
-    <Box sx={{ width: '60%', maxWidth: 300 }}>
-      <LinearProgress />
-    </Box>
+    <div className="w-60 h-2 bg-gray-200 rounded-full overflow-hidden">
+      <div className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 animate-pulse"></div>
+    </div>
   </div>
 );
 
-const HomeDashboard = ({ studentProfile, basicProfile, setPage, loadingProfile }) => {
+// Empty State Component for users without profile
+const EmptyDashboard = ({ onCreateProfile }) => (
+  <div className="p-6 lg:p-8 flex items-center justify-center min-h-[60vh]">
+    <div className="w-full max-w-2xl p-8 text-center bg-white rounded-2xl shadow-xl shadow-gray-200">
+      <div className="w-20 h-20 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-2xl flex items-center justify-center mx-auto mb-6">
+        <Rocket size={32} className="text-white" />
+      </div>
+
+      <h2 className="text-2xl font-bold text-gray-800 mb-4">Welcome to CareerHub!</h2>
+      <p className="text-gray-600 mb-6 max-w-md mx-auto">
+        Get started by creating your professional profile. Showcase your skills, education, and experience to potential employers.
+      </p>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="p-4 bg-blue-50 rounded-xl">
+          <Briefcase className="w-8 h-8 text-blue-500 mx-auto mb-2" />
+          <p className="text-sm font-medium text-gray-800">Job Opportunities</p>
+        </div>
+        <div className="p-4 bg-purple-50 rounded-xl">
+          <GraduationCap className="w-8 h-8 text-purple-500 mx-auto mb-2" />
+          <p className="text-sm font-medium text-gray-800">Showcase Education</p>
+        </div>
+        <div className="p-4 bg-indigo-50 rounded-xl">
+          <Award className="w-8 h-8 text-indigo-500 mx-auto mb-2" />
+          <p className="text-sm font-medium text-gray-800">Highlight Achievements</p>
+        </div>
+      </div>
+
+      <button
+        onClick={onCreateProfile}
+        className="px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-600 transition-all shadow-lg hover:shadow-xl flex items-center justify-center mx-auto"
+      >
+        Create Your Profile
+        <ArrowRight size={20} className="ml-2" />
+      </button>
+    </div>
+  </div>
+);
+
+// Modern Home Dashboard Component
+const HomeDashboard = ({ studentProfile, basicProfile, setPage, loadingProfile, onCreateProfile }) => {
   const stats = [
     {
       title: 'Achievements',
       value: studentProfile?.achievements?.length || 0,
       icon: Award,
-      color: 'bg-purple-500'
+      color: 'bg-gradient-to-r from-purple-500 to-pink-500'
     },
     {
       title: 'Education',
       value: studentProfile?.education?.length || 0,
       icon: GraduationCap,
-      color: 'bg-blue-500'
+      color: 'bg-gradient-to-r from-blue-500 to-cyan-500'
     },
     {
       title: 'Experience',
       value: studentProfile?.experience?.length || 0,
       icon: BriefcaseBusiness,
-      color: 'bg-yellow-500'
+      color: 'bg-gradient-to-r from-amber-500 to-orange-500'
     },
     {
       title: 'Certifications',
       value: studentProfile?.certifications?.length || 0,
       icon: CheckCircle,
-      color: 'bg-green-500'
+      color: 'bg-gradient-to-r from-green-500 to-emerald-500'
     }
   ];
 
@@ -216,16 +353,28 @@ const HomeDashboard = ({ studentProfile, basicProfile, setPage, loadingProfile }
     );
   }
 
+  // Show empty state if no profile exists
+  if (!studentProfile) {
+    return <EmptyDashboard onCreateProfile={onCreateProfile} />;
+  }
+
   return (
     <div className="p-6 lg:p-8 space-y-8">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-8 rounded-2xl text-white">
-        <h1 className="text-3xl font-bold mb-2">
-          Welcome back, {basicProfile?.name || 'Student'}!
-        </h1>
-        <p className="text-indigo-100">
-          {studentProfile?.summary || 'Complete your profile to unlock more opportunities'}
-        </p>
+      <div className="p-8 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white rounded-2xl shadow-xl shadow-purple-200">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">
+              Welcome back, {basicProfile?.name || 'Future Leader'}! 👋
+            </h1>
+            <p className="text-indigo-100 opacity-90">
+              {studentProfile?.summary || 'Your journey to career success starts here. Complete your profile to unlock opportunities.'}
+            </p>
+          </div>
+          <div className="hidden lg:block">
+            <Rocket size={48} className="text-white/20" />
+          </div>
+        </div>
       </div>
 
       {/* Stats Grid */}
@@ -240,25 +389,25 @@ const HomeDashboard = ({ studentProfile, basicProfile, setPage, loadingProfile }
         {/* Left Column */}
         <div className="lg:col-span-2 space-y-6">
           {/* Personal Information */}
-          <InfoCard title="Personal Information" icon={User}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <InfoCard title="Personal Information" icon={User} action>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-1">
-                <p className="text-sm text-gray-500">Full Name</p>
-                <p className="font-medium">{basicProfile?.name || 'Not provided'}</p>
+                <p className="text-sm text-gray-500 font-medium">Full Name</p>
+                <p className="font-semibold text-gray-800">{basicProfile?.name || 'Not provided'}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm text-gray-500">Email</p>
-                <p className="font-medium">{basicProfile?.email || 'Not provided'}</p>
+                <p className="text-sm text-gray-500 font-medium">Email</p>
+                <p className="font-semibold text-gray-800">{basicProfile?.email || 'Not provided'}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm text-gray-500">Bio</p>
-                <p className="font-medium">{studentProfile?.bio || 'Not provided'}</p>
+                <p className="text-sm text-gray-500 font-medium">Bio</p>
+                <p className="font-semibold text-gray-800">{studentProfile?.bio || 'Not provided'}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm text-gray-500">Location</p>
-                <p className="font-medium">
+                <p className="text-sm text-gray-500 font-medium">Location</p>
+                <p className="font-semibold text-gray-800">
                   {studentProfile?.address ? (
-                    `${studentProfile.address.details || ''}, ${studentProfile.address.ward || ''}, ${studentProfile.address.subCounty || ''}, ${studentProfile.address.county || ''}`
+                    `${studentProfile.address.details || ''}, ${studentProfile.address.ward || ''}`
                   ) : (
                     'Not provided'
                   )}
@@ -268,121 +417,160 @@ const HomeDashboard = ({ studentProfile, basicProfile, setPage, loadingProfile }
           </InfoCard>
 
           {/* Education & Experience */}
-          <InfoCard title="Education & Experience" icon={GraduationCap}>
+          <InfoCard title="Education & Experience" icon={GraduationCap} action>
             <div className="space-y-4">
-              {studentProfile?.education?.map((edu, index) => (
-                <div key={index} className="border-l-4 border-indigo-400 pl-4 py-2">
-                  <p className="font-semibold">{edu.degree} in {edu.fieldOfStudy}</p>
-                  <p className="text-sm text-gray-600">{edu.school}</p>
-                  <p className="text-sm text-gray-500">
-                    {edu.graduationYear} {edu.isCurrent && '(Current)'}
-                  </p>
+              {studentProfile?.education?.slice(0, 2).map((edu, index) => (
+                <div key={index} className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl shadow-sm">
+                  <div className="w-12 h-12 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center">
+                    <GraduationCap size={24} className="text-blue-500" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-gray-800">{edu.degree} in {edu.fieldOfStudy}</p>
+                    <p className="text-sm text-gray-600">{edu.school}</p>
+                    <p className="text-sm text-gray-500">
+                      {edu.graduationYear} {edu.isCurrent && '(Current)'}
+                    </p>
+                  </div>
                 </div>
               ))}
-              {studentProfile?.experience?.map((exp, index) => (
-                <div key={index} className="border-l-4 border-blue-400 pl-4 py-2">
-                  <p className="font-semibold">{exp.title}</p>
-                  <p className="text-sm text-gray-600">{exp.company}</p>
-                  <p className="text-sm text-gray-500">
-                    {new Date(exp.startDate).toLocaleDateString()} -{' '}
-                    {exp.isCurrent ? 'Present' : new Date(exp.endDate).toLocaleDateString()}
-                  </p>
-                  {exp.description && (
-                    <p className="text-sm text-gray-600 mt-1">{exp.description}</p>
-                  )}
+              {studentProfile?.experience?.slice(0, 2).map((exp, index) => (
+                <div key={index} className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl shadow-sm">
+                  <div className="w-12 h-12 bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl flex items-center justify-center">
+                    <BriefcaseBusiness size={24} className="text-green-500" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-gray-800">{exp.title}</p>
+                    <p className="text-sm text-gray-600">{exp.company}</p>
+                    <p className="text-sm text-gray-500">
+                      {exp.startDate ? new Date(exp.startDate).toLocaleDateString() : 'N/A'} -{' '}
+                      {exp.isCurrent ? 'Present' : (exp.endDate ? new Date(exp.endDate).toLocaleDateString() : 'N/A')}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
           </InfoCard>
         </div>
-        
+
         {/* Right Column */}
         <div className="space-y-6">
-          {/* Achievements */}
-          <InfoCard title="Achievements" icon={Award}>
-            <ul className="space-y-2">
-              {studentProfile?.achievements?.map((ach, index) => (
-                <li key={index} className="flex items-center">
-                  <ChevronRight size={16} className="text-indigo-400 mr-2" />
-                  <span>{ach.name}</span>
-                </li>
-              ))}
-            </ul>
-          </InfoCard>
-
-          {/* Certifications */}
-          <InfoCard title="Certifications" icon={BookOpen}>
-            <ul className="space-y-2">
-              {studentProfile?.certifications?.map((cert, index) => (
-                <li key={index} className="flex items-center">
-                  <ChevronRight size={16} className="text-indigo-400 mr-2" />
-                  <span>{cert.name}</span>
-                </li>
-              ))}
-            </ul>
-          </InfoCard>
-
           {/* Quick Actions */}
-          <InfoCard title="Quick Actions" icon={Sparkles}>
+          <InfoCard title="Quick Actions" icon={Zap}>
             <div className="space-y-3">
               <button
                 onClick={() => setPage('profile')}
-                className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl hover:from-indigo-100 hover:to-purple-100 transition-all group shadow-sm"
               >
-                <span>Update Profile</span>
-                <ChevronRight size={16} />
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center mr-3">
+                    <User size={18} className="text-white" />
+                  </div>
+                  <span className="font-medium text-gray-800">Update Profile</span>
+                </div>
+                <ArrowRight size={18} className="text-gray-400 group-hover:text-indigo-500" />
               </button>
               <button
                 onClick={() => setPage('jobs')}
-                className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl hover:from-blue-100 hover:to-cyan-100 transition-all group shadow-sm"
               >
-                <span>Browse Jobs</span>
-                <ChevronRight size={16} />
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center mr-3">
+                    <Briefcase size={18} className="text-white" />
+                  </div>
+                  <span className="font-medium text-gray-800">Browse Jobs</span>
+                </div>
+                <ArrowRight size={18} className="text-gray-400 group-hover:text-blue-500" />
               </button>
               <button
                 onClick={() => setPage('events')}
-                className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl hover:from-green-100 hover:to-emerald-100 transition-all group shadow-sm"
               >
-                <span>View Events</span>
-                <ChevronRight size={16} />
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center mr-3">
+                    <Calendar size={18} className="text-white" />
+                  </div>
+                  <span className="font-medium text-gray-800">View Events</span>
+                </div>
+                <ArrowRight size={18} className="text-gray-400 group-hover:text-green-500" />
               </button>
             </div>
           </InfoCard>
 
-          {/* WhatsApp Connect */}
-          <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 rounded-xl text-white">
-            <div className="flex items-center mb-3">
-              <MessageCircle size={24} className="mr-2" />
-              <h3 className="font-semibold">Student Network</h3>
+          {/* Community Connect */}
+          <div className="p-6 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-2xl shadow-xl shadow-green-200">
+            <div className="flex items-center mb-4">
+              <HeartHandshake size={24} className="mr-3" />
+              <h3 className="font-semibold">Student Community</h3>
             </div>
             <p className="text-green-100 mb-4 text-sm">
-              Connect with fellow students and get real-time updates
+              Join 2,500+ students networking and sharing opportunities
             </p>
             <a
               href="https://chat.whatsapp.com/your-group-link"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full flex items-center justify-center py-2 bg-white text-green-600 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+              className="w-full flex items-center justify-center py-3 bg-white text-green-600 rounded-xl font-semibold hover:bg-gray-50 transition-all shadow-lg"
             >
-              Join WhatsApp Group
+              <MessageCircle size={18} className="mr-2" />
+              Join Community
             </a>
           </div>
+
+          {/* Recent Activity */}
+          <InfoCard title="Recent Activity" icon={Star}>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-xl shadow-sm">
+                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                  <CheckCircle size={16} className="text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-800">Profile updated</p>
+                  <p className="text-xs text-gray-500">2 hours ago</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-xl shadow-sm">
+                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                  <Briefcase size={16} className="text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-800">New job matches</p>
+                  <p className="text-xs text-gray-500">5 hours ago</p>
+                </div>
+              </div>
+            </div>
+          </InfoCard>
         </div>
       </div>
     </div>
   );
 };
 
-// Main App component
+// Main App Component
 const App = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Default to closed on small screens
   const [page, setPage] = useState('home');
   const [studentProfile, setStudentProfile] = useState(null);
   const [basicProfile, setBasicProfile] = useState(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [error, setError] = useState(null);
+  const [showCreateProfileModal, setShowCreateProfileModal] = useState(false);
+
+  // Effect to handle initial sidebar state on different screen sizes
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) { // 'lg' breakpoint
+        setIsSidebarOpen(true);
+      } else {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    handleResize(); // Set initial state
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -390,30 +578,29 @@ const App = () => {
       return;
     }
 
-    if (status === 'authenticated' && session?.user?.id) {
+    if (status === 'authenticated' && session?.user?.id && session?.user?.role === 'STUDENT') {
       const fetchProfiles = async () => {
         setLoadingProfile(true);
         setError(null);
         try {
-          // Fetch detailed student profile from the new API endpoint
           const profileRes = await fetch(`/api/studententireprofile/${session.user.id}`);
-          
+
           if (!profileRes.ok) {
             if (profileRes.status === 404) {
-              // Profile doesn't exist yet, that's okay
               setStudentProfile(null);
+              setShowCreateProfileModal(true);
             } else {
               throw new Error(`Failed to fetch profile: ${profileRes.status}`);
             }
           } else {
             const profileData = await profileRes.json();
             setStudentProfile(profileData);
+            setShowCreateProfileModal(false);
           }
 
-          // Set basic profile from session
           setBasicProfile({
             name: session.user.name,
-            email: session.user.email
+            email: session.user.email,
           });
 
         } catch (error) {
@@ -424,6 +611,8 @@ const App = () => {
         }
       };
       fetchProfiles();
+    } else if (status === 'authenticated' && session?.user?.role !== 'STUDENT') {
+      router.push('/studentlogin');
     }
   }, [status, router, session]);
 
@@ -431,9 +620,14 @@ const App = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  const handleCreateProfile = () => {
+    setShowCreateProfileModal(false);
+    setPage('profile');
+  };
+
   const renderPage = () => {
     if (loadingProfile && page === 'home') {
-      return <HomeDashboard studentProfile={studentProfile} basicProfile={basicProfile} setPage={setPage} loadingProfile={loadingProfile} />;
+      return <HomeDashboard studentProfile={studentProfile} basicProfile={basicProfile} setPage={setPage} loadingProfile={loadingProfile} onCreateProfile={handleCreateProfile} />;
     }
 
     if (error) {
@@ -446,10 +640,10 @@ const App = () => {
         </div>
       );
     }
-    
+
     switch (page) {
       case 'home':
-        return <HomeDashboard studentProfile={studentProfile} basicProfile={basicProfile} setPage={setPage} loadingProfile={loadingProfile} />;
+        return <HomeDashboard studentProfile={studentProfile} basicProfile={basicProfile} setPage={setPage} loadingProfile={loadingProfile} onCreateProfile={handleCreateProfile} />;
       case 'jobs':
         return <Jobistings title="Job Listings" />;
       case 'events':
@@ -457,16 +651,19 @@ const App = () => {
       case 'profile':
         return <Profile studentProfile={studentProfile} basicProfile={basicProfile} title="My Profile" />;
       default:
-        return <HomeDashboard studentProfile={studentProfile} basicProfile={basicProfile} setPage={setPage} loadingProfile={loadingProfile} />;
+        return <HomeDashboard studentProfile={studentProfile} basicProfile={basicProfile} setPage={setPage} loadingProfile={loadingProfile} onCreateProfile={handleCreateProfile} />;
     }
   };
 
   if (status === 'loading') {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-center">
-          <CircularProgress size={60} thickness={4} className="text-indigo-600" />
-          <p className="mt-4 text-lg font-semibold text-gray-700">Loading dashboard...</p>
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
+        <div className="text-center space-y-6">
+          <CircularLoader />
+          <div>
+            <p className="text-xl font-semibold text-gray-700">Launching CareerHub</p>
+            <p className="text-gray-500 mt-2">Preparing your professional dashboard</p>
+          </div>
         </div>
       </div>
     );
@@ -474,26 +671,28 @@ const App = () => {
 
   if (status === 'authenticated') {
     return (
-      <div className="flex min-h-screen bg-gray-50 font-sans text-gray-800 overflow-hidden">
-        <Sidebar 
-          isSidebarOpen={isSidebarOpen} 
-          toggleSidebar={toggleSidebar} 
-          setPage={setPage} 
-          session={session} 
+      <div className="flex min-h-screen bg-white font-sans text-gray-800">
+        <Sidebar
+          isSidebarOpen={isSidebarOpen}
+          toggleSidebar={toggleSidebar}
+          setPage={setPage}
+          session={session}
           activePage={page}
+          hasProfile={!!studentProfile}
         />
-        <div className="flex-grow lg:ml-72">
+        <div className="flex-grow lg:ml-80">
           <Header toggleSidebar={toggleSidebar} studentProfile={studentProfile} />
-          <main className="min-h-screen">
+          <main className="min-h-screen px-3 md:px-[3%] lg:px-[7%]">
             {renderPage()}
           </main>
         </div>
-        {isSidebarOpen && (
-          <div
-            onClick={toggleSidebar}
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          ></div>
-        )}
+
+        {/* Create Profile Modal */}
+        <CreateProfileModal
+          isOpen={showCreateProfileModal}
+          onClose={() => setShowCreateProfileModal(false)}
+          onCreateProfile={handleCreateProfile}
+        />
       </div>
     );
   }

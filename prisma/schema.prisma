@@ -130,7 +130,7 @@ model StudentEntireProfile {
   id                 String          @id @default(auto()) @map("_id") @db.ObjectId
   userId             String          @unique @db.ObjectId // Foreign key to User
   user               User            @relation(fields: [userId], references: [id])
-
+  email              String?
   name               String
   bio                String?
   summary            String?

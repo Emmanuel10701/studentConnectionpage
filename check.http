@@ -1,53 +1,54 @@
 ### POST Create a New Student Profile for Alice Mwangi
 POST http://localhost:3000/api/studententireprofile
-Content-Type: multipart/form-data; boundary=myboundary
+Content-Type: multipart/form-data; boundary=MyBoundary
 
---myboundary
+--MyBoundary
 Content-Disposition: form-data; name="userId"
 
 68a8c852e4222a5d2ab76066
---myboundary
+--MyBoundary
 Content-Disposition: form-data; name="name"
 
 Alice Mwangi
---myboundary
+--MyBoundary
 Content-Disposition: form-data; name="bio"
 
 A passionate Computer Science student from the University of Nairobi, specializing in web development and data analytics.
---myboundary
+--MyBoundary
 Content-Disposition: form-data; name="summary"
 
 Seeking a challenging internship to apply my skills in Python, JavaScript, and cloud computing.
---myboundary
+--MyBoundary
 Content-Disposition: form-data; name="skills"
 
 ["Python", "JavaScript", "SQL", "React", "Node.js", "MongoDB"]
---myboundary
+--MyBoundary
 Content-Disposition: form-data; name="address"
 
 {"county": "Nairobi", "subCounty": "Westlands", "ward": "Kangemi", "details": "123 Park Avenue"}
---myboundary
+--MyBoundary
 Content-Disposition: form-data; name="education"
 
 [{"school": "University of Nairobi", "degree": "Bachelor of Science", "fieldOfStudy": "Computer Science", "graduationYear": 2026, "isCurrent": true}]
---myboundary
+--MyBoundary
 Content-Disposition: form-data; name="experience"
 
 [{"title": "Data Analyst Intern", "company": "Tech Solutions Ltd.", "startDate": "2024-06-01T00:00:00.000Z", "endDate": null, "isCurrent": true, "description": "Assisted in data collection and analysis for various projects, creating reports and dashboards."}]
---myboundary
+--MyBoundary
 Content-Disposition: form-data; name="achievements"
 
 ["Dean's List for Academic Excellence (2024)"]
---myboundary
+--MyBoundary
 Content-Disposition: form-data; name="certifications"
 
 ["Google Data Analytics Professional Certificate"]
---myboundary
+--MyBoundary
 Content-Disposition: form-data; name="resume"; filename="resume.pdf"
 Content-Type: application/pdf
 
-< your_local_file_path/alice_mwangi_resume.pdf
---myboundary--
+< ./files/alice_mwangi_resume.pdf
+--MyBoundary--
+
 
 ### POST Create a New Student Profile for Brian Otieno
 POST http://localhost:3000/api/studententireprofile

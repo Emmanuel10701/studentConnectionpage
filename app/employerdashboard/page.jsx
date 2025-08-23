@@ -355,13 +355,16 @@ const App = () => {
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-2">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-bold text-gray-900">Recent Students</h2>
-                  <button className="text-blue-600 text-sm font-medium flex items-center">
+                  <button
+                    className="text-blue-600 text-sm font-medium flex items-center"
+                    onClick={() => setActiveSection('TalentSearch')}
+                  >
                     View all <ChevronRight className="h-4 w-4 ml-1" />
                   </button>
                 </div>
                 <div className="space-y-4">
                   {students.slice(0, 3).map(student => (
-                    <div key={student.id} className="flex items-center p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer" onClick={() => setSelectedStudent(student)}>
+                    <div key={student.id} className="flex items-center p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer" onClick={() => setActiveSection('TalentSearch')}>
                       <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
                         <User className="h-6 w-6 text-blue-600" />
                       </div>
@@ -381,7 +384,10 @@ const App = () => {
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-bold text-gray-900">Active Jobs</h2>
-                  <button className="text-blue-600 text-sm font-medium flex items-center">
+                  <button
+                    className="text-blue-600 text-sm font-medium flex items-center"
+                    onClick={() => setActiveSection('JobPostings')}
+                  >
                     View all <ChevronRight className="h-4 w-4 ml-1" />
                   </button>
                 </div>
@@ -395,7 +401,7 @@ const App = () => {
                           {job.applicants?.length || 0} applicants
                         </span>
                         <button 
-                          onClick={() => handleViewApplicants(job)}
+                          onClick={() => setActiveSection('JobPostings')}
                           className="text-blue-600 text-sm font-medium"
                         >
                           View
@@ -411,7 +417,10 @@ const App = () => {
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-gray-900">Upcoming Events</h2>
-                <button className="text-blue-600 text-sm font-medium flex items-center">
+                <button
+                  className="text-blue-600 text-sm font-medium flex items-center"
+                  onClick={() => setActiveSection('News and Events')}
+                >
                   View all <ChevronRight className="h-4 w-4 ml-1" />
                 </button>
               </div>

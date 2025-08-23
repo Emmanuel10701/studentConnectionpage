@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -6,7 +7,7 @@ import {
   Briefcase, Users, Building2, Edit, Save, Mail, Phone, Globe,
   MapPin, ClipboardList, Fingerprint, Calendar, CreditCard,
   Building, Link, FileText, AlertCircle, CheckCircle, XCircle,
-  Upload, Eye, Shield, TrendingUp, BarChart3, HeartHandshake, Zap, Target, Loader2, X, ChevronDown 
+  Upload, Eye, Shield, TrendingUp, BarChart3, HeartHandshake, Zap, Target, Loader2, X, ChevronDown, Clock
 } from 'lucide-react';
 
 const INDUSTRY_OPTIONS = [
@@ -14,6 +15,39 @@ const INDUSTRY_OPTIONS = [
   'Manufacturing', 'Retail', 'Hospitality', 'Construction',
   'Media & Entertainment', 'Other'
 ];
+
+// Function to calculate profile completion percentage
+const calculateCompletion = (profile) => {
+  const requiredFields = [
+    'name', 'industry', 'description', 'companySize', 
+    'email', 'phone', 'website', 'city', 'country'
+  ];
+  
+  const completedFields = requiredFields.filter(field => {
+    const value = profile[field];
+    return value !== undefined && value !== null && value !== '';
+  }).length;
+  
+  return Math.round((completedFields / requiredFields.length) * 100);
+};
+
+// Function to format date relative to now
+const formatRelativeTime = (dateString) => {
+  if (!dateString) return 'Never updated';
+  
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now - date) / 1000);
+  
+  if (diffInSeconds < 60) return 'Just now';
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 604800)} weeks ago`;
+  if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)} months ago`;
+  
+  return `${Math.floor(diffInSeconds / 31536000)} years ago`;
+};
 
 const CompanyProfile = () => {
   const { data: session, status } = useSession();
@@ -44,7 +78,8 @@ const CompanyProfile = () => {
     linkedin: '',
     twitter: '',
     facebook: '',
-    instagram: ''
+    instagram: '',
+    lastUpdated: ''
   });
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -54,7 +89,15 @@ const CompanyProfile = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [logoPreview, setLogoPreview] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [completionPercentage, setCompletionPercentage] = useState(0);
+  const [lastUpdatedText, setLastUpdatedText] = useState('');
   const formRef = useRef(null);
+
+  // Update completion percentage and last updated text when profile changes
+  useEffect(() => {
+    setCompletionPercentage(calculateCompletion(profile));
+    setLastUpdatedText(formatRelativeTime(profile.lastUpdated));
+  }, [profile]);
 
   // Fetch company profile from API
   useEffect(() => {
@@ -143,13 +186,17 @@ const handleSubmit = async (e) => {
 
   try {
     let response;
+    const updatedProfile = {
+      ...profile,
+      lastUpdated: new Date().toISOString()
+    };
     
     if (hasProfile && profile.id) {
       // PUT request - include company ID in the URL
       const apiEndpoint = `/api/company/${profile.id}`;
       
       // Prepare data without the id field for the update
-      const { id, ...updateData } = profile;
+      const { id, ...updateData } = updatedProfile;
       
       response = await fetch(apiEndpoint, {
         method: 'PUT',
@@ -166,7 +213,7 @@ const handleSubmit = async (e) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...profile,
+          ...updatedProfile,
           userId: userId
         }),
       });
@@ -190,40 +237,47 @@ const handleSubmit = async (e) => {
   }
 };
 
-
-  const Field = ({ label, name, type = 'text', icon: Icon, isTextArea = false, placeholder = "", color = "text-blue-500" }) => (
-    <div className="mb-5">
-      <div className="flex items-center text-gray-700 font-medium mb-2">
-        {Icon && <Icon size={18} className={`mr-2 ${color}`} />}
-        <span className={`text-base font-semibold ${color.replace('500', '700')}`}>{label}</span>
-      </div>
-      {isEditing ? (
-        isTextArea ? (
-          <textarea
-            name={name}
-            value={profile[name] || ''}
-            onChange={handleProfileChange}
-            className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base resize-y bg-gray-50"
-            rows="3"
-            placeholder={placeholder}
-          />
+  const Field = ({ label, name, type = 'text', icon: Icon, isTextArea = false, placeholder = "", color = "text-blue-500", required = false }) => {
+    const fieldValue = profile[name] || '';
+    const isCompleted = required && fieldValue !== '';
+    
+    return (
+      <div className="mb-5">
+        <div className="flex items-center text-gray-700 font-medium mb-2">
+          {Icon && <Icon size={18} className={`mr-2 ${color}`} />}
+          <span className={`text-base font-semibold ${color.replace('500', '700')}`}>{label}</span>
+          {required && isCompleted && (
+            <CheckCircle size={16} className="ml-2 text-green-500" />
+          )}
+        </div>
+        {isEditing ? (
+          isTextArea ? (
+            <textarea
+              name={name}
+              value={fieldValue}
+              onChange={handleProfileChange}
+              className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base resize-y bg-gray-50"
+              rows="3"
+              placeholder={placeholder}
+            />
+          ) : (
+            <input
+              type={type}
+              name={name}
+              value={fieldValue}
+              onChange={handleProfileChange}
+              className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
+              placeholder={placeholder}
+            />
+          )
         ) : (
-          <input
-            type={type}
-            name={name}
-            value={profile[name] || ''}
-            onChange={handleProfileChange}
-            className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
-            placeholder={placeholder}
-          />
-        )
-      ) : (
-        <p className={`text-gray-700 text-base break-words p-2 rounded-lg ${!profile[name] ? 'text-gray-400 italic' : 'bg-gray-50'}`}>
-          {profile[name] || 'Not specified'}
-        </p>
-      )}
-    </div>
-  );
+          <p className={`text-gray-700 text-base break-words p-2 rounded-lg ${!fieldValue ? 'text-gray-400 italic' : 'bg-gray-50'}`}>
+            {fieldValue || 'Not specified'}
+          </p>
+        )}
+      </div>
+    );
+  };
 
   if (loading || status === 'loading') {
     return (
@@ -481,12 +535,14 @@ const handleSubmit = async (e) => {
                         name="name" 
                         icon={Building2} 
                         placeholder="Enter your company name"
+                        required={true}
                       />
                       
                       <div>
                         <div className="flex items-center text-gray-700 font-medium mb-2">
                           <Briefcase size={18} className="mr-2 text-blue-500" />
                           <span className="text-base font-semibold text-blue-700">Industry</span>
+                          {profile.industry && <CheckCircle size={16} className="ml-2 text-green-500" />}
                         </div>
                         {isEditing ? (
                           <select
@@ -512,6 +568,7 @@ const handleSubmit = async (e) => {
                         name="companySize" 
                         icon={Users} 
                         placeholder="e.g., 50-100 employees"
+                        required={true}
                       />
                       
                       <Field 
@@ -520,6 +577,7 @@ const handleSubmit = async (e) => {
                         icon={FileText} 
                         isTextArea={true}
                         placeholder="Tell us about your company culture, mission, and values..."
+                        required={true}
                       />
                     </div>
                   </div>
@@ -534,22 +592,32 @@ const handleSubmit = async (e) => {
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-sm font-semibold text-blue-800 uppercase">Profile Completeness</p>
-                            <p className="text-2xl font-bold text-blue-600 mt-1">72%</p>
+                            <p className="text-2xl font-bold text-blue-600 mt-1">{completionPercentage}%</p>
                           </div>
                           <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                             <TrendingUp size={20} className="text-blue-600" />
                           </div>
                         </div>
                         <div className="w-full bg-blue-200 rounded-full h-2 mt-3">
-                          <div className="bg-blue-600 h-2 rounded-full" style={{width: '72%'}}></div>
+                          <div 
+                            className="bg-blue-600 h-2 rounded-full transition-all duration-500 ease-out" 
+                            style={{width: `${completionPercentage}%`}}
+                          ></div>
                         </div>
+                        <p className="text-xs text-blue-600 mt-2">
+                          {completionPercentage === 100 
+                            ? 'Profile complete! 🎉' 
+                            : `Complete ${100 - completionPercentage}% more to finish`}
+                        </p>
                       </div>
                       
                       <div className="bg-purple-50 p-4 rounded-xl border border-purple-100">
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-sm font-semibold text-purple-800 uppercase">Last Updated</p>
-                            <p className="text-base font-medium text-purple-600 mt-1">2 days ago</p>
+                            <p className="text-base font-medium text-purple-600 mt-1 flex items-center gap-1">
+                              <Clock size={14} /> {lastUpdatedText}
+                            </p>
                           </div>
                           <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
                             <Calendar size={20} className="text-purple-600" />
@@ -581,9 +649,9 @@ const handleSubmit = async (e) => {
                     </h2>
                     
                     <div className="space-y-5">
-                      <Field label="Email" name="email" type="email" icon={Mail} color="text-purple-500" placeholder="company@example.com" />
-                      <Field label="Phone" name="phone" type="tel" icon={Phone} color="text-purple-500" placeholder="+1 (555) 123-4567" />
-                      <Field label="Website" name="website" type="url" icon={Link} color="text-purple-500" placeholder="https://www.example.com" />
+                      <Field label="Email" name="email" type="email" icon={Mail} color="text-purple-500" placeholder="company@example.com" required={true} />
+                      <Field label="Phone" name="phone" type="tel" icon={Phone} color="text-purple-500" placeholder="+1 (555) 123-4567" required={true} />
+                      <Field label="Website" name="website" type="url" icon={Link} color="text-purple-500" placeholder="https://www.example.com" required={true} />
                     </div>
                   </div>
 
@@ -594,9 +662,9 @@ const handleSubmit = async (e) => {
                     
                     <div className="space-y-5">
                       <Field label="Street" name="street" icon={MapPin} color="text-orange-500" placeholder="123 Main Street" />
-                      <Field label="City" name="city" icon={Building} color="text-orange-500" placeholder="New York" />
+                      <Field label="City" name="city" icon={Building} color="text-orange-500" placeholder="New York" required={true} />
                       <Field label="State/County" name="county" icon={MapPin} color="text-orange-500" placeholder="New York" />
-                      <Field label="Country" name="country" icon={Globe} color="text-orange-500" placeholder="United States" />
+                      <Field label="Country" name="country" icon={Globe} color="text-orange-500" placeholder="United States" required={true} />
                       <Field label="Postal Code" name="postalCode" icon={Mail} color="text-orange-500" placeholder="10001" />
                     </div>
                   </div>
@@ -650,60 +718,70 @@ const handleSubmit = async (e) => {
                     <Eye size={22} className="text-blue-600" /> Profile Preview
                   </h2>
                   
-                  <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center shadow-sm border border-white">
-                        {logoPreview || profile.logoUrl ? (
-                          <img 
-                            src={logoPreview || profile.logoUrl} 
-                            alt="Company logo" 
-                            className="w-12 h-12 rounded-md object-cover"
-                          />
-                        ) : (
-                          <Building2 size={24} className="text-blue-600" />
-                        )}
-                      </div>
-                        <div>
-                          <h3 className="text-xl font-bold text-gray-900">{profile.name || 'Company Name'}</h3>
-                          <p className="text-gray-600 text-base">{profile.industry || 'Industry'} • {profile.companySize || 'Company Size'}</p>
-                        </div>
-                    </div>
-                    
-                    <p className="text-gray-700 mb-6 text-base leading-relaxed">
-                      {profile.description || 'Company description will appear here.'}
-                    </p>
-                    
-                    <div className="grid grid-cols-2 gap-4 text-base">
-                      <div>
-                        <p className="text-gray-500">Email</p>
-                        <p className="text-gray-800 font-medium">{profile.email || 'N/A'}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Phone</p>
-                        <p className="text-gray-800 font-medium">{profile.phone || 'N/A'}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Website</p>
-                        <p className="text-blue-600 font-medium">{profile.website || 'N/A'}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Location</p>
-                        <p className="text-gray-800 font-medium">
-                          {[profile.city, profile.country].filter(Boolean).join(', ') || 'N/A'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+               <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+  <div className="flex items-center gap-4 mb-6">
+    <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center shadow-sm border border-white">
+      {logoPreview || profile.logoUrl ? (
+        <img 
+          src={logoPreview || profile.logoUrl} 
+          alt="Company logo" 
+          className="w-12 h-12 rounded-md object-cover"
+        />
+      ) : (
+        <Building2 size={24} className="text-blue-600" />
+      )}
+    </div>
+    <div>
+      <h3 className="text-xl font-bold text-gray-900">{profile.name || 'Company Name'}</h3>
+      <p className="text-gray-600 text-base">{profile.industry || 'Industry'} • {profile.companySize || 'Company Size'}</p>
+    </div>
+  </div>
+  
+  <p className="text-gray-700 mb-6 text-base leading-relaxed">
+    {profile.description || 'Company description will appear here.'}
+  </p>
+  
+  <div className="grid grid-cols-2 gap-4 text-base">
+    <div>
+      <p className="text-gray-500">Email</p>
+      <p className="text-gray-800 font-medium">{profile.email || 'N/A'}</p>
+    </div>
+    <div>
+      <p className="text-gray-500">Phone</p>
+      <p className="text-gray-800 font-medium">{profile.phone || 'N/A'}</p>
+    </div>
+    <div>
+      <p className="text-gray-500">Website</p>
+      <p className="text-blue-600 font-medium">{profile.website || 'N/A'}</p>
+    </div>
+    <div>
+      <p className="text-gray-500">Location</p>
+      <p className="text-gray-800 font-medium">
+        {[profile.city, profile.country].filter(Boolean).join(', ') || 'N/A'}
+      </p>
+    </div>
+  </div>
+</div>
                 </div>
               )}
 
               {isEditing && (
                 <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 sticky bottom-4 z-10">
                   <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
-                    <p className="text-gray-600 text-base flex items-center gap-2">
-                      <AlertCircle size={16} className="text-blue-500" />
-                      {hasProfile ? 'Editing your company profile' : 'Creating your company profile'}
-                    </p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <BarChart3 size={16} className="text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-gray-700 font-medium">Profile Completion: {completionPercentage}%</p>
+                        <div className="w-32 bg-gray-200 rounded-full h-1.5">
+                          <div 
+                            className="bg-blue-600 h-1.5 rounded-full" 
+                            style={{width: `${completionPercentage}%`}}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
                     
                     <div className="flex gap-3">
                       <button
@@ -715,7 +793,7 @@ const handleSubmit = async (e) => {
                         <XCircle size={18} /> Cancel
                       </button>
                       <button
-                        type="submit"
+                                               type="submit"
                         className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-md disabled:opacity-70 flex items-center gap-2 text-base"
                         disabled={isSubmitting}
                       >
@@ -724,7 +802,7 @@ const handleSubmit = async (e) => {
                         ) : (
                           <Save size={18} />
                         )}
-                        {hasProfile ? 'Update Profile' : 'Create Profile'}
+                        Save Changes
                       </button>
                     </div>
                   </div>
@@ -733,26 +811,23 @@ const handleSubmit = async (e) => {
             </form>
           </>
         ) : (
-          // Empty state when no profile exists and modal is not shown
-          !showModal && (
-            <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
-              <div className="max-w-md mx-auto">
-                <div className="w-20 h-20 mx-auto rounded-xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center shadow-md border-2 border-white mb-6">
-                  <Building2 size={32} className="text-blue-600" />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-3">No Company Profile Yet</h2>
-                <p className="text-gray-600 mb-6">
-                  Get started by creating your company profile to showcase your organization to potential candidates.
-                </p>
-                <button
-                  onClick={() => setShowModal(true)}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-2.5 px-5 rounded-xl transition-all duration-300 shadow-lg hover:from-blue-700 hover:to-purple-700 flex items-center gap-2 mx-auto"
-                >
-                  <Briefcase size={18} /> Create Company Profile
-                </button>
+          <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
+            <div className="max-w-md mx-auto">
+              <div className="w-20 h-20 mx-auto bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl flex items-center justify-center mb-6">
+                <Building2 size={32} className="text-blue-600" />
               </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">No Company Profile Found</h2>
+              <p className="text-gray-600 mb-6">
+                It looks like you haven't created a company profile yet. Get started by setting up your company information to attract the best talent.
+              </p>
+              <button
+                onClick={() => setShowModal(true)}
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-md flex items-center gap-2 mx-auto text-base"
+              >
+                <Briefcase size={18} /> Create Company Profile
+              </button>
             </div>
-          )
+          </div>
         )}
       </div>
     </div>

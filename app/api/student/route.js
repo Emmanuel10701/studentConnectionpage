@@ -16,7 +16,7 @@ export async function POST(req) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // ✅ Convert yearOfStudy to integer
+    // ✅ No parseInt, keep yearOfStudy as STRING
     const student = await prisma.user.create({
       data: {
         name,
@@ -27,20 +27,21 @@ export async function POST(req) {
           create: {
             institution,
             course,
-            yearOfStudy: parseInt(yearOfStudy), // fix here
+            yearOfStudy, // now string
             constituency,
             ward
           }
         }
-      }
+      },
+      include: { studentProfile: true }
     });
 
     // ✅ Send email via Nodemailer
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.EMAIL_USER, // e.g. your Gmail
-        pass: process.env.EMAIL_PASS, // app password
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
     });
 
@@ -67,16 +68,28 @@ export async function POST(req) {
 }
 
 
+// File: /api/student/route.js
+
 export async function GET() {
   try {
     const users = await prisma.user.findMany({
+      where: { role: "STUDENT" },
       include: {
-        studentProfile: true, // include student profile details
+        studentProfile: true,
       }
     });
 
-    return new Response(JSON.stringify(users), { status: 200 });
+    // Optional: convert yearOfStudy to string just in case some old data is number
+    const sanitizedUsers = users.map(user => {
+      if (user.studentProfile) {
+        user.studentProfile.yearOfStudy = user.studentProfile.yearOfStudy?.toString() || null;
+      }
+      return user;
+    });
+
+    return new Response(JSON.stringify(sanitizedUsers), { status: 200 });
   } catch (error) {
+    console.error("Failed to fetch students:", error);
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 }

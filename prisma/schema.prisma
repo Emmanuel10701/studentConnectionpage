@@ -31,7 +31,7 @@ model User {
   employerProfile   EmployerProfile?
   studentProfile    StudentProfile?
   Admin             Admin?
-  company           Company? // 👈 Added this one-to-one relation
+  company  Company?
 
   newsletters       Newsletter[]
   accounts          Account[]
@@ -111,12 +111,12 @@ model Newsletter {
 
 // Minimal student info (on registration)
 model StudentProfile {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   userId        String   @unique @db.ObjectId
-  user          User     @relation(fields: [userId], references: [id])
+  user         User    @relation(fields: [userId], references: [id])
   institution   String
   course        String
-  yearOfStudy   Int
+  yearOfStudy   String?
   constituency  String
   ward          String
   createdAt     DateTime @default(now())
@@ -216,17 +216,17 @@ model EmployerProfile {
 }
 
 model Company {
-  id                         String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId                     String   @unique @db.ObjectId // 👈 Added this one-to-one relation
-  user                       User     @relation(fields: [userId], references: [id]) // 👈 Added this one-to-one relation
-  name                       String
-  industry                   String
-  description                String
-  foundedDate                DateTime
-  companySize                String
-  logoUrl                    String
-  email                      String
-  jobs                       Job[]  // <-- add this line to establish reverse relation
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String   @unique @db.ObjectId // 👈 Added this one-to-one relation
+  user         User     @relation(fields: [userId], references: [id]) // 👈 Added this one-to-one relation
+  name         String
+  industry     String
+  description  String
+  foundedDate  DateTime
+  companySize  String
+  logoUrl      String
+  email        String @unique
+  jobs         Job[]  // <-- add this line to establish reverse relation
 
   phone                      String
   website                    String?

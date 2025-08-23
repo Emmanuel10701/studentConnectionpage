@@ -56,38 +56,64 @@ const CompanyProfile = () => {
   const [showModal, setShowModal] = useState(false);
   const formRef = useRef(null);
 
-  // Fetch company profile data
+  // Fetch company profile from API
   useEffect(() => {
     if (status === 'authenticated' && userId) {
-      const fetchProfile = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-          const response = await fetch(`/api/company?userId=${userId}`);
-          if (response.ok) {
-            const data = await response.json();
-            if (data.company) {
-              setProfile(data.company);
-              setHasProfile(true);
-            } else {
-              setHasProfile(false);
-              setShowModal(true);
-            }
-          } else if (response.status === 404) {
-            setHasProfile(false);
-            setShowModal(true);
-          } else {
-            throw new Error('Failed to fetch company profile.');
-          }
-        } catch (err) {
-          setError(err.message || 'An unexpected error occurred.');
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchProfile();
+      fetchCompanyProfile();
+    } else if (status === 'unauthenticated') {
+      setLoading(false);
     }
   }, [status, userId]);
+
+  const fetchCompanyProfile = async () => {
+    try {
+      setLoading(true);
+      
+      // 1️⃣ Get employee ID
+      const employerRes = await fetch(`/api/employerId/user/${userId}`);
+      if (!employerRes.ok) {
+        throw new Error('Failed to fetch employer data');
+      }
+      
+      const employerData = await employerRes.json();
+      if (!employerData.success) {
+        setHasProfile(false);
+        setShowModal(true);
+        return;
+      }
+      
+      const employeeId = employerData.employee.id;
+      //localhost:3000/api/company/employee/68a980043a168eaaead916da
+      // 2️⃣ Fetch company using employee ID
+      const companyRes = await fetch(`/api/company/employee/${employeeId}`);
+      console.log(companyRes)
+      if (companyRes.status === 404) {
+        setHasProfile(false);
+        setShowModal(true);
+        return;
+      }
+      
+      if (!companyRes.ok) {
+        throw new Error('Failed to fetch company data');
+      }
+      
+      const companyJson = await companyRes.json();
+      if (companyJson.success) {
+        setProfile(companyJson.company);
+        setHasProfile(true);
+      } else {
+        setHasProfile(false);
+        setShowModal(true);
+      }
+    } catch (err) {
+      console.error('Error fetching company profile:', err);
+      setError(err.message);
+      setHasProfile(false);
+      setShowModal(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
@@ -110,44 +136,60 @@ const CompanyProfile = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsSubmitting(true);
+  setError(null);
 
-    const method = hasProfile ? 'PUT' : 'POST';
-    const apiEndpoint = '/api/company';
+  try {
+    let response;
     
-    // Prepare the data for the backend
-    const payload = { 
-      ...profile,
-      userId: userId
-    };
-
-    try {
-      const response = await fetch(apiEndpoint, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to save profile.');
-      }
-
-      const data = await response.json();
-      setProfile(data.company);
-      setIsEditing(false);
-      setHasProfile(true);
-      setShowModal(false);
+    if (hasProfile && profile.id) {
+      // PUT request - include company ID in the URL
+      const apiEndpoint = `/api/company/${profile.id}`;
       
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setIsSubmitting(false);
+      // Prepare data without the id field for the update
+      const { id, ...updateData } = profile;
+      
+      response = await fetch(apiEndpoint, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...updateData,
+          userId: userId
+        }),
+      });
+    } else {
+      // POST request - create new company
+      const apiEndpoint = '/api/company';
+      response = await fetch(apiEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...profile,
+          userId: userId
+        }),
+      });
     }
-  };
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to save profile.');
+    }
+
+    const data = await response.json();
+    setProfile(data.company);
+    setIsEditing(false);
+    setHasProfile(true);
+    setShowModal(false);
+    
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   const Field = ({ label, name, type = 'text', icon: Icon, isTextArea = false, placeholder = "", color = "text-blue-500" }) => (
     <div className="mb-5">
@@ -197,22 +239,22 @@ const CompanyProfile = () => {
       {/* Modal for new users without a profile */}
       {showModal && !hasProfile && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center rounded-t-2xl">
-              <h2 className="text-xl font-bold text-gray-800">Create Your Company Profile</h2>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[95vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center rounded-t-2xl">
+              <h2 className="text-2xl font-bold text-gray-800">Create Your Company Profile</h2>
               <button 
                 onClick={() => setShowModal(false)}
-                className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+                className="p-2 rounded-full hover:bg-gray-100 transition-colors"
               >
                 <X size={24} />
               </button>
             </div>
             
-            <div className="p-6">
-              <div className="bg-blue-50 p-4 rounded-xl mb-6 border border-blue-100">
+            <div className="p-8">
+              <div className="bg-blue-50 p-5 rounded-xl mb-6 border border-blue-100">
                 <div className="flex items-start gap-3">
-                  <Briefcase className="text-blue-600 mt-0.5 flex-shrink-0" size={20} />
-                  <p className="text-blue-800">
+                  <Briefcase className="text-blue-600 mt-0.5 flex-shrink-0" size={22} />
+                  <p className="text-blue-800 text-lg">
                     <span className="font-semibold">Welcome!</span> Create your company profile to get started. 
                     This will help candidates learn about your organization and culture.
                   </p>
@@ -220,22 +262,22 @@ const CompanyProfile = () => {
               </div>
               
               <form ref={formRef} onSubmit={handleSubmit}>
-                <div className="space-y-5">
-                  <div className="flex flex-col items-center mb-4">
+                <div className="space-y-6">
+                  <div className="flex flex-col items-center mb-6">
                     <div className="relative mb-4">
-                      <div className="w-24 h-24 rounded-xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center shadow-md border-2 border-white">
+                      <div className="w-28 h-28 rounded-xl bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center shadow-md border-2 border-white">
                         {logoPreview ? (
                           <img 
                             src={logoPreview} 
                             alt="Company logo preview" 
-                            className="w-20 h-20 rounded-lg object-cover"
+                            className="w-24 h-24 rounded-lg object-cover"
                           />
                         ) : (
-                          <Building2 size={32} className="text-blue-600" />
+                          <Building2 size={40} className="text-blue-600" />
                         )}
                       </div>
-                      <label className="absolute -bottom-2 -right-2 bg-blue-600 text-white p-1.5 rounded-full cursor-pointer shadow-lg">
-                        <Upload size={14} />
+                      <label className="absolute -bottom-2 -right-2 bg-blue-600 text-white p-2 rounded-full cursor-pointer shadow-lg">
+                        <Upload size={16} />
                         <input 
                           type="file" 
                           className="hidden" 
@@ -247,31 +289,33 @@ const CompanyProfile = () => {
                     <p className="text-sm text-gray-600">Upload your company logo</p>
                   </div>
                   
-                  <div className="mb-5">
-                    <div className="flex items-center text-gray-700 font-medium mb-2">
-                      <Building2 size={18} className="mr-2 text-blue-500" />
-                      <span className="text-base font-semibold text-blue-700">Company Name</span>
+                  <div className="mb-6">
+                    <div className="flex items-center text-gray-700 font-medium mb-3">
+                      <Building2 size={20} className="mr-2 text-blue-500" />
+                      <span className="text-lg font-semibold text-blue-700">Company Name</span>
                     </div>
                     <input
                       type="text"
                       name="name"
                       value={profile.name || ''}
                       onChange={handleProfileChange}
-                      className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
+                      className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
                       placeholder="Enter your company name"
+                      required
                     />
                   </div>
                   
-                  <div>
-                    <div className="flex items-center text-gray-700 font-medium mb-2">
-                      <Briefcase size={18} className="mr-2 text-blue-500" />
-                      <span className="text-base font-semibold text-blue-700">Industry</span>
+                  <div className="mb-6">
+                    <div className="flex items-center text-gray-700 font-medium mb-3">
+                      <Briefcase size={20} className="mr-2 text-blue-500" />
+                      <span className="text-lg font-semibold text-blue-700">Industry</span>
                     </div>
                     <select
                       name="industry"
                       value={profile.industry || ''}
                       onChange={handleProfileChange}
-                      className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
+                      className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
+                      required
                     >
                       <option value="">Select an Industry</option>
                       {INDUSTRY_OPTIONS.map(option => (
@@ -280,48 +324,50 @@ const CompanyProfile = () => {
                     </select>
                   </div>
                   
-                  <div className="mb-5">
-                    <div className="flex items-center text-gray-700 font-medium mb-2">
-                      <Users size={18} className="mr-2 text-blue-500" />
-                      <span className="text-base font-semibold text-blue-700">Company Size</span>
+                  <div className="mb-6">
+                    <div className="flex items-center text-gray-700 font-medium mb-3">
+                      <Users size={20} className="mr-2 text-blue-500" />
+                      <span className="text-lg font-semibold text-blue-700">Company Size</span>
                     </div>
                     <input
                       type="text"
                       name="companySize"
                       value={profile.companySize || ''}
                       onChange={handleProfileChange}
-                      className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
+                      className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
                       placeholder="e.g., 50-100 employees"
+                      required
                     />
                   </div>
                   
-                  <div className="mb-5">
-                    <div className="flex items-center text-gray-700 font-medium mb-2">
-                      <FileText size={18} className="mr-2 text-blue-500" />
-                      <span className="text-base font-semibold text-blue-700">Description</span>
+                  <div className="mb-6">
+                    <div className="flex items-center text-gray-700 font-medium mb-3">
+                      <FileText size={20} className="mr-2 text-blue-500" />
+                      <span className="text-lg font-semibold text-blue-700">Description</span>
                     </div>
                     <textarea
                       name="description"
                       value={profile.description || ''}
                       onChange={handleProfileChange}
-                      className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base resize-y bg-gray-50"
-                      rows="3"
+                      className="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base resize-y bg-gray-50"
+                      rows="4"
                       placeholder="Tell us about your company culture, mission, and values..."
+                      required
                     />
                   </div>
                 </div>
                 
-                <div className="flex gap-3 mt-8">
+                <div className="flex gap-4 mt-8">
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors flex items-center gap-2 text-base"
+                    className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors flex items-center gap-2 text-base"
                   >
                     <XCircle size={18} /> Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-md disabled:opacity-70 flex items-center gap-2 text-base"
+                    className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-md disabled:opacity-70 flex items-center gap-2 text-base"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
@@ -576,7 +622,7 @@ const CompanyProfile = () => {
 
               {activeTab === 'social' && (
                 <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-200 mb-6">
-                  <h2 className="text-xl font-bold text-gray-800 mb极6 flex items-center gap-2">
+                  <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                     <HeartHandshake size={22} className="text-red-600" /> Social Presence
                   </h2>
                   
@@ -638,7 +684,7 @@ const CompanyProfile = () => {
                       </div>
                       <div>
                         <p className="text-gray-500">Website</p>
-                        <p className="text-blue-600 font极ium">{profile.website || 'N/A'}</p>
+                        <p className="text-blue-600 font-medium">{profile.website || 'N/A'}</p>
                       </div>
                       <div>
                         <p className="text-gray-500">Location</p>
@@ -670,7 +716,7 @@ const CompanyProfile = () => {
                       </button>
                       <button
                         type="submit"
-                        className="px-5 py-2.5 bg-gradient-to-r from-blue极600 to-purple-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-md disabled:opacity-70 flex items-center gap-2 text-base"
+                        className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-md disabled:opacity-70 flex items-center gap-2 text-base"
                         disabled={isSubmitting}
                       >
                         {isSubmitting ? (

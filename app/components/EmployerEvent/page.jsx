@@ -56,8 +56,8 @@ const PostTypeIconMap = {
 };
 
 const PostCard = ({ post, onRegister }) => {
-  const IconComponent = PostTypeIconMap[post.type] || Briefcase;
-  const displayDate = post.date || post.createdAt;
+  const IconComponent = PostTypeIconMap[post?.type] || Briefcase;
+  const displayDate = post?.date || post?.createdAt || new Date();
 
   return (
     <motion.div
@@ -71,15 +71,19 @@ const PostCard = ({ post, onRegister }) => {
           <IconComponent size={24} />
         </div>
         <div>
-          <h3 className="font-bold text-xl text-gray-900 line-clamp-1">{post.title}</h3>
+          <h3 className="font-bold text-xl text-gray-900 line-clamp-1">
+            {post?.title || 'Untitled Post'}
+          </h3>
           <p className="text-sm text-gray-500 flex items-center gap-1">
             <Clock size={16} /> {formatTimeAgo(new Date(displayDate))}
           </p>
         </div>
       </div>
-      <p className="text-gray-700 line-clamp-3">{post.description}</p>
+      <p className="text-gray-700 line-clamp-3">
+        {post?.description || 'No description available'}
+      </p>
       <div className="flex flex-wrap items-center text-sm text-gray-600 gap-4">
-        {post.location && (
+        {post?.location && (
           <span className="flex items-center gap-1">
             <MapPin size={16} /> {post.location}
           </span>
@@ -89,11 +93,11 @@ const PostCard = ({ post, onRegister }) => {
         </span>
       </div>
 
-      {post.type === 'Event' && (
+      {post?.type === 'Event' && (
         <EmployerRegistration post={post} onRegister={onRegister} />
       )}
 
-      {post.type !== 'Event' && post.url && (
+      {post?.type !== 'Event' && post?.url && (
         <a
           href={post.url}
           target="_blank"
@@ -117,7 +121,7 @@ const EmployerRegistration = ({ post, onRegister }) => {
     if (!email) return;
     setIsSubmitting(true);
     await new Promise(resolve => setTimeout(resolve, 1000));
-    onRegister(post.id, email);
+    onRegister(post?.id, email);
     setIsRegistered(true);
     setIsSubmitting(false);
   };
@@ -208,15 +212,25 @@ export default function EmployerEvents() {
           fetch('http://localhost:3000/api/video'),
         ]);
 
+        // Check if responses are OK
+        if (!eventsResponse.ok) throw new Error('Events fetch failed');
+        if (!newsResponse.ok) throw new Error('News fetch failed');
+        if (!videosResponse.ok) throw new Error('Videos fetch failed');
+
         const events = await eventsResponse.json();
         const news = await newsResponse.json();
         const videos = await videosResponse.json();
 
-        setEventsData(Array.isArray(events) ? events : [events]);
-        setNewsData(Array.isArray(news) ? news : [news]);
-        setVideosData(Array.isArray(videos) ? videos : [videos]);
+        // Ensure we have arrays and filter out null values
+        setEventsData(Array.isArray(events) ? events.filter(item => item != null) : []);
+        setNewsData(Array.isArray(news) ? news.filter(item => item != null) : []);
+        setVideosData(Array.isArray(videos) ? videos.filter(item => item != null) : []);
       } catch (err) {
         console.error("Failed to fetch posts:", err);
+        // Set empty arrays on error
+        setEventsData([]);
+        setNewsData([]);
+        setVideosData([]);
       } finally {
         setLoading(false);
       }
@@ -225,19 +239,45 @@ export default function EmployerEvents() {
   }, []);
 
   const combinedData = useMemo(() => {
-    const formattedEvents = eventsData.map(item => ({ ...item, type: 'Event', date: new Date(item.date) }));
-    const formattedNews = newsData.map(item => ({ ...item, type: 'News', date: new Date(item.date) }));
-    const formattedVideos = videosData.map(item => ({ ...item, type: 'Video', date: new Date(item.createdAt) }));
+    const formattedEvents = eventsData
+      .filter(item => item != null) // Filter out null/undefined items
+      .map(item => ({ 
+        ...item, 
+        type: 'Event', 
+        date: item.date ? new Date(item.date) : new Date() // Fallback to current date
+      }));
+    
+    const formattedNews = newsData
+      .filter(item => item != null) // Filter out null/undefined items
+      .map(item => ({ 
+        ...item, 
+        type: 'News', 
+        date: item.date ? new Date(item.date) : new Date() // Fallback to current date
+      }));
+    
+    const formattedVideos = videosData
+      .filter(item => item != null) // Filter out null/undefined items
+      .map(item => ({ 
+        ...item, 
+        type: 'Video', 
+        date: item.createdAt ? new Date(item.createdAt) : new Date() // Fallback to current date
+      }));
+    
     return [...formattedEvents, ...formattedNews, ...formattedVideos];
   }, [eventsData, newsData, videosData]);
 
   const sortedPosts = useMemo(() => {
-    return [...combinedData].sort((a, b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt));
+    return [...combinedData].sort((a, b) => {
+      const dateA = a.date || a.createdAt || new Date(0); // Fallback to epoch if missing
+      const dateB = b.date || b.createdAt || new Date(0); // Fallback to epoch if missing
+      return new Date(dateB) - new Date(dateA);
+    });
   }, [combinedData]);
   
   const filteredPosts = useMemo(() => {
     return sortedPosts.filter(post => {
-      const matchesSearchTerm = post.title?.toLowerCase().includes(searchTerm.toLowerCase()) || post.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearchTerm = post.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                              post.description?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesPostType = selectedPostType === '' || post.type === selectedPostType;
       return matchesSearchTerm && matchesPostType;
     });
@@ -282,7 +322,7 @@ export default function EmployerEvents() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all shadow-sm"
               />
-            </div>
+              </div>
           </div>
 
           {/* Filters Section */}

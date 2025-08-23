@@ -2,7 +2,7 @@
 import prisma from '../../../libs/prisma';
 
 // =============================
-// POST: Create Company (NO userId required)
+// POST: Create Company (with employeeId relation)
 // =============================
 export async function POST(request) {
   try {
@@ -12,30 +12,29 @@ export async function POST(request) {
       logoUrl, email, phone, website, street, city, county,
       country, postalCode, businessRegistrationNumber, kraPin,
       businessPermitNumber, licenseExpiryDate, vatNumber, legalName,
-      linkedin, twitter, facebook, instagram
+      linkedin, twitter, facebook, instagram, employeeId
     } = body;
 
-    // ✅ Validate required fields
-    if (!name || !email) {
+    if (!name || !email || !employeeId) {
       return new Response(
-        JSON.stringify({ success: false, message: 'Company name and email are required' }),
+        JSON.stringify({ success: false, message: 'Company name, email, and employeeId are required' }),
         { status: 400 }
       );
     }
 
-    // ✅ Check if a company already exists with this email
-    const existingCompany = await prisma.company.findUnique({
-      where: { email }
+    // ✅ Ensure employee exists in Users table with role EMPLOYER
+    const employee = await prisma.user.findUnique({
+      where: { id: employeeId },
     });
 
-    if (existingCompany) {
+    if (!employee || employee.role !== 'EMPLOYER') {
       return new Response(
-        JSON.stringify({ success: false, message: 'A company already exists with this email' }),
-        { status: 409 }
+        JSON.stringify({ success: false, message: 'Employee not found or not an EMPLOYER' }),
+        { status: 404 }
       );
     }
 
-    // ✅ Create company (no link to userId anymore)
+    // ✅ Create company linked to this employee
     const newCompany = await prisma.company.create({
       data: {
         name,
@@ -61,8 +60,10 @@ export async function POST(request) {
         linkedin,
         twitter,
         facebook,
-        instagram
+        instagram,
+        user: { connect: { id: employeeId } } // ✅ link the user
       },
+      include: { user: true }
     });
 
     return new Response(JSON.stringify({ success: true, company: newCompany }), { status: 201 });
@@ -75,12 +76,17 @@ export async function POST(request) {
   }
 }
 
-// =============================
-// GET: All Companies
-// =============================
+
+/// =============================
+// GET: All Companies (with employer user)
 export async function GET() {
   try {
-    const companies = await prisma.company.findMany();
+    const companies = await prisma.company.findMany({
+      include: {
+        user: true,       // 👈 includes employer/owner
+        // employees: true // 👈 only if you use employees[] relation
+      }
+    });
 
     return new Response(JSON.stringify({ success: true, companies }), { status: 200 });
   } catch (error) {

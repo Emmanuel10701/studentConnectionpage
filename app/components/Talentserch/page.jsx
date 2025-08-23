@@ -174,8 +174,36 @@ const StudentProfile = ({ student, onClose }) => {
     document.body.removeChild(link);
   };
 
-  const handleEmailClick = () => {
-    window.location.href = `mailto:${student.email}?subject=Interest in Your Profile`;
+// Dynamic function to fetch email by user/company ID
+// Function to fetch email dynamically
+  const [email, setEmail] = useState("");
+async function fetchEmail(userId) {
+  try {
+    const res = await fetch(`http://localhost:3000/api/student/${userId}`);
+    const data = await res.json();
+
+    if (data.success && data.student) {
+      console.log("Email:", data.student.email);
+    } else {
+      console.log("No student/email found");
+    }
+  } catch (error) {
+    console.error("Error fetching student:", error);
+  }
+}
+
+
+
+
+
+
+   const handleEmailClick = async () => {
+    if (!email) {
+      await fetchEmail(); // fetch first if not already available
+    }
+    if (email) {
+      window.location.href = `mailto:${email}?subject=Interest in Your Profile`;
+    }
   };
 
   return (
@@ -190,6 +218,7 @@ const StudentProfile = ({ student, onClose }) => {
           </div>
           <h2 className="text-3xl font-bold text-gray-900">{student.name}</h2>
           <p className="text-md text-blue-600 font-semibold">{student.specialization}</p>
+          {console.log(student.userId)}
         </div>
         <div className="mt-8 space-y-6">
           <div className="bg-gray-50 p-6 rounded-2xl shadow-inner">
@@ -523,6 +552,7 @@ export default function TalentSearchApp() {
                     <Users size={48} className="mx-auto text-gray-400 mb-4" />
                     <p className="text-gray-500 text-lg">No students found matching your search.</p>
                     <p className="text-gray-400">Try adjusting your filters or search query.</p>
+
                   </div>
                 )}
               </div>

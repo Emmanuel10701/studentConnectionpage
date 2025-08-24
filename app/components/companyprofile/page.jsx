@@ -1,13 +1,12 @@
-
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import {
   Briefcase, Users, Building2, Edit, Save, Mail, Phone, Globe,
   MapPin, ClipboardList, Fingerprint, Calendar, CreditCard,
   Building, Link, FileText, AlertCircle, CheckCircle, XCircle,
-  Upload, Eye, Shield, TrendingUp, BarChart3, HeartHandshake, Zap, Target, Loader2, X, ChevronDown, Clock
+  Upload, Eye, Shield, TrendingUp, BarChart3, HeartHandshake, Zap, Target, Loader2, X, Clock
 } from 'lucide-react';
 
 const INDUSTRY_OPTIONS = [
@@ -15,39 +14,6 @@ const INDUSTRY_OPTIONS = [
   'Manufacturing', 'Retail', 'Hospitality', 'Construction',
   'Media & Entertainment', 'Other'
 ];
-
-// Function to calculate profile completion percentage
-const calculateCompletion = (profile) => {
-  const requiredFields = [
-    'name', 'industry', 'description', 'companySize', 
-    'email', 'phone', 'website', 'city', 'country'
-  ];
-  
-  const completedFields = requiredFields.filter(field => {
-    const value = profile[field];
-    return value !== undefined && value !== null && value !== '';
-  }).length;
-  
-  return Math.round((completedFields / requiredFields.length) * 100);
-};
-
-// Function to format date relative to now
-const formatRelativeTime = (dateString) => {
-  if (!dateString) return 'Never updated';
-  
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffInSeconds = Math.floor((now - date) / 1000);
-  
-  if (diffInSeconds < 60) return 'Just now';
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
-  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`;
-  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 604800)} weeks ago`;
-  if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)} months ago`;
-  
-  return `${Math.floor(diffInSeconds / 31536000)} years ago`;
-};
 
 const CompanyProfile = () => {
   const { data: session, status } = useSession();
@@ -81,6 +47,7 @@ const CompanyProfile = () => {
     instagram: '',
     lastUpdated: ''
   });
+  
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -91,16 +58,100 @@ const CompanyProfile = () => {
   const [showModal, setShowModal] = useState(false);
   const [completionPercentage, setCompletionPercentage] = useState(0);
   const [lastUpdatedText, setLastUpdatedText] = useState('');
-  const formRef = useRef(null);
 
-  // Update completion percentage and last updated text when profile changes
-  useEffect(() => {
-    setCompletionPercentage(calculateCompletion(profile));
-    setLastUpdatedText(formatRelativeTime(profile.lastUpdated));
-  }, [profile]);
+  // Calculate profile completion
+  const calculateCompletion = (profile) => {
+    const requiredFields = [
+      'name', 'industry', 'description', 'companySize', 
+      'email', 'phone', 'website', 'city', 'country'
+    ];
+    
+    const completedFields = requiredFields.filter(field => {
+      const value = profile[field];
+      return value !== undefined && value !== null && value !== '';
+    }).length;
+    
+    return Math.round((completedFields / requiredFields.length) * 100);
+  };
+
+  // Format date relative to now
+  const formatRelativeTime = (dateString) => {
+    if (!dateString) return 'Never updated';
+    
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+    
+    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 604800)} weeks ago`;
+    if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)} months ago`;
+    
+    return `${Math.floor(diffInSeconds / 31536000)} years ago`;
+  };
 
   // Fetch company profile from API
   useEffect(() => {
+    if (status !== 'authenticated' || !userId) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchCompanyProfile = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Get employee ID
+        const employerRes = await fetch(`/api/employerId/user/${userId}`);
+        if (!employerRes.ok) {
+          throw new Error('Failed to fetch employer data');
+        }
+        
+        const employerData = await employerRes.json();
+        if (!employerData.success) {
+          setHasProfile(false);
+          setShowModal(true);
+          setLoading(false);
+          return;
+        }
+        
+        const employeeId = employerData.employee.id;
+        
+        // Fetch company using employee ID
+        const companyRes = await fetch(`/api/company/employee/${employeeId}`);
+        
+        if (companyRes.status === 404) {
+          setHasProfile(false);
+          setShowModal(true);
+          setLoading(false);
+          return;
+        }
+        
+        if (!companyRes.ok) {
+          throw new Error('Failed to fetch company data');
+        }
+        
+        const companyJson = await companyRes.json();
+        if (companyJson.success) {
+          setProfile(companyJson.company);
+          setHasProfile(true);
+        } else {
+          setHasProfile(false);
+          setShowModal(true);
+        }
+      } catch (err) {
+        console.error('Error fetching company profile:', err);
+        setError(err.message);
+        setHasProfile(false);
+        setShowModal(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (status === 'authenticated' && userId) {
       fetchCompanyProfile();
     } else if (status === 'unauthenticated') {
@@ -108,55 +159,11 @@ const CompanyProfile = () => {
     }
   }, [status, userId]);
 
-  const fetchCompanyProfile = async () => {
-    try {
-      setLoading(true);
-      
-      // 1️⃣ Get employee ID
-      const employerRes = await fetch(`/api/employerId/user/${userId}`);
-      if (!employerRes.ok) {
-        throw new Error('Failed to fetch employer data');
-      }
-      
-      const employerData = await employerRes.json();
-      if (!employerData.success) {
-        setHasProfile(false);
-        setShowModal(true);
-        return;
-      }
-      
-      const employeeId = employerData.employee.id;
-      //localhost:3000/api/company/employee/68a980043a168eaaead916da
-      // 2️⃣ Fetch company using employee ID
-      const companyRes = await fetch(`/api/company/employee/${employeeId}`);
-      console.log(companyRes)
-      if (companyRes.status === 404) {
-        setHasProfile(false);
-        setShowModal(true);
-        return;
-      }
-      
-      if (!companyRes.ok) {
-        throw new Error('Failed to fetch company data');
-      }
-      
-      const companyJson = await companyRes.json();
-      if (companyJson.success) {
-        setProfile(companyJson.company);
-        setHasProfile(true);
-      } else {
-        setHasProfile(false);
-        setShowModal(true);
-      }
-    } catch (err) {
-      console.error('Error fetching company profile:', err);
-      setError(err.message);
-      setHasProfile(false);
-      setShowModal(true);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Update completion percentage and last updated text when profile changes
+  useEffect(() => {
+    setCompletionPercentage(calculateCompletion(profile));
+    setLastUpdatedText(formatRelativeTime(profile.lastUpdated));
+  }, [profile]);
 
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
@@ -172,7 +179,6 @@ const CompanyProfile = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setLogoPreview(reader.result);
-        // In a real app, you would upload this to a server and get a URL
         setProfile(prev => ({ ...prev, logoUrl: reader.result }));
       };
       reader.readAsDataURL(file);
@@ -191,20 +197,17 @@ const handleSubmit = async (e) => {
       lastUpdated: new Date().toISOString()
     };
     
+    // Remove userId from the data being sent
+    const { userId: _, ...profileWithoutUserId } = updatedProfile;
+    
     if (hasProfile && profile.id) {
       // PUT request - include company ID in the URL
       const apiEndpoint = `/api/company/${profile.id}`;
       
-      // Prepare data without the id field for the update
-      const { id, ...updateData } = updatedProfile;
-      
       response = await fetch(apiEndpoint, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...updateData,
-          userId: userId
-        }),
+        body: JSON.stringify(profileWithoutUserId), // Send data without userId
       });
     } else {
       // POST request - create new company
@@ -213,8 +216,8 @@ const handleSubmit = async (e) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...updatedProfile,
-          userId: userId
+          ...profileWithoutUserId,
+          userId: userId // Only include userId for POST, not PUT
         }),
       });
     }
@@ -236,48 +239,6 @@ const handleSubmit = async (e) => {
     setIsSubmitting(false);
   }
 };
-
-  const Field = ({ label, name, type = 'text', icon: Icon, isTextArea = false, placeholder = "", color = "text-blue-500", required = false }) => {
-    const fieldValue = profile[name] || '';
-    const isCompleted = required && fieldValue !== '';
-    
-    return (
-      <div className="mb-5">
-        <div className="flex items-center text-gray-700 font-medium mb-2">
-          {Icon && <Icon size={18} className={`mr-2 ${color}`} />}
-          <span className={`text-base font-semibold ${color.replace('500', '700')}`}>{label}</span>
-          {required && isCompleted && (
-            <CheckCircle size={16} className="ml-2 text-green-500" />
-          )}
-        </div>
-        {isEditing ? (
-          isTextArea ? (
-            <textarea
-              name={name}
-              value={fieldValue}
-              onChange={handleProfileChange}
-              className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base resize-y bg-gray-50"
-              rows="3"
-              placeholder={placeholder}
-            />
-          ) : (
-            <input
-              type={type}
-              name={name}
-              value={fieldValue}
-              onChange={handleProfileChange}
-              className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
-              placeholder={placeholder}
-            />
-          )
-        ) : (
-          <p className={`text-gray-700 text-base break-words p-2 rounded-lg ${!fieldValue ? 'text-gray-400 italic' : 'bg-gray-50'}`}>
-            {fieldValue || 'Not specified'}
-          </p>
-        )}
-      </div>
-    );
-  };
 
   if (loading || status === 'loading') {
     return (
@@ -315,7 +276,7 @@ const handleSubmit = async (e) => {
                 </div>
               </div>
               
-              <form ref={formRef} onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit}>
                 <div className="space-y-6">
                   <div className="flex flex-col items-center mb-6">
                     <div className="relative mb-4">
@@ -521,7 +482,7 @@ const handleSubmit = async (e) => {
               ))}
             </div>
 
-            <form ref={formRef} onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit}>
               {activeTab === 'overview' && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                   <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
@@ -530,15 +491,29 @@ const handleSubmit = async (e) => {
                     </h2>
                     
                     <div className="space-y-5">
-                      <Field 
-                        label="Company Name" 
-                        name="name" 
-                        icon={Building2} 
-                        placeholder="Enter your company name"
-                        required={true}
-                      />
+                      <div className="mb-5">
+                        <div className="flex items-center text-gray-700 font-medium mb-2">
+                          <Building2 size={18} className="mr-2 text-blue-500" />
+                          <span className="text-base font-semibold text-blue-700">Company Name</span>
+                          {profile.name && <CheckCircle size={16} className="ml-2 text-green-500" />}
+                        </div>
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            name="name"
+                            value={profile.name || ''}
+                            onChange={handleProfileChange}
+                            className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
+                            placeholder="Enter your company name"
+                          />
+                        ) : (
+                          <p className={`text-gray-700 text-base break-words p-2 rounded-lg ${!profile.name ? 'text-gray-400 italic' : 'bg-gray-50'}`}>
+                            {profile.name || 'Not specified'}
+                          </p>
+                        )}
+                      </div>
                       
-                      <div>
+                      <div className="mb-5">
                         <div className="flex items-center text-gray-700 font-medium mb-2">
                           <Briefcase size={18} className="mr-2 text-blue-500" />
                           <span className="text-base font-semibold text-blue-700">Industry</span>
@@ -563,22 +538,49 @@ const handleSubmit = async (e) => {
                         )}
                       </div>
                       
-                      <Field 
-                        label="Company Size" 
-                        name="companySize" 
-                        icon={Users} 
-                        placeholder="e.g., 50-100 employees"
-                        required={true}
-                      />
+                      <div className="mb-5">
+                        <div className="flex items-center text-gray-700 font-medium mb-2">
+                          <Users size={18} className="mr-2 text-blue-500" />
+                          <span className="text-base font-semibold text-blue-700">Company Size</span>
+                          {profile.companySize && <CheckCircle size={16} className="ml-2 text-green-500" />}
+                        </div>
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            name="companySize"
+                            value={profile.companySize || ''}
+                            onChange={handleProfileChange}
+                            className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
+                            placeholder="e.g., 50-100 employees"
+                          />
+                        ) : (
+                          <p className={`text-gray-700 text-base break-words p-2 rounded-lg ${!profile.companySize ? 'text-gray-400 italic' : 'bg-gray-50'}`}>
+                            {profile.companySize || 'Not specified'}
+                          </p>
+                        )}
+                      </div>
                       
-                      <Field 
-                        label="Description" 
-                        name="description" 
-                        icon={FileText} 
-                        isTextArea={true}
-                        placeholder="Tell us about your company culture, mission, and values..."
-                        required={true}
-                      />
+                      <div className="mb-5">
+                        <div className="flex items-center text-gray-700 font-medium mb-2">
+                          <FileText size={18} className="mr-2 text-blue-500" />
+                          <span className="text-base font-semibold text-blue-700">Description</span>
+                          {profile.description && <CheckCircle size={16} className="ml-2 text-green-500" />}
+                        </div>
+                        {isEditing ? (
+                          <textarea
+                            name="description"
+                            value={profile.description || ''}
+                            onChange={handleProfileChange}
+                            className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base resize-y bg-gray-50"
+                            rows="3"
+                            placeholder="Tell us about your company culture, mission, and values..."
+                          />
+                        ) : (
+                          <p className={`text-gray-700 text-base break-words p-2 rounded-lg ${!profile.description ? 'text-gray-400 italic' : 'bg-gray-50'}`}>
+                            {profile.description || 'Not specified'}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -649,9 +651,68 @@ const handleSubmit = async (e) => {
                     </h2>
                     
                     <div className="space-y-5">
-                      <Field label="Email" name="email" type="email" icon={Mail} color="text-purple-500" placeholder="company@example.com" required={true} />
-                      <Field label="Phone" name="phone" type="tel" icon={Phone} color="text-purple-500" placeholder="+1 (555) 123-4567" required={true} />
-                      <Field label="Website" name="website" type="url" icon={Link} color="text-purple-500" placeholder="https://www.example.com" required={true} />
+                      <div className="mb-5">
+                        <div className="flex items-center text-gray-700 font-medium mb-2">
+                          <Mail size={18} className="mr-2 text-purple-500" />
+                          <span className="text-base font-semibold text-purple-700">Email</span>
+                        </div>
+                        {isEditing ? (
+                          <input
+                            type="email"
+                            name="email"
+                            value={profile.email || ''}
+                            onChange={handleProfileChange}
+                            className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
+                            placeholder="company@example.com"
+                          />
+                        ) : (
+                          <p className={`text-gray-700 text-base break-words p-2 rounded-lg ${!profile.email ? 'text-gray-400 italic' : 'bg-gray-50'}`}>
+                            {profile.email || 'Not specified'}
+                          </p>
+                        )}
+                      </div>
+                      
+                      <div className="mb-5">
+                        <div className="flex items-center text-gray-700 font-medium mb-2">
+                          <Phone size={18} className="mr-2 text-purple-500" />
+                          <span className="text-base font-semibold text-purple-700">Phone</span>
+                        </div>
+                        {isEditing ? (
+                          <input
+                            type="tel"
+                            name="phone"
+                            value={profile.phone || ''}
+                            onChange={handleProfileChange}
+                            className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
+                            placeholder="+1 (555) 123-4567"
+                          />
+                        ) : (
+                          <p className={`text-gray-700 text-base break-words p-2 rounded-lg ${!profile.phone ? 'text-gray-400 italic' : 'bg-gray-50'}`}>
+                            {profile.phone || 'Not specified'}
+                          </p>
+                        )}
+                      </div>
+                      
+                      <div className="mb-5">
+                        <div className="flex items-center text-gray-700 font-medium mb-2">
+                          <Link size={18} className="mr-2 text-purple-500" />
+                          <span className="text-base font-semibold text-purple-700">Website</span>
+                        </div>
+                        {isEditing ? (
+                          <input
+                            type="url"
+                            name="website"
+                            value={profile.website || ''}
+                            onChange={handleProfileChange}
+                            className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
+                            placeholder="https://www.example.com"
+                          />
+                        ) : (
+                          <p className={`text-gray-700 text-base break-words p-2 rounded-lg ${!profile.website ? 'text-gray-400 italic' : 'bg-gray-50'}`}>
+                            {profile.website || 'Not specified'}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -661,11 +722,110 @@ const handleSubmit = async (e) => {
                     </h2>
                     
                     <div className="space-y-5">
-                      <Field label="Street" name="street" icon={MapPin} color="text-orange-500" placeholder="123 Main Street" />
-                      <Field label="City" name="city" icon={Building} color="text-orange-500" placeholder="New York" required={true} />
-                      <Field label="State/County" name="county" icon={MapPin} color="text-orange-500" placeholder="New York" />
-                      <Field label="Country" name="country" icon={Globe} color="text-orange-500" placeholder="United States" required={true} />
-                      <Field label="Postal Code" name="postalCode" icon={Mail} color="text-orange-500" placeholder="10001" />
+                      <div className="mb-5">
+                        <div className="flex items-center text-gray-700 font-medium mb-2">
+                          <MapPin size={18} className="mr-2 text-orange-500" />
+                          <span className="text-base font-semibold text-orange-700">Street</span>
+                        </div>
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            name="street"
+                            value={profile.street || ''}
+                            onChange={handleProfileChange}
+                            className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
+                            placeholder="123 Main Street"
+                          />
+                        ) : (
+                          <p className={`text-gray-700 text-base break-words p-2 rounded-lg ${!profile.street ? 'text-gray-400 italic' : 'bg-gray-50'}`}>
+                            {profile.street || 'Not specified'}
+                          </p>
+                        )}
+                      </div>
+                      
+                      <div className="mb-5">
+                        <div className="flex items-center text-gray-700 font-medium mb-2">
+                          <Building size={18} className="mr-2 text-orange-500" />
+                          <span className="text-base font-semibold text-orange-700">City</span>
+                        </div>
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            name="city"
+                            value={profile.city || ''}
+                            onChange={handleProfileChange}
+                            className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
+                            placeholder="New York"
+                          />
+                        ) : (
+                          <p className={`text-gray-700 text-base break-words p-2 rounded-lg ${!profile.city ? 'text-gray-400 italic' : 'bg-gray-50'}`}>
+                            {profile.city || 'Not specified'}
+                          </p>
+                        )}
+                      </div>
+                      
+                      <div className="mb-5">
+                        <div className="flex items-center text-gray-700 font-medium mb-2">
+                          <MapPin size={18} className="mr-2 text-orange-500" />
+                          <span className="text-base font-semibold text-orange-700">State/County</span>
+                        </div>
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            name="county"
+                            value={profile.county || ''}
+                            onChange={handleProfileChange}
+                            className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
+                            placeholder="New York"
+                          />
+                        ) : (
+                          <p className={`text-gray-700 text-base break-words p-2 rounded-lg ${!profile.county ? 'text-gray-400 italic' : 'bg-gray-50'}`}>
+                            {profile.county || 'Not specified'}
+                          </p>
+                        )}
+                      </div>
+                      
+                      <div className="mb-5">
+                        <div className="flex items-center text-gray-700 font-medium mb-2">
+                          <Globe size={18} className="mr-2 text-orange-500" />
+                          <span className="text-base font-semibold text-orange-700">Country</span>
+                        </div>
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            name="country"
+                            value={profile.county || ''}
+                            onChange={handleProfileChange}
+                            className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
+                            placeholder="United States"
+                          />
+                        ) : (
+                          <p className={`text-gray-700 text-base break-words p-2 rounded-lg ${!profile.country ? 'text-gray-400 italic' : 'bg-gray-50'}`}>
+                            {profile.country || 'Not specified'}
+                          </p>
+                        )}
+                      </div>
+                      
+                      <div className="mb-5">
+                        <div className="flex items-center text-gray-700 font-medium mb-2">
+                          <Mail size={18} className="mr-2 text-orange-500" />
+                          <span className="text-base font-semibold text-orange-700">Postal Code</span>
+                        </div>
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            name="postalCode"
+                            value={profile.postalCode || ''}
+                            onChange={handleProfileChange}
+                            className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
+                            placeholder="10001"
+                          />
+                        ) : (
+                          <p className={`text-gray-700 text-base break-words p-2 rounded-lg ${!profile.postalCode ? 'text-gray-400 italic' : 'bg-gray-50'}`}>
+                            {profile.postalCode || 'Not specified'}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -678,12 +838,130 @@ const handleSubmit = async (e) => {
                   </h2>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Field label="Business Reg. No." name="businessRegistrationNumber" icon={ClipboardList} color="text-teal-500" placeholder="123456789" />
-                    <Field label="KRA PIN" name="kraPin" icon={Fingerprint} color="text-teal-500" placeholder="P123456789X" />
-                    <Field label="Business Permit No." name="businessPermitNumber" icon={CreditCard} color="text-teal-500" placeholder="BP-12345" />
-                    <Field label="License Expiry" name="licenseExpiryDate" type="date" icon={Calendar} color="text-teal-500" />
-                    <Field label="VAT Number" name="vatNumber" icon={Briefcase} color="text-teal-500" placeholder="VAT123456789" />
-                    <Field label="Legal Name" name="legalName" icon={Building} color="text-teal-500" placeholder="Legal Company Name, Inc." />
+                    <div className="mb-5">
+                      <div className="flex items-center text-gray-700 font-medium mb-2">
+                        <ClipboardList size={18} className="mr-2 text-teal-500" />
+                        <span className="text-base font-semibold text-teal-700">Business Reg. No.</span>
+                      </div>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          name="businessRegistrationNumber"
+                          value={profile.businessRegistrationNumber || ''}
+                          onChange={handleProfileChange}
+                          className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
+                          placeholder="123456789"
+                        />
+                      ) : (
+                        <p className={`text-gray-700 text-base break-words p-2 rounded-lg ${!profile.businessRegistrationNumber ? 'text-gray-400 italic' : 'bg-gray-50'}`}>
+                          {profile.businessRegistrationNumber || 'Not specified'}
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div className="mb-5">
+                      <div className="flex items-center text-gray-700 font-medium mb-2">
+                        <Fingerprint size={18} className="mr-2 text-teal-500" />
+                        <span className="text-base font-semibold text-teal-700">KRA PIN</span>
+                      </div>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          name="kraPin"
+                          value={profile.kraPin || ''}
+                          onChange={handleProfileChange}
+                          className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
+                          placeholder="P123456789X"
+                        />
+                      ) : (
+                        <p className={`text-gray-700 text-base break-words p-2 rounded-lg ${!profile.kraPin ? 'text-gray-400 italic' : 'bg-gray-50'}`}>
+                          {profile.kraPin || 'Not specified'}
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div className="mb-5">
+                      <div className="flex items-center text-gray-700 font-medium mb-2">
+                        <CreditCard size={18} className="mr-2 text-teal-500" />
+                        <span className="text-base font-semibold text-teal-700">Business Permit No.</span>
+                      </div>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          name="businessPermitNumber"
+                          value={profile.businessPermitNumber || ''}
+                          onChange={handleProfileChange}
+                          className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
+                          placeholder="BP-12345"
+                        />
+                      ) : (
+                        <p className={`text-gray-700 text-base break-words p-2 rounded-lg ${!profile.businessPermitNumber ? 'text-gray-400 italic' : 'bg-gray-50'}`}>
+                          {profile.businessPermitNumber || 'Not specified'}
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div className="mb-5">
+                      <div className="flex items-center text-gray-700 font-medium mb-2">
+                        <Calendar size={18} className="mr-2 text-teal-500" />
+                        <span className="text-base font-semibold text-teal-700">License Expiry</span>
+                      </div>
+                      {isEditing ? (
+                        <input
+                          type="date"
+                          name="licenseExpiryDate"
+                          value={profile.licenseExpiryDate || ''}
+                          onChange={handleProfileChange}
+                          className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
+                        />
+                      ) : (
+                        <p className={`text-gray-700 text-base break-words p-2 rounded-lg ${!profile.licenseExpiryDate ? 'text-gray-400 italic' : 'bg-gray-50'}`}>
+                          {profile.licenseExpiryDate || 'Not specified'}
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div className="mb-5">
+                      <div className="flex items-center text-gray-700 font-medium mb-2">
+                        <Briefcase size={18} className="mr-2 text-teal-500" />
+                        <span className="text-base font-semibold text-teal-700">VAT Number</span>
+                      </div>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          name="vatNumber"
+                          value={profile.vatNumber || ''}
+                          onChange={handleProfileChange}
+                          className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
+                          placeholder="VAT123456789"
+                        />
+                      ) : (
+                        <p className={`text-gray-700 text-base break-words p-2 rounded-lg ${!profile.vatNumber ? 'text-gray-400 italic' : 'bg-gray-50'}`}>
+                          {profile.vatNumber || 'Not specified'}
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div className="mb-5">
+                      <div className="flex items-center text-gray-700 font-medium mb-2">
+                        <Building size={18} className="mr-2 text-teal-500" />
+                        <span className="text-base font-semibold text-teal-700">Legal Name</span>
+                      </div>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          name="legalName"
+                          value={profile.legalName || ''}
+                          onChange={handleProfileChange}
+                          className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
+                          placeholder="Legal Company Name, Inc."
+                        />
+                      ) : (
+                        <p className={`text-gray-700 text-base break-words p-2 rounded-lg ${!profile.legalName ? 'text-gray-400 italic' : 'bg-gray-50'}`}>
+                          {profile.legalName || 'Not specified'}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}
@@ -695,10 +973,89 @@ const handleSubmit = async (e) => {
                   </h2>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Field label="LinkedIn" name="linkedin" type="url" icon={Link} color="text-red-500" placeholder="https://linkedin.com/company/example" />
-                    <Field label="Twitter" name="twitter" type="url" icon={Link} color="text-red-500" placeholder="https://twitter.com/example" />
-                    <Field label="Facebook" name="facebook" type="url" icon={Link} color="text-red-500" placeholder="https://facebook.com/example" />
-                    <Field label="Instagram" name="instagram" type="url" icon={Link} color="text-red-500" placeholder="https://instagram.com/example" />
+                    <div className="mb-5">
+                      <div className="flex items-center text-gray-700 font-medium mb-2">
+                        <Link size={18} className="mr-2 text-red-500" />
+                        <span className="text-base font-semibold text-red-700">LinkedIn</span>
+                      </div>
+                      {isEditing ? (
+                        <input
+                          type="url"
+                          name="linkedin"
+                          value={profile.linkedin || ''}
+                          onChange={handleProfileChange}
+                          className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
+                          placeholder="https://linkedin.com/company/example"
+                        />
+                      ) : (
+                        <p className={`text-gray-700 text-base break-words p-2 rounded-lg ${!profile.linkedin ? 'text-gray-400 italic' : 'bg-gray-50'}`}>
+                          {profile.linkedin || 'Not specified'}
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div className="mb-5">
+                      <div className="flex items-center text-gray-700 font-medium mb-2">
+                        <Link size={18} className="mr-2 text-red-500" />
+                        <span className="text-base font-semibold text-red-700">Twitter</span>
+                      </div>
+                      {isEditing ? (
+                        <input
+                          type="url"
+                          name="twitter"
+                          value={profile.twitter || ''}
+                          onChange={handleProfileChange}
+                          className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
+                          placeholder="https://twitter.com/example"
+                        />
+                      ) : (
+                        <p className={`text-gray-700 text-base break-words p-2 rounded-lg ${!profile.twitter ? 'text-gray-400 italic' : 'bg-gray-50'}`}>
+                          {profile.twitter || 'Not specified'}
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div className="mb-5">
+                      <div className="flex items-center text-gray-700 font-medium mb-2">
+                        <Link size={18} className="mr-2 text-red-500" />
+                        <span className="text-base font-semibold text-red-700">Facebook</span>
+                      </div>
+                      {isEditing ? (
+                        <input
+                          type="url"
+                          name="facebook"
+                          value={profile.facebook || ''}
+                          onChange={handleProfileChange}
+                          className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
+                          placeholder="https://facebook.com/example"
+                        />
+                      ) : (
+                        <p className={`text-gray-700 text-base break-words p-2 rounded-lg ${!profile.facebook ? 'text-gray-400 italic' : 'bg-gray-50'}`}>
+                          {profile.facebook || 'Not specified'}
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div className="mb-5">
+                      <div className="flex items-center text-gray-700 font-medium mb-2">
+                        <Link size={18} className="mr-2 text-red-500" />
+                        <span className="text-base font-semibold text-red-700">Instagram</span>
+                      </div>
+                      {isEditing ? (
+                        <input
+                          type="url"
+                          name="instagram"
+                          value={profile.instagram || ''}
+                          onChange={handleProfileChange}
+                          className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all text-base bg-gray-50"
+                          placeholder="https://instagram.com/example"
+                        />
+                      ) : (
+                        <p className={`text-gray-700 text-base break-words p-2 rounded-lg ${!profile.instagram ? 'text-gray-400 italic' : 'bg-gray-50'}`}>
+                          {profile.instagram || 'Not specified'}
+                        </p>
+                      )}
+                    </div>
                   </div>
                   
                   <div className="mt-8 p-4 bg-gradient-to-r from-red-50 to-pink-50 rounded-xl border border-red-100">
@@ -718,50 +1075,50 @@ const handleSubmit = async (e) => {
                     <Eye size={22} className="text-blue-600" /> Profile Preview
                   </h2>
                   
-               <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
-  <div className="flex items-center gap-4 mb-6">
-    <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center shadow-sm border border-white">
-      {logoPreview || profile.logoUrl ? (
-        <img 
-          src={logoPreview || profile.logoUrl} 
-          alt="Company logo" 
-          className="w-12 h-12 rounded-md object-cover"
-        />
-      ) : (
-        <Building2 size={24} className="text-blue-600" />
-      )}
-    </div>
-    <div>
-      <h3 className="text-xl font-bold text-gray-900">{profile.name || 'Company Name'}</h3>
-      <p className="text-gray-600 text-base">{profile.industry || 'Industry'} • {profile.companySize || 'Company Size'}</p>
-    </div>
-  </div>
-  
-  <p className="text-gray-700 mb-6 text-base leading-relaxed">
-    {profile.description || 'Company description will appear here.'}
-  </p>
-  
-  <div className="grid grid-cols-2 gap-4 text-base">
-    <div>
-      <p className="text-gray-500">Email</p>
-      <p className="text-gray-800 font-medium">{profile.email || 'N/A'}</p>
-    </div>
-    <div>
-      <p className="text-gray-500">Phone</p>
-      <p className="text-gray-800 font-medium">{profile.phone || 'N/A'}</p>
-    </div>
-    <div>
-      <p className="text-gray-500">Website</p>
-      <p className="text-blue-600 font-medium">{profile.website || 'N/A'}</p>
-    </div>
-    <div>
-      <p className="text-gray-500">Location</p>
-      <p className="text-gray-800 font-medium">
-        {[profile.city, profile.country].filter(Boolean).join(', ') || 'N/A'}
-      </p>
-    </div>
-  </div>
-</div>
+                  <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center shadow-sm border border-white">
+                        {logoPreview || profile.logoUrl ? (
+                          <img 
+                            src={logoPreview || profile.logoUrl} 
+                            alt="Company logo" 
+                            className="w-12 h-12 rounded-md object-cover"
+                          />
+                        ) : (
+                          <Building2 size={24} className="text-blue-600" />
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900">{profile.name || 'Company Name'}</h3>
+                        <p className="text-gray-600 text-base">{profile.industry || 'Industry'} • {profile.companySize || 'Company Size'}</p>
+                      </div>
+                    </div>
+                    
+                    <p className="text-gray-700 mb-6 text-base leading-relaxed">
+                      {profile.description || 'Company description will appear here.'}
+                    </p>
+                    
+                    <div className="grid grid-cols-2 gap-4 text-base">
+                      <div>
+                        <p className="text-gray-500">Email</p>
+                        <p className="text-gray-800 font-medium">{profile.email || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Phone</p>
+                        <p className="text-gray-800 font-medium">{profile.phone || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Website</p>
+                        <p className="text-blue-600 font-medium">{profile.website || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">Location</p>
+                        <p className="text-gray-800 font-medium">
+                          {[profile.city, profile.country].filter(Boolean).join(', ') || 'N/A'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -793,7 +1150,7 @@ const handleSubmit = async (e) => {
                         <XCircle size={18} /> Cancel
                       </button>
                       <button
-                                               type="submit"
+                        type="submit"
                         className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-md disabled:opacity-70 flex items-center gap-2 text-base"
                         disabled={isSubmitting}
                       >

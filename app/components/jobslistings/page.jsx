@@ -37,14 +37,202 @@ import {
   BookOpen,
   Target,
   Zap,
-  HeartHandshake
+  HeartHandshake,
+
+  User,
+ 
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useSession } from 'next-auth/react';
 
+
+
+// --- FILTER COMPONENTS ---
+const EducationLevelFilter = ({ value, onChange }) => {
+  const educationLevels = [
+    "Certificate",
+    "Diploma", 
+    "Bachelor's",
+    "Master's",
+    "PhD"
+  ];
+
+  return (
+    <div className="bg-white p-4 rounded-lg border border-gray-200">
+      <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+        <GraduationCap size={16} />
+        Education Level
+      </h4>
+      <div className="space-y-2">
+        {educationLevels.map(level => (
+          <label key={level} className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={value.includes(level)}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  onChange([...value, level]);
+                } else {
+                  onChange(value.filter(l => l !== level));
+                }
+              }}
+              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-700">{level}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const ExperienceFilter = ({ value, onChange }) => {
+  const experienceRanges = [
+    "Less than 1 year",
+    "1-2 years",
+    "3-5 years", 
+    "5+ years"
+  ];
+
+  return (
+    <div className="bg-white p-4 rounded-lg border border-gray-200">
+      <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+        <Briefcase size={16} />
+        Experience
+      </h4>
+      <div className="space-y-2">
+        {experienceRanges.map(range => (
+          <label key={range} className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={value.includes(range)}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  onChange([...value, range]);
+                } else {
+                  onChange(value.filter(r => r !== range));
+                }
+              }}
+              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-700">{range}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const StatusFilter = ({ value, onChange }) => {
+  const statuses = ["Student", "Alumni"];
+
+  return (
+    <div className="bg-white p-4 rounded-lg border border-gray-200">
+      <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+        <User size={16} />
+        Status
+      </h4>
+      <div className="space-y-2">
+        {statuses.map(status => (
+          <label key={status} className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={value.includes(status)}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  onChange([...value, status]);
+                } else {
+                  onChange(value.filter(s => s !== status));
+                }
+              }}
+              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-700">{status}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const FilterSidebar = ({ isOpen, onClose, filters, onFilterChange }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-end pt-16">
+      <div className="fixed inset-0 bg-black/30" onClick={onClose} />
+      <div className="relative bg-white rounded-l-xl shadow-2xl w-80 h-full max-h-[calc(100vh-4rem)] overflow-y-auto">
+        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+          <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+            <Filter size={18} />
+            Filters
+          </h3>
+          <button
+            onClick={onClose}
+            className="p-1 hover:bg-gray-100 rounded"
+          >
+            <X size={18} />
+          </button>
+        </div>
+        
+        <div className="p-4 space-y-4">
+          <EducationLevelFilter
+            value={filters.educationLevel}
+            onChange={(value) => onFilterChange('educationLevel', value)}
+          />
+          
+          <ExperienceFilter
+            value={filters.experience}
+            onChange={(value) => onFilterChange('experience', value)}
+          />
+          
+          <StatusFilter
+            value={filters.status}
+            onChange={(value) => onFilterChange('status', value)}
+          />
+          
+          <button
+            onClick={() => onFilterChange('reset')}
+            className="w-full py-2 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+          >
+            Reset Filters
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Helper function to calculate experience from experience array
+const calculateExperienceRange = (experienceArray) => {
+  if (!experienceArray || experienceArray.length === 0) {
+    return "Less than 1 year";
+  }
+
+  // Calculate total months of experience
+  let totalMonths = 0;
+  
+  experienceArray.forEach(exp => {
+    const startDate = new Date(exp.startDate);
+    const endDate = exp.isCurrent ? new Date() : new Date(exp.endDate);
+    const months = (endDate.getFullYear() - startDate.getFullYear()) * 12 + 
+                  (endDate.getMonth() - startDate.getMonth());
+    totalMonths += Math.max(0, months);
+  });
+
+  // Convert to years and categorize
+  const totalYears = totalMonths / 12;
+  
+  if (totalYears < 1) return "Less than 1 year";
+  if (totalYears <= 2) return "1-2 years";
+  if (totalYears <= 5) return "3-5 years";
+  return "5+ years";
+};
 // --- COMPONENTS ---
 const ApplicantDetailsModal = ({ applicant, onClose, onEmail }) => {
   if (!applicant) return null;
+
+  const applicantExperience = calculateExperienceRange(applicant.student.experience);
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md overflow-y-auto">
@@ -62,18 +250,39 @@ const ApplicantDetailsModal = ({ applicant, onClose, onEmail }) => {
             <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
               <UserCheck className="w-10 h-10 text-blue-600" />
             </div>
-            <div>
+            <div className="flex-1">
               <h2 className="text-2xl font-bold text-gray-900">{applicant.student.name}</h2>
               <p className="text-gray-600">{applicant.student.email}</p>
-             <span className="inline-block mt-2 px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-  <span className="font-bold">Address:</span>
-  <span className="text-blue-800">
-    details
-  </span>
-  <span className="italic  text-gray-700">
-    {`, ${applicant.student.address.ward}, ${applicant.student.address.subCounty}, ${applicant.student.address.county}`}
-  </span>
-</span>
+              
+              {/* Education, Experience, and Status Badges */}
+              <div className="flex flex-wrap gap-2 mt-2">
+                {applicant.student.educationLevel && (
+                  <span className="px-3 py-1 bg-purple-100 text-purple-700 text-sm font-medium rounded-full">
+                    <GraduationCap size={14} className="inline mr-1" />
+                    {applicant.student.educationLevel}
+                  </span>
+                )}
+                {applicantExperience && (
+                  <span className="px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">
+                    <Briefcase size={14} className="inline mr-1" />
+                    {applicantExperience}
+                  </span>
+                )}
+                {applicant.student.studentStatus && (
+                  <span className="px-3 py-1 bg-blue-100 text-blue-700 text-sm font-medium rounded-full">
+                    <User size={14} className="inline mr-1" />
+                    {applicant.student.studentStatus}
+                  </span>
+                )}
+              </div>
+              
+              <span className="inline-block mt-2 px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                <span className="font-bold">Address:</span>
+                <span className="text-blue-800">details</span>
+                <span className="italic text-gray-700">
+                  {`, ${applicant.student.address.ward}, ${applicant.student.address.subCounty}, ${applicant.student.address.county}`}
+                </span>
+              </span>
             </div>
             <button
               onClick={() => onEmail(applicant.student.email)}
@@ -98,6 +307,8 @@ const ApplicantDetailsModal = ({ applicant, onClose, onEmail }) => {
               <div className="space-y-2">
                 <p><span className="font-medium">Bio:</span> {applicant.student.bio || 'Not provided'}</p>
                 <p><span className="font-medium">Summary:</span> {applicant.student.summary || 'Not provided'}</p>
+                <p><span className="font-medium">Education Level:</span> {applicant.student.educationLevel || 'Not specified'}</p>
+                <p><span className="font-medium">Status:</span> {applicant.student.studentStatus || 'Not specified'}</p>
               </div>
             </div>
 
@@ -112,6 +323,40 @@ const ApplicantDetailsModal = ({ applicant, onClose, onEmail }) => {
               </div>
             </div>
           </div>
+
+          {/* Experience Section */}
+          {applicant.student.experience && applicant.student.experience.length > 0 && (
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Work Experience</h3>
+              <div className="space-y-3">
+                {applicant.student.experience.map((exp, index) => (
+                  <div key={index} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <h4 className="font-semibold text-gray-900">{exp.title} at {exp.company}</h4>
+                    <p className="text-sm text-gray-600">
+                      {new Date(exp.startDate).toLocaleDateString()} - {exp.isCurrent ? 'Present' : new Date(exp.endDate).toLocaleDateString()}
+                    </p>
+                    <p className="text-gray-700 mt-2">{exp.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Education Section */}
+          {applicant.student.education && applicant.student.education.length > 0 && (
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Education</h3>
+              <div className="space-y-3">
+                {applicant.student.education.map((edu, index) => (
+                  <div key={index} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <h4 className="font-semibold text-gray-900">{edu.degree} in {edu.fieldOfStudy}</h4>
+                    <p className="text-sm text-gray-600">{edu.school}</p>
+                    <p className="text-sm text-gray-600">Graduated: {edu.graduationYear}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Resume */}
           <div>
@@ -246,19 +491,64 @@ const DeleteConfirmationModal = ({ onConfirm, onCancel, title, message }) => {
 const ApplicantsModal = ({ job, onClose }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedApplicant, setSelectedApplicant] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    educationLevel: [],
+    experience: [],
+    status: []
+  });
 
-  const filteredApplicants = job.applicants.filter(applicant =>
-    applicant.student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    applicant.student.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter applicants based on search term and filters
+  const filteredApplicants = job.applicants.filter(applicant => {
+    // Search filter
+    const matchesSearch = 
+      applicant.student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      applicant.student.email.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Education level filter - using educationLevel from student profile
+    const matchesEducation = filters.educationLevel.length === 0 || 
+      (applicant.student.educationLevel && 
+       filters.educationLevel.includes(applicant.student.educationLevel));
+    
+    // Experience filter - calculate from experience array
+    const applicantExperience = calculateExperienceRange(applicant.student.experience);
+    const matchesExperience = filters.experience.length === 0 || 
+      filters.experience.includes(applicantExperience);
+    
+    // Status filter - using studentStatus from student profile
+    const matchesStatus = filters.status.length === 0 || 
+      (applicant.student.studentStatus && 
+       filters.status.includes(applicant.student.studentStatus));
+    
+    return matchesSearch && matchesEducation && matchesExperience && matchesStatus;
+  });
+
+  const handleFilterChange = (filterType, value) => {
+    if (filterType === 'reset') {
+      setFilters({
+        educationLevel: [],
+        experience: [],
+        status: []
+      });
+    } else {
+      setFilters(prev => ({
+        ...prev,
+        [filterType]: value
+      }));
+    }
+  };
 
   const handleEmail = (email) => {
     window.location.href = `mailto:${email}`;
   };
 
+  const getActiveFilterCount = () => {
+    return Object.values(filters).reduce((count, filterArray) => count + filterArray.length, 0);
+  };
+
   if (!job) return null;
 
-  return createPortal(
+  return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md overflow-y-auto">
       <div className="relative bg-white rounded-2xl p-6 max-w-6xl w-full mx-auto my-8 shadow-2xl max-h-[90vh] overflow-hidden">
         <button
@@ -273,73 +563,137 @@ const ApplicantsModal = ({ job, onClose }) => {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">Applicants for "{job.title}"</h2>
-                <p className="text-gray-600">{filteredApplicants.length} applicants found</p>
+                <p className="text-gray-600">
+                  {filteredApplicants.length} applicant{filteredApplicants.length !== 1 ? 's' : ''} found
+                  {getActiveFilterCount() > 0 && ` (${getActiveFilterCount()} filter${getActiveFilterCount() !== 1 ? 's' : ''} active)`}
+                </p>
               </div>
-              <div className="relative w-64">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Search applicants..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+              
+              <div className="flex items-center gap-3">
+                <div className="relative w-64">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                    type="text"
+                    placeholder="Search applicants..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                
+                <button
+                  onClick={() => setShowFilters(true)}
+                  className="relative p-2.5 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors"
+                >
+                  <Filter size={18} />
+                  {getActiveFilterCount() > 0 && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-600 text-white text-xs rounded-full flex items-center justify-center">
+                      {getActiveFilterCount()}
+                    </span>
+                  )}
+                </button>
               </div>
             </div>
 
+            {/* Applicant Cards */}
             {filteredApplicants.length > 0 ? (
               <div className="grid grid-cols-1 gap-4 overflow-y-auto pr-2">
-                {filteredApplicants.map(applicant => (
-                  <div
-                    key={applicant.id}
-                    onClick={() => setSelectedApplicant(applicant)}
-                    className="bg-gradient-to-br from-white to-gray-50 p-6 rounded-xl border border-gray-200 hover:border-blue-300 cursor-pointer transition-all duration-200 hover:shadow-lg group"
-                  >
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                        <UserCheck className="w-6 h-6 text-blue-600" />
+                {filteredApplicants.map(applicant => {
+                  const applicantExperience = calculateExperienceRange(applicant.student.experience);
+                  
+                  return (
+                    <div
+                      key={applicant.id}
+                      onClick={() => setSelectedApplicant(applicant)}
+                      className="bg-gradient-to-br from-white to-gray-50 p-6 rounded-xl border border-gray-200 hover:border-blue-300 cursor-pointer transition-all duration-200 hover:shadow-lg group"
+                    >
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                          <UserCheck className="w-6 h-6 text-blue-600" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                            {applicant.student.name}
+                          </h3>
+                          <p className="text-sm text-gray-600">{applicant.student.email}</p>
+                          
+                          {/* Display education, experience, and status badges */}
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {applicant.student.educationLevel && (
+                              <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">
+                                {applicant.student.educationLevel}
+                              </span>
+                            )}
+                            {applicantExperience && (
+                              <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                                {applicantExperience}
+                              </span>
+                            )}
+                            {applicant.student.studentStatus && (
+                              <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                                {applicant.student.studentStatus}
+                              </span>
+                            )}
+                          </div>
+                          
+                          <p className="text-xs text-gray-400 mt-1">
+                            Applied {new Date(applicant.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                          Applied
+                        </span>
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                          {applicant.student.name}
-                        </h3>
-                        <p className="text-sm text-gray-600">{applicant.student.email}</p>
-                        <p className="text-xs text-gray-400">
-                          Applied {new Date(applicant.createdAt).toLocaleDateString()}
-                        </p>
+                      
+                      <div className="text-sm text-gray-700 mb-4">
+                        <p className="line-clamp-2">{applicant.coverLetter}</p>
                       </div>
-                   <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                      Applied
-                   </span>
-                    </div>
-                    <div className="text-sm text-gray-700 mb-4">
-                      <p className="line-clamp-2">{applicant.coverLetter}</p>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex flex-wrap gap-2">
-                        {applicant.student.skills && applicant.student.skills.slice(0, 3).map((skill, index) => (
-                          <span key={index} className="px-2.5 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
-                            {skill}
-                          </span>
-                        ))}
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-wrap gap-2">
+                          {applicant.student.skills && applicant.student.skills.slice(0, 3).map((skill, index) => (
+                            <span key={index} className="px-2.5 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEmail(applicant.student.email);
+                          }}
+                          className="p-2 text-gray-400 hover:text-blue-600 rounded-lg transition-colors"
+                        >
+                          <Mail size={16} />
+                        </button>
                       </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEmail(applicant.student.email);
-                        }}
-                        className="p-2 text-gray-400 hover:text-blue-600 rounded-lg transition-colors"
-                      >
-                        <Mail size={16} />
-                      </button>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="text-center py-12">
                 <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500">No applicants found</p>
+                <p className="text-gray-500">
+                  {getActiveFilterCount() > 0 || searchTerm 
+                    ? "No applicants match your filters. Try adjusting your search criteria." 
+                    : "No applicants found"}
+                </p>
+                {(getActiveFilterCount() > 0 || searchTerm) && (
+                  <button
+                    onClick={() => {
+                      setSearchTerm('');
+                      setFilters({
+                        educationLevel: [],
+                        experience: [],
+                        status: []
+                      });
+                    }}
+                    className="mt-4 px-4 py-2 text-blue-600 hover:text-blue-700"
+                  >
+                    Clear all filters
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -350,11 +704,19 @@ const ApplicantsModal = ({ job, onClose }) => {
             onEmail={handleEmail}
           />
         )}
+        
+        {/* Filter Sidebar */}
+        <FilterSidebar
+          isOpen={showFilters}
+          onClose={() => setShowFilters(false)}
+          filters={filters}
+          onFilterChange={handleFilterChange}
+        />
       </div>
-    </div>,
-    document.body
+    </div>
   );
 };
+
 
 const JobPostings = ({
   jobs,

@@ -18,7 +18,8 @@ import {
   Pencil,
   Eye,
   EyeOff,
-  AlertCircle
+  AlertCircle,
+  Loader
 } from 'lucide-react';
 
 // --- Reusable Avatar Component ---
@@ -59,16 +60,41 @@ const ProfileAvatar = ({ name, avatarUrl }) => {
   );
 };
 
-
 // --- Main Component ---
 const ProfileSettings = () => {
   const { data: session, status } = useSession();
+  const [adminData, setAdminData] = useState(null);
+ const [adminId, setAdminId] = useState(null); 
+  const [isLoading, setIsLoading] = useState(true);
   
   const [isEditing, setIsEditing] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isPasswordSectionOpen, setIsPasswordSectionOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+ const fetchAdminData = async () => {
+  if (session?.user?.id) {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`/api/admins/${session.user.id}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch admin data');
+      }
+      
+      const admin = await response.json();
+      console.log(admin.id);
+      setAdminData(admin);
+      setAdminId(admin.id); // Store the admin ID
+    } catch (error) {
+      console.error('Error fetching admin data:', error);
+      setErrorMessage('Failed to load admin profile data');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+};
 
   // Form for general profile information
   const { 
@@ -80,25 +106,44 @@ const ProfileSettings = () => {
     getValues 
   } = useForm({
     defaultValues: {
-      fullName: session?.user?.name || '',
-      email: session?.user?.email || '',
-      role: session?.user?.role || '',
-      phoneNumber: session?.user?.admin?.phoneNumber || '',
-      department: session?.user?.department || '',
-      title: session?.user?.title || '',
-      accessLevel: session?.admin?.accessLevel || '',
-      street: session?.admin?.street || '',
-      city: session?.admin?.city || '',
-      postalCode: session?.admin?.postalCode || '',
-      country: session?.admin?.country || '',
+      fullName: '',
+      email: '',
+      role: '',
+      phoneNumber: '',
+      department: '',
+      title: '',
+      accessLevel: '',
+      street: '',
+      city: '',
+      postalCode: '',
+      country: '',
     }
   });
+
+  // Reset form when adminData changes
+  useEffect(() => {
+    if (adminData) {
+      reset({
+        fullName: adminData.name || '',
+        email: adminData.email || '',
+        role: adminData.role || '',
+        phoneNumber: adminData.phoneNumber || '',
+        department: adminData.department || '',
+        title: adminData.title || '',
+        accessLevel: adminData.accessLevel || '',
+        street: adminData.street || '',
+        city: adminData.city || '',
+        postalCode: adminData.postalCode || '',
+        country: adminData.country || '',
+      });
+    }
+  }, [adminData, reset]);
 
   // Form for password change
   const { 
     register: registerPassword, 
     handleSubmit: handleSubmitPassword, 
-    formState: { errors: passwordErrors }, 
+    formState: { errors: passwordErrors, isSubmitting: isPasswordSubmitting }, 
     reset: resetPassword, 
     getValues: getPasswordValues 
   } = useForm();
@@ -106,111 +151,120 @@ const ProfileSettings = () => {
   const fullName = useWatch({
     control,
     name: 'fullName',
-    defaultValue: session?.user?.name || '',
+    defaultValue: adminData?.name || '',
   });
 
-  useEffect(() => {
-    if (session?.admin) {
-      reset({
-        fullName: session.admin.name || '',
-        email: session.admin.email || '',
-        role: session.admin.role || '',
-        phoneNumber: session.admin.phoneNumber || '',
-        department: session.admin.department || '',
-        title: session.admin.title || '',
-        accessLevel: session.admin.accessLevel || '',
-        street: session.admin.street || '',
-        city: session.admin.city || '',
-        postalCode: session.admin.postalCode || '',
-        country: session.admin.country || '',
-      });
-    }
-  }, [session, reset]);
+const handleSaveChanges = async (data) => {
+  setSuccessMessage('');
+  setErrorMessage('');
   
-  const handleSaveChanges = async (data) => {
-    setSuccessMessage('');
-    setErrorMessage('');
+  if (!adminId) {
+    setErrorMessage("Admin ID not found. Unable to save changes.");
+    console.error("Admin ID is missing");
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/adminregister/${adminId}`, {
+      method: 'PUT', // Change from PATCH to PUT
+      headers: { 
+        'Content-Type': 'application/json' 
+      },
+      body: JSON.stringify({
+        name: data.fullName,
+        email: data.email,
+        phoneNumber: data.phoneNumber,
+        department: data.department,
+        title: data.title,
+        street: data.street,
+        city: data.city,
+        postalCode: data.postalCode,
+        country: data.country,
+        // Include other fields that might be required by your API
+        role: data.role || adminData.role,
+        accessLevel: data.accessLevel || adminData.accessLevel,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to update profile.');
+    }
     
-    const userId = session?.admin?.id;
-    if (!userId) {
-      setErrorMessage("User ID not found. Unable to save changes.");
-      console.error("User ID is missing from session data.");
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/adminregister/${userId}`, {
-        method: 'PATCH',
-        headers: { 
-          'Content-Type': 'application/json' 
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update profile.');
-      }
-      
-      const updatedProfile = await response.json();
-      
-      setSuccessMessage('Your profile has been updated successfully!');
-      
-      reset(updatedProfile); 
-      setIsEditing(false);
-      
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      setErrorMessage(error.message);
-    }
-  };
-
-  const handlePasswordSave = async (data) => {
-    setErrorMessage('');
-    setSuccessMessage('');
+    const updatedProfile = await response.json();
+    setAdminData(updatedProfile);
     
-    const userId = session?.admin?.id;
-    if (!userId) {
-      setErrorMessage("User ID not found. Unable to change password.");
-      console.error("User ID is missing from session data.");
-      return;
+    setSuccessMessage('Your profile has been updated successfully!');
+    setIsEditing(false);
+    
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    setErrorMessage(error.message);
+  }
+};
+
+const handlePasswordSave = async (data) => {
+  setErrorMessage('');
+  setSuccessMessage('');
+  
+  if (!adminId) {
+    setErrorMessage("Admin ID not found. Unable to change password.");
+    console.error("Admin ID is missing");
+    return;
+  }
+
+  try {
+    // Get current form values
+    const formValues = getValues();
+    
+    // Send password update with all required fields
+    const response = await fetch(`/api/adminregister/${adminId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        password: data.newPassword,
+        // Include all other fields to prevent validation errors
+        name: formValues.fullName,
+        email: formValues.email,
+        phoneNumber: formValues.phoneNumber,
+        department: formValues.department,
+        title: formValues.title,
+        street: formValues.street,
+        city: formValues.city,
+        postalCode: formValues.postalCode,
+        country: formValues.country,
+        role: formValues.role || adminData.role,
+        accessLevel: formValues.accessLevel || adminData.accessLevel,
+      }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to update password.');
     }
 
-    try {
-      // Assuming you have a separate API endpoint for password changes
-      const response = await fetch(`/api/admin/change-password/${userId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ newPassword: data.newPassword }),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update password.');
-      }
-
-      setSuccessMessage('Your password has been updated successfully!');
-      resetPassword();
-      setIsPasswordSectionOpen(false);
-    } catch (error) {
-      console.error("Error updating password:", error);
-      setErrorMessage(error.message);
-    }
-  };
+    setSuccessMessage('Your password has been updated successfully!');
+    resetPassword();
+    setIsPasswordSectionOpen(false);
+  } catch (error) {
+    console.error("Error updating password:", error);
+    setErrorMessage(error.message);
+  }
+};
 
   const handleCancel = () => {
     reset({
-        fullName: session?.admin?.name || '',
-        email: session?.admin?.email || '',
-        role: session?.admin?.role || '',
-        phoneNumber: session?.admin?.phoneNumber || '',
-        department: session?.admin?.department || '',
-        title: session?.admin?.title || '',
-        accessLevel: session?.admin?.accessLevel || '',
-        street: session?.admin?.street || '',
-        city: session?.admin?.city || '',
-        postalCode: session?.admin?.postalCode || '',
-        country: session?.admin?.country || '',
+      fullName: adminData?.name || '',
+      email: adminData?.email || '',
+      role: adminData?.role || '',
+      phoneNumber: adminData?.phoneNumber || '',
+      department: adminData?.department || '',
+      title: adminData?.title || '',
+      accessLevel: adminData?.accessLevel || '',
+      street: adminData?.street || '',
+      city: adminData?.city || '',
+      postalCode: adminData?.postalCode || '',
+      country: adminData?.country || '',
     });
     setIsEditing(false);
     setErrorMessage('');
@@ -219,8 +273,25 @@ const ProfileSettings = () => {
     resetPassword();
   };
   
-  if (status === "loading") {
-    return <div className="text-center text-gray-500 font-medium">Loading profile...</div>;
+  if (status === "loading" || isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <Loader size={32} className="animate-spin mx-auto text-blue-600" />
+          <p className="mt-4 text-gray-500 font-medium">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!adminData) {
+    return (
+      <div className="text-center p-10 bg-white rounded-3xl shadow-lg">
+        <AlertCircle size={48} className="mx-auto text-red-500 mb-4" />
+        <h2 className="text-xl font-bold text-gray-800 mb-2">Profile Not Found</h2>
+        <p className="text-gray-600">We couldn't find your admin profile. Please contact support.</p>
+      </div>
+    );
   }
   
   return (
@@ -232,10 +303,14 @@ const ProfileSettings = () => {
     >
       <div className="flex flex-col md:flex-row items-center md:items-start justify-between mb-8">
         <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
-          <ProfileAvatar name={fullName} avatarUrl={session?.admin?.avatarUrl} />
+          <ProfileAvatar name={fullName} avatarUrl={adminData?.avatarUrl} />
           <div className="text-center md:text-left">
             <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900">{fullName}</h1>
             <p className="text-gray-500 text-lg">{getValues("title")}</p>
+            <div className="mt-2 flex flex-wrap gap-2 justify-center md:justify-start">
+              <span className="badge badge-success">{adminData.status}</span>
+              <span className="badge badge-primary">{adminData.accessLevel}</span>
+            </div>
           </div>
         </div>
         <div className="mt-6 md:mt-0">
@@ -453,11 +528,12 @@ const ProfileSettings = () => {
                     <motion.button
                       type="button"
                       onClick={handleSubmitPassword(handlePasswordSave)}
+                      disabled={isPasswordSubmitting}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className="bg-green-600 text-white font-bold py-2 px-6 rounded-full shadow-md hover:bg-green-700 transition-colors"
+                      className="bg-green-600 text-white font-bold py-2 px-6 rounded-full shadow-md hover:bg-green-700 transition-colors disabled:bg-green-400 disabled:cursor-not-allowed"
                     >
-                      Set New Password
+                      {isPasswordSubmitting ? 'Updating...' : 'Set New Password'}
                     </motion.button>
                   </div>
                 </div>

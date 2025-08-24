@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useRouter } from 'next/navigation'; // Using next/navigation for App Router
+import { useRouter } from 'next/navigation';
 import { 
   LayoutDashboard, 
   Users, 
@@ -18,68 +18,144 @@ import {
   LogOut, 
   Calendar,
   MapPin,
-  Clock
+  Clock,
+  Loader
 } from 'lucide-react';
 import ProfileSettings from '../components/adminprofile/page.jsx';
 import Usermanagement from "../components/admintab/page.jsx"
 import Emailform from "../components/Emailform/page.jsx";
 import { useSession, signOut } from 'next-auth/react';
-// --- Mock Data ---
-const initialUsers = [
-  { id: 1, name: 'John Doe', email: 'john.doe@example.com', role: 'Administrator', status: 'Active' },
-  { id: 2, name: 'Jane Smith', email: 'jane.smith@example.com', role: 'User', status: 'Active' },
-  { id: 3, name: 'Peter Jones', email: 'peter.jones@example.com', role: 'User', status: 'Suspended' },
-  { id: 4, name: 'Mary Brown', email: 'mary.brown@example.com', role: 'User', status: 'Active' },
-];
 
-const initialNews = [
-  { id: 1, type: 'news', title: 'New Job Board Features Released', description: 'We are excited to announce the launch of new features for our job board, including advanced filtering and personalized recommendations...', date: '2024-08-14' },
-  { id: 2, type: 'video', title: 'Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)', description: 'Watch our exclusive interview with Sarah Chen, a leading recruiter, as she shares tips on building a standout resume and acing interviews.', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', date: '2024-08-12' },
-  { id: 3, type: 'news', title: 'Upcoming Career Fair Event', description: 'Our annual virtual career fair is scheduled for September 25th. Register now to connect with top employers from around the globe.', date: '2024-08-10' },
-];
-const initialEvents = [
-  {
-    id: 1,
-    title: "Web Development Workshop",
-    date: "2024-09-15",
-    time: "10:00 AM",
-    location: "Online",
-    description: "Learn modern web development tools and practices.",
-    target: "All",
-  },
-  {
-    id: 2,
-    title: "Resume Review Clinic",
-    date: "2024-09-20",
-    time: "02:00 PM",
-    location: "Office 3B",
-    description: "One-on-one resume review session with experts.",
-    target: "Job Seekers",
-  },
-  {
-    id: 3,
-    title: "Networking Session",
-    date: "2024-09-28",
-    time: "06:30 PM",
-    location: "Virtual Lounge",
-    description: "Meet employers and other professionals in your field.",
-    target: "Employers",
-  },
-];
+// --- Safe Fetch Wrapper ---
+const safeFetch = async (url, errorMessage) => {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(errorMessage);
+    const data = await response.json();
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error(errorMessage, error);
+    return [];
+  }
+};
 
-const dashboardMetrics = [
-  { id: 1, title: 'Total Users', value: '4,200', icon: Users, color: 'bg-blue-100 text-blue-600' },
-  { id: 2, title: 'New Signups', value: '350', icon: Plus, color: 'bg-green-100 text-green-600' },
-  { id: 3, title: 'Articles Published', value: '1,200', icon: Newspaper, color: 'bg-yellow-100 text-yellow-600' },
-  { id: 4, title: 'Events This Month', value: '8', icon: Calendar, color: 'bg-purple-100 text-purple-600' },
-];
+// --- API Integration Functions ---
+const fetchStudents = () => safeFetch('/api/student', 'Error fetching students:');
+const fetchStudentProfiles = () => safeFetch('/api/studententireprofile', 'Error fetching student profiles:');
+const fetchEmployers = () => safeFetch('/api/employer', 'Error fetching employers:');
+const fetchCompanies = () => safeFetch('/api/company', 'Error fetching companies:');
+const fetchSubscribers = () => safeFetch('/api/subscriber', 'Error fetching subscribers:');
+const fetchNews = () => safeFetch('/api/new', 'Error fetching news:');
+const fetchVideos = () => safeFetch('/api/video', 'Error fetching videos:');
+const fetchEvents = () => safeFetch('/api/events', 'Error fetching events:');
 
-const recentActivity = [
-  { id: 1, text: 'John Doe updated his profile.', time: '2 hours ago' },
-  { id: 2, text: 'New news article "Upcoming Career Fair" was published.', time: '1 day ago' },
-  { id: 3, text: 'Jane Smith registered for the "Job Board Features" webinar.', time: '2 days ago' },
-  { id: 4, text: 'A new user signed up for an account.', time: '3 days ago' },
-];
+const createEvent = async (eventData) => {
+  try {
+    const response = await fetch('/api/events', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(eventData),
+    });
+    if (!response.ok) throw new Error('Failed to create event');
+    return await response.json();
+  } catch (error) {
+    console.error('Error creating event:', error);
+    throw error;
+  }
+};
+
+const createNews = async (newsData) => {
+  try {
+    const response = await fetch('/api/new', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newsData),
+    });
+    if (!response.ok) throw new Error('Failed to create news');
+    return await response.json();
+  } catch (error) {
+    console.error('Error creating news:', error);
+    throw error;
+  }
+};
+
+const createVideo = async (videoData) => {
+  try {
+    const response = await fetch('/api/video', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(videoData),
+    });
+    if (!response.ok) throw new Error('Failed to create video');
+    return await response.json();
+  } catch (error) {
+    console.error('Error creating video:', error);
+    throw error;
+  }
+};
+
+const deleteEvent = async (id) => {
+  try {
+    const response = await fetch(`/api/events/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) throw new Error('Failed to delete event');
+    return true;
+  } catch (error) {
+    console.error('Error deleting event:', error);
+    throw error;
+  }
+};
+
+const deleteNews = async (id) => {
+  try {
+    const response = await fetch(`/api/new/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) throw new Error('Failed to delete news');
+    return true;
+  } catch (error) {
+    console.error('Error deleting news:', error);
+    throw error;
+  }
+};
+
+const deleteVideo = async (id) => {
+  try {
+    const response = await fetch(`/api/video/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) throw new Error('Failed to delete video');
+    return true;
+  } catch (error) {
+    console.error('Error deleting video:', error);
+    throw error;
+  }
+};
+
+// Helper function to format time ago
+const formatTimeAgo = (dateString) => {
+  if (!dateString) return 'Recently';
+  
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  
+  if (diffMins < 60) return `${diffMins} minutes ago`;
+  if (diffHours < 24) return `${diffHours} hours ago`;
+  if (diffDays < 7) return `${diffDays} days ago`;
+  
+  return date.toLocaleDateString();
+};
 
 // --- Reusable Components ---
 const Modal = ({ isOpen, onClose, title, children }) => {
@@ -101,213 +177,217 @@ const Modal = ({ isOpen, onClose, title, children }) => {
 };
 
 // --- New Components ---
-// Component for adding events
 const AddEventForm = ({ onAdd, onClose }) => {
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
 
-  const onSubmit = (data) => {
-    const newId = Math.random(); 
-    const newItem = {
-      id: newId,
-      ...data,
-    };
-    onAdd(newItem);
-    reset();
-    onClose();
+  const onSubmit = async (data) => {
+    try {
+      const newEvent = await createEvent(data);
+      onAdd(newEvent);
+      reset();
+      onClose();
+    } catch (error) {
+      alert('Failed to create event: ' + error.message);
+    }
   };
 
-return (
-  <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-    {/* Event Title */}
-    <div>
-      <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-        Event Title
-      </label>
-      <input 
-        type="text" 
-        id="title" 
-        {...register("title", { required: "Title is required" })} 
-        className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-        placeholder="e.g. Annual Career Fair"
-      />
-      {errors.title && <p className="mt-1 text-sm text-red-500">{errors.title.message}</p>}
-    </div>
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <div>
+        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+          Event Title
+        </label>
+        <input 
+          type="text" 
+          id="title" 
+          {...register("title", { required: "Title is required" })} 
+          className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="e.g. Annual Career Fair"
+        />
+        {errors.title && <p className="mt-1 text-sm text-red-500">{errors.title.message}</p>}
+      </div>
 
-    {/* Date */}
-    <div>
-      <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
-        Date
-      </label>
-      <input 
-        type="date" 
-        id="date" 
-        {...register("date", { required: "Date is required" })} 
-        className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
-      {errors.date && <p className="mt-1 text-sm text-red-500">{errors.date.message}</p>}
-    </div>
+      <div>
+        <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
+          Date
+        </label>
+        <input 
+          type="date" 
+          id="date" 
+          {...register("date", { required: "Date is required" })} 
+          className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        {errors.date && <p className="mt-1 text-sm text-red-500">{errors.date.message}</p>}
+      </div>
 
-    {/* Time */}
-    <div>
-      <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-1">
-        Time
-      </label>
-      <input 
-        type="time" 
-        id="time" 
-        {...register("time", { required: "Time is required" })} 
-        className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
-      {errors.time && <p className="mt-1 text-sm text-red-500">{errors.time.message}</p>}
-    </div>
+      <div>
+        <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-1">
+          Time
+        </label>
+        <input 
+          type="time" 
+          id="time" 
+          {...register("time", { required: "Time is required" })} 
+          className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        {errors.time && <p className="mt-1 text-sm text-red-500">{errors.time.message}</p>}
+      </div>
 
-    {/* Location */}
-    <div>
-      <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
-        Location
-      </label>
-      <input 
-        type="text" 
-        id="location" 
-        {...register("location", { required: "Location is required" })} 
-        className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-        placeholder="e.g. Online or 123 Main St"
-      />
-      {errors.location && <p className="mt-1 text-sm text-red-500">{errors.location.message}</p>}
-    </div>
+      <div>
+        <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
+          Location
+        </label>
+        <input 
+          type="text" 
+          id="location" 
+          {...register("location", { required: "Location is required" })} 
+          className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="e.g. Online or 123 Main St"
+        />
+        {errors.location && <p className="mt-1 text-sm text-red-500">{errors.location.message}</p>}
+      </div>
 
-    {/* Event Description */}
-    <div>
-      <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-        Event Description
-      </label>
-      <textarea
-        id="description"
-        {...register("description", { required: "Description is required" })}
-        className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-        placeholder="Brief details about the event..."
-        rows={4}
-      />
-      {errors.description && <p className="mt-1 text-sm text-red-500">{errors.description.message}</p>}
-    </div>
+      <div>
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+          Event Description
+        </label>
+        <textarea
+          id="description"
+          {...register("description", { required: "Description is required" })}
+          className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Brief details about the event..."
+          rows={4}
+        />
+        {errors.description && <p className="mt-1 text-sm text-red-500">{errors.description.message}</p>}
+      </div>
 
-    {/* Event Target */}
-    <div>
-      <label htmlFor="target" className="block text-sm font-medium text-gray-700 mb-1">
-        Event Target
-      </label>
-      <select
-        id="target"
-        {...register("target", { required: "Please select an event target" })}
-        className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+      <div>
+        <label htmlFor="target" className="block text-sm font-medium text-gray-700 mb-1">
+          Event Target
+        </label>
+        <select
+          id="target"
+          {...register("target", { required: "Please select an event target" })}
+          className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">-- Select Target --</option>
+          <option value="all">All</option>
+          <option value="employers">Employers</option>
+          <option value="jobseekers">Job Seekers</option>
+        </select>
+        {errors.target && <p className="mt-1 text-sm text-red-500">{errors.target.message}</p>}
+      </div>
+
+      <button 
+        type="submit" 
+        className="w-full bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
       >
-        <option value="">-- Select Target --</option>
-        <option value="all">All</option>
-        <option value="employers">Employers</option>
-        <option value="jobseekers">Job Seekers</option>
-      </select>
-      {errors.target && <p className="mt-1 text-sm text-red-500">{errors.target.message}</p>}
-    </div>
-
-    {/* Submit Button */}
-    <button 
-      type="submit" 
-      className="w-full bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-    >
-      <Plus size={18} /> Publish Event
-    </button>
-  </form>
-);
-
+        <Plus size={18} /> Publish Event
+      </button>
+    </form>
+  );
 };
 
 const EventsCalendar = ({ events, setEvents }) => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleAddEvent = (newEvent) => {
-    setEvents([newEvent, ...events]);
+  const safeEvents = Array.isArray(events) ? events : [];
+
+  const handleAddEvent = async (newEvent) => {
+    setIsLoading(true);
+    try {
+      const createdEvent = await createEvent(newEvent);
+      setEvents([createdEvent, ...safeEvents]);
+    } catch (error) {
+      alert('Failed to add event: ' + error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
   
-  const handleDeleteEvent = (id) => {
-    setEvents(events.filter(event => event.id !== id));
+  const handleDeleteEvent = async (id) => {
+    if (confirm("Are you sure you want to delete this event?")) {
+      setIsLoading(true);
+      try {
+        await deleteEvent(id);
+        setEvents(safeEvents.filter(event => event.id !== id));
+      } catch (error) {
+        alert('Failed to delete event: ' + error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    }
   };
 
   return (
     <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 h-full flex flex-col">
-      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-xl md:text-2xl font-bold text-gray-900">Upcoming Events</h3>
         <button
           onClick={() => setIsAddModalOpen(true)}
           className="bg-blue-600 text-white font-bold py-2 px-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+          disabled={isLoading}
         >
-          <Plus size={18} /> Add Event
+          {isLoading ? <Loader size={18} className="animate-spin" /> : <Plus size={18} />} Add Event
         </button>
       </div>
 
-      {/* Events List */}
       <div className="flex-grow overflow-y-auto">
-        <div className="space-y-4">
-          {events.length > 0 ? (
-            events.map(event => (
-              <div 
-                key={event.id} 
-                className="bg-gray-50 p-4 rounded-2xl flex items-start space-x-4 border border-gray-100 hover:shadow-md transition-shadow"
-              >
-                {/* Icon */}
-                <div className="flex-shrink-0 p-3 rounded-full bg-purple-100 text-purple-600 mt-1">
-                  <Calendar size={20} />
-                </div>
-
-                {/* Event Details */}
-                <div className="flex-grow">
-                  <h4 className="text-lg font-bold text-gray-900">{event.title}</h4>
-                  <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
-                    <Calendar size={14} /> {event.date}
-                  </p>
-                  <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
-                    <Clock size={14} /> {event.time}
-                  </p>
-                  <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
-                    <MapPin size={14} /> {event.location}
-                  </p>
-
-                  {/* NEW: Description */}
-                  <p className="text-sm text-gray-700 mt-2">
-                    {event.description || "No description provided."}
-                  </p>
-
-                  {/* NEW: Target Audience */}
-                  <p className="text-xs font-medium mt-2 px-2 py-1 inline-block rounded-full 
-                               bg-blue-100 text-blue-700">
-                    🎯 Target: {event.target || "All"}
-                  </p>
-                </div>
-
-                {/* Delete Button */}
-                <div className="flex-shrink-0">
-                  <button 
-                onClick={() => confirm("Are you sure you want to delete this event?") && handleDeleteEvent(event.id)}
-                    className="text-red-600 hover:text-red-800 transition-colors p-2 rounded-full hover:bg-red-100"
-                    title="Delete"
-                  >
-                    <Trash2 size={20} />
-                  </button>
-
-                </div>
+        {isLoading ? (
+          <div className="flex justify-center items-center h-32">
+            <Loader size={32} className="animate-spin text-blue-600" />
+          </div>
+        ) : safeEvents.length > 0 ? (
+          safeEvents.map(event => (
+            <div 
+              key={event.id} 
+              className="bg-gray-50 p-4 rounded-2xl flex items-start space-x-4 border border-gray-100 hover:shadow-md transition-shadow mb-4"
+            >
+              <div className="flex-shrink-0 p-3 rounded-full bg-purple-100 text-purple-600 mt-1">
+                <Calendar size={20} />
               </div>
-              
-            ))
-          ) : (
-            <div className="text-center p-8 text-gray-500">
-              No upcoming events have been added yet.
-            </div>
-          )}
-        </div>
-      </div>
-  
 
-      {/* Modal */}
+              <div className="flex-grow">
+                <h4 className="text-lg font-bold text-gray-900">{event.title}</h4>
+                <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                  <Calendar size={14} /> {event.date}
+                </p>
+                <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                  <Clock size={14} /> {event.time}
+                </p>
+                <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                  <MapPin size={14} /> {event.location}
+                </p>
+
+                <p className="text-sm text-gray-700 mt-2">
+                  {event.description || "No description provided."}
+                </p>
+
+                <p className="text-xs font-medium mt-2 px-2 py-1 inline-block rounded-full bg-blue-100 text-blue-700">
+                  🎯 Target: {event.target || "All"}
+                </p>
+              </div>
+
+              <div className="flex-shrink-0">
+                <button 
+                  onClick={() => handleDeleteEvent(event.id)}
+                  className="text-red-600 hover:text-red-800 transition-colors p-2 rounded-full hover:bg-red-100"
+                  title="Delete"
+                  disabled={isLoading}
+                >
+                  <Trash2 size={20} />
+                </button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="text-center p-8 text-gray-500">
+            No upcoming events have been added yet.
+          </div>
+        )}
+      </div>
+
       <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Add New Event">
         <AddEventForm 
           onAdd={handleAddEvent} 
@@ -318,25 +398,39 @@ const EventsCalendar = ({ events, setEvents }) => {
   );
 };
 
-
-// --- Existing Components from User's Code ---
 const AddContentForm = ({ onAdd, onClose }) => {
   const [contentType, setContentType] = useState('news');
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
 
-  const onSubmit = (data) => {
-    const newId = Math.random(); 
-    const newItem = {
-      id: newId,
-      type: contentType,
-      title: data.title,
-      description: data.description,
-      date: new Date().toISOString().split('T')[0],
-      ...(contentType === 'video' && { url: data.url }),
-    };
-    onAdd(newItem);
-    reset();
-    onClose();
+  const onSubmit = async (data) => {
+    try {
+      let newItem;
+      if (contentType === 'news') {
+        newItem = await createNews({
+          title: data.title,
+          content: data.description,
+          type: 'news'
+        });
+      } else {
+        newItem = await createVideo({
+          title: data.title,
+          description: data.description,
+          url: data.url,
+          type: 'video'
+        });
+      }
+      
+      onAdd({
+        ...newItem,
+        type: contentType,
+        description: contentType === 'news' ? data.description : data.description
+      });
+      
+      reset();
+      onClose();
+    } catch (error) {
+      alert('Failed to create content: ' + error.message);
+    }
   };
 
   return (
@@ -434,13 +528,30 @@ const AddContentForm = ({ onAdd, onClose }) => {
 
 const NewsAndContentManagement = ({ newsItems, setNewsItems }) => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleDeleteItem = (id) => {
-    setNewsItems(newsItems.filter(item => item.id !== id));
+  const safeNewsItems = Array.isArray(newsItems) ? newsItems : [];
+
+  const handleDeleteItem = async (id, type) => {
+    if (confirm("Are you sure you want to delete this item?")) {
+      setIsLoading(true);
+      try {
+        if (type === 'news') {
+          await deleteNews(id);
+        } else {
+          await deleteVideo(id);
+        }
+        setNewsItems(safeNewsItems.filter(item => item.id !== id));
+      } catch (error) {
+        alert('Failed to delete item: ' + error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    }
   };
   
   const handleAddItem = (newItem) => {
-    setNewsItems([newItem, ...newsItems]);
+    setNewsItems([newItem, ...safeNewsItems]);
   };
 
   return (
@@ -450,51 +561,55 @@ const NewsAndContentManagement = ({ newsItems, setNewsItems }) => {
         <button
           onClick={() => setIsAddModalOpen(true)}
           className="bg-blue-600 text-white font-bold py-2 px-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+          disabled={isLoading}
         >
-          <Plus size={18} /> Add New
+          {isLoading ? <Loader size={18} className="animate-spin" /> : <Plus size={18} />} Add New
         </button>
       </div>
 
       <div className="flex-grow overflow-y-auto">
-        <div className="space-y-4">
-          {newsItems.length > 0 ? (
-            newsItems.map(item => (
-              <div 
-                key={item.id} 
-                className="bg-gray-50 p-4 rounded-2xl flex items-start space-x-4 border border-gray-100 hover:shadow-md transition-shadow"
-              >
-                <div className="flex-shrink-0 p-3 rounded-full bg-blue-100 text-blue-600 mt-1">
-                  {item.type === 'news' ? <Newspaper size={20} /> : <Video size={20} />}
-                </div>
-                <div className="flex-grow">
-                  <h4 className="text-lg font-bold text-gray-900">{item.title}</h4>
-                  {item.type === 'video' && (
-                    <p className="text-sm text-gray-600">
-                      <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline flex items-center gap-1">
-                        <Link size={14} /> {item.url}
-                      </a>
-                    </p>
-                  )}
-                  <p className="text-gray-700 mt-2">{item.description}</p>
-                  <p className="text-xs text-gray-400 mt-2">Published: {item.date}</p>
-                </div>
-                <div className="flex-shrink-0">
-                  <button 
-                    onClick={() => handleDeleteItem(item.id)}
-                    className="text-red-600 hover:text-red-800 transition-colors p-2 rounded-full hover:bg-red-100"
-                    title="Delete"
-                  >
-                    <Trash2 size={20} />
-                  </button>
-                </div>
+        {isLoading ? (
+          <div className="flex justify-center items-center h-32">
+            <Loader size={32} className="animate-spin text-blue-600" />
+          </div>
+        ) : safeNewsItems.length > 0 ? (
+          safeNewsItems.map(item => (
+            <div 
+              key={item.id} 
+              className="bg-gray-50 p-4 rounded-2xl flex items-start space-x-4 border border-gray-100 hover:shadow-md transition-shadow mb-4"
+            >
+              <div className="flex-shrink-0 p-3 rounded-full bg-blue-100 text-blue-600 mt-1">
+                {item.type === 'news' ? <Newspaper size={20} /> : <Video size={20} />}
               </div>
-            ))
-          ) : (
-            <div className="text-center p-8 text-gray-500">
-              No news or video content has been added yet.
+              <div className="flex-grow">
+                <h4 className="text-lg font-bold text-gray-900">{item.title}</h4>
+                {item.type === 'video' && (
+                  <p className="text-sm text-gray-600">
+                    <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline flex items-center gap-1">
+                      <Link size={14} /> {item.url}
+                    </a>
+                  </p>
+                )}
+                <p className="text-gray-700 mt-2">{item.description || item.content}</p>
+                <p className="text-xs text-gray-400 mt-2">Published: {item.date || item.createdAt}</p>
+              </div>
+              <div className="flex-shrink-0">
+                <button 
+                  onClick={() => handleDeleteItem(item.id, item.type)}
+                  className="text-red-600 hover:text-red-800 transition-colors p-2 rounded-full hover:bg-red-100"
+                  title="Delete"
+                  disabled={isLoading}
+                >
+                  <Trash2 size={20} />
+                </button>
+              </div>
             </div>
-          )}
-        </div>
+          ))
+        ) : (
+          <div className="text-center p-8 text-gray-500">
+            No news or video content has been added yet.
+          </div>
+        )}
       </div>
       <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Add News or Video">
         <AddContentForm onAdd={handleAddItem} onClose={() => setIsAddModalOpen(false)} />
@@ -503,91 +618,218 @@ const NewsAndContentManagement = ({ newsItems, setNewsItems }) => {
   );
 };
 
-const DashboardOverview = ({ newsItems }) => (
-  <>
-    <header className="flex justify-between items-center mb-8">
-      <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900">Dashboard Overview</h1>
-    </header>
-    <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      {dashboardMetrics.map(metric => (
-        <div key={metric.id} className="bg-white p-6 rounded-3xl shadow-lg border border-gray-100 flex items-center justify-between transition-transform duration-200 hover:scale-105 hover:shadow-xl">
-          <div>
-            <p className="text-sm font-semibold text-gray-500 mb-1">{metric.title}</p>
-            <h2 className="text-3xl font-bold text-gray-900">{metric.value}</h2>
+const DashboardOverview = ({ newsItems, metrics, recentActivities }) => {
+  const safeNewsItems = Array.isArray(newsItems) ? newsItems : [];
+  const safeMetrics = Array.isArray(metrics) ? metrics : [];
+  const safeRecentActivities = Array.isArray(recentActivities) ? recentActivities : [];
+
+  return (
+    <>
+      <header className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900">Dashboard Overview</h1>
+      </header>
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {safeMetrics.map(metric => (
+          <div key={metric.id} className="bg-white p-6 rounded-3xl shadow-lg border border-gray-100 flex items-center justify-between transition-transform duration-200 hover:scale-105 hover:shadow-xl">
+            <div>
+              <p className="text-sm font-semibold text-gray-500 mb-1">{metric.title}</p>
+              <h2 className="text-3xl font-bold text-gray-900">{metric.value}</h2>
+            </div>
+            <div className={`p-3 rounded-full ${metric.color}`}>
+              <metric.icon size={28} />
+            </div>
           </div>
-          <div className={`p-3 rounded-full ${metric.color}`}>
-            <metric.icon size={28} />
-          </div>
+        ))}
+      </section>
+      
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 transition-shadow hover:shadow-xl">
+          <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <Newspaper size={24} /> Latest News & Videos
+          </h3>
+          <ul className="space-y-4">
+            {safeNewsItems.slice(0, 3).map(item => (
+              <li key={item.id} className="flex items-start gap-4">
+                <div className={`flex-shrink-0 p-2 rounded-full ${item.type === 'news' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'}`}>
+                  {item.type === 'news' ? <Newspaper size={20} /> : <Video size={20} />}
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900">{item.title}</h4>
+                  <p className="text-sm text-gray-600 line-clamp-2">{item.description || item.content}</p>
+                  <p className="text-xs text-gray-400 mt-1">Published: {item.date || item.createdAt}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
-      ))}
-    </section>
-    
-    {/* News Feed Section on Dashboard */}
-    <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-      <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 transition-shadow hover:shadow-xl">
-        <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-          <Newspaper size={24} /> Latest News & Videos
-        </h3>
-        <ul className="space-y-4">
-          {newsItems.slice(0, 3).map(item => (
-            <li key={item.id} className="flex items-start gap-4">
-              <div className={`flex-shrink-0 p-2 rounded-full ${item.type === 'news' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'}`}>
-                {item.type === 'news' ? <Newspaper size={20} /> : <Video size={20} />}
-              </div>
-              <div>
-                <h4 className="font-semibold text-gray-900">{item.title}</h4>
-                <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
-                <p className="text-xs text-gray-400 mt-1">Published: {item.date}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 h-full">
-        <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-6">Recent Activity</h3>
-        <ul className="space-y-4">
-          {recentActivity.map(activity => (
-            <li key={activity.id} className="flex items-start">
-              <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-              <div>
-                <p className="text-gray-800">{activity.text}</p>
-                <p className="text-sm text-gray-500">{activity.time}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  </>
-);
+        <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 h-full">
+          <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-6">Recent Activity</h3>
+          <ul className="space-y-4">
+            {safeRecentActivities.map(activity => (
+              <li key={activity.id} className="flex items-start">
+                <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                <div>
+                  <p className="text-gray-800">{activity.text}</p>
+                  <p className="text-sm text-gray-500">{formatTimeAgo(activity.time)}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    </>
+  );
+};
 
 export default function CareerConnectApp() {
   const [view, setView] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [users, setUsers] = useState(initialUsers);
-  const [newsItems, setNewsItems] = useState(initialNews);
-  const [events, setEvents] = useState(initialEvents);
+  const [users, setUsers] = useState([]);
+  const [newsItems, setNewsItems] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [metrics, setMetrics] = useState([]);
+  const [recentActivities, setRecentActivities] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-const { data: session, status } = useSession();
-const router = useRouter();
+  const { data: session, status } = useSession();
+  const router = useRouter();
 
-useEffect(() => {
-  // If the session data is still loading, do nothing and wait.
-  if (status === 'loading') {
-    return;
-  }
+  useEffect(() => {
+    if (status === 'loading') return;
+    if (status === 'unauthenticated' || session?.user?.role !== 'ADMIN') {
+      router.push('/adminlogin');
+    }
+  }, [status, router, session]);
 
-  // If the user is not authenticated, redirect them to the login page.
-  if (status === 'unauthenticated') {
-    router.push('/adminlogin');
-  } 
-  // If the user is authenticated but their role isn't 'Administrator',
-  // redirect them to the login page as they don't have access.
-  else if (session?.user?.role !== 'ADMIN') {
-    router.push('/adminlogin');
-  }
-}, [status, router, session]);
+  useEffect(() => {
+    const fetchAllData = async () => {
+      setIsLoading(true);
+      try {
+        const [
+          students,
+          studentProfiles,
+          employers,
+          companies,
+          subscribers,
+          news,
+          videos,
+          events
+        ] = await Promise.all([
+          fetchStudents(),
+          fetchStudentProfiles(),
+          fetchEmployers(),
+          fetchCompanies(),
+          fetchSubscribers(),
+          fetchNews(),
+          fetchVideos(),
+          fetchEvents()
+        ]);
+
+        // Safely combine news and videos
+        const combinedNews = [
+          ...(Array.isArray(news) ? news.map(item => ({ ...item, type: 'news' })) : []),
+          ...(Array.isArray(videos) ? videos.map(item => ({ ...item, type: 'video' })) : [])
+        ];
+
+        // Calculate metrics based on the fetched data
+        const totalUsers = students.length + employers.length;
+        const newSignups = students.filter(s => {
+          const created = new Date(s.createdAt || s.dateCreated);
+          const now = new Date();
+          return (now - created) < (24 * 60 * 60 * 1000);
+        }).length;
+        
+        const articlesPublished = combinedNews.length;
+        const eventsThisMonth = events.filter(e => {
+          const eventDate = new Date(e.date);
+          const now = new Date();
+          return eventDate.getMonth() === now.getMonth() && 
+                eventDate.getFullYear() === now.getFullYear();
+        }).length;
+
+        // Generate recent activities
+        const allActivities = [
+          ...students.slice(0, 3).map((student, index) => ({
+            id: `student-${index}`,
+            text: `New student registered: ${student.name || student.email}`,
+            time: student.createdAt || new Date().toISOString(),
+          })),
+          ...employers.slice(0, 3).map((employer, index) => ({
+            id: `employer-${index}`,
+            text: `New employer registered: ${employer.name || employer.companyName}`,
+            time: employer.createdAt || new Date().toISOString(),
+          })),
+          ...combinedNews.slice(0, 3).map((item, index) => ({
+            id: `content-${index}`,
+            text: `New ${item.type} published: ${item.title}`,
+            time: item.createdAt || new Date().toISOString(),
+          })),
+          ...events.slice(0, 3).map((event, index) => ({
+            id: `event-${index}`,
+            text: `New event created: ${event.title}`,
+            time: event.createdAt || new Date().toISOString(),
+          }))
+        ];
+
+        // Sort activities by time (newest first)
+        allActivities.sort((a, b) => new Date(b.time) - new Date(a.time));
+        
+        // Update metrics
+        setMetrics([
+          { 
+            id: 1, 
+            title: 'Total Users', 
+            value: totalUsers.toLocaleString(), 
+            icon: Users, 
+            color: 'bg-blue-100 text-blue-600' 
+          },
+          { 
+            id: 2, 
+            title: 'New Signups', 
+            value: newSignups.toLocaleString(), 
+            icon: Plus, 
+            color: 'bg-green-100 text-green-600' 
+          },
+          { 
+            id: 3, 
+            title: 'Articles Published', 
+            value: articlesPublished.toLocaleString(), 
+            icon: Newspaper, 
+            color: 'bg-yellow-100 text-yellow-600' 
+          },
+          { 
+            id: 4, 
+            title: 'Events This Month', 
+            value: eventsThisMonth.toLocaleString(), 
+            icon: Calendar, 
+            color: 'bg-purple-100 text-purple-600' 
+          },
+        ]);
+
+        // Update state
+        setRecentActivities(allActivities.slice(0, 10));
+        setNewsItems(combinedNews);
+        setEvents(events);
+        setUsers([...students, ...employers]);
+        
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        // Set empty arrays
+        setMetrics([]);
+        setRecentActivities([]);
+        setNewsItems([]);
+        setEvents([]);
+        setUsers([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (status === 'authenticated' && session?.user?.role === 'ADMIN') {
+      fetchAllData();
+    }
+  }, [status, session]);
 
   const navigationItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -596,72 +838,60 @@ useEffect(() => {
     { id: 'profile-settings', label: 'Profile & Settings', icon: Settings },
     { id: 'events-calendar', label: 'Events Calendar', icon: Calendar },
     { id: 'email-form', label: 'Email Form', icon: Mail },
-
   ];
 
   const renderContent = () => {
-    if (status === 'loading') {
+    if (status === 'loading' || isLoading) {
       return (
         <div className="flex items-center justify-center min-h-screen">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
         </div>
       );
-      
     }
+    
+    const safeUsers = Array.isArray(users) ? users : [];
+    const safeNewsItems = Array.isArray(newsItems) ? newsItems : [];
+    const safeEvents = Array.isArray(events) ? events : [];
+    const safeMetrics = Array.isArray(metrics) ? metrics : [];
+    const safeRecentActivities = Array.isArray(recentActivities) ? recentActivities : [];
     
     switch(view) {
       case 'dashboard':
-        return <DashboardOverview newsItems={newsItems} />;
+        return <DashboardOverview newsItems={safeNewsItems} metrics={safeMetrics} recentActivities={safeRecentActivities} />;
       case 'user-management':
         return (
-          <>
-
-            <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100">
-              <div className="text-center p-8 text-gray-500">
-                <Usermanagement users={users} setUsers={setUsers} />
-              </div>
-            </div>
-          </>
+          <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100">
+            <Usermanagement users={safeUsers} setUsers={setUsers} />
+          </div>
         );
       case 'news-content':
         return (
-            <>
-              <header className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900">News & Content Management</h1>
-              </header>
-              <NewsAndContentManagement newsItems={newsItems} setNewsItems={setNewsItems} />
-            </>
-          );
+          <>
+            <header className="flex justify-between items-center mb-8">
+              <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900">News & Content Management</h1>
+            </header>
+            <NewsAndContentManagement newsItems={safeNewsItems} setNewsItems={setNewsItems} />
+          </>
+        );
       case 'events-calendar':
         return (
           <>
             <header className="flex justify-between items-center mb-8">
               <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900">Events Calendar</h1>
             </header>
-            <EventsCalendar events={events} setEvents={setEvents} />
+            <EventsCalendar events={safeEvents} setEvents={setEvents} />
           </>
         );
       case 'profile-settings':
+        return <ProfileSettings />;
+      case 'email-form':
         return (
-          <>
-        
-            <ProfileSettings />
-          </>
+          <div className="pt-32 px-4">
+            <Emailform />
+          </div>
         );
-case 'email-form':
-  return (
-    <>
-  {/* Add padding-top so content appears below the header */}
-      <div className="pt-32 px-4">
-        <Emailform />
-      </div>
-    </>
-  );
-
-
-      
       default:
-        return <DashboardOverview newsItems={newsItems} />;
+        return <DashboardOverview newsItems={safeNewsItems} metrics={safeMetrics} recentActivities={safeRecentActivities} />;
     }
   };
   
@@ -696,8 +926,8 @@ case 'email-form':
         }
       `}</style>
       
-      {/* Sidebar - Mobile Toggle (Updated) */}
-      <div className="p-4 md:hidden flex justify-between items-center bg-transparent  curser-pointer fixed   top-0 z-20">
+      {/* Sidebar - Mobile Toggle */}
+      <div className="p-4 md:hidden flex justify-between items-center bg-transparent cursor-pointer fixed top-0 z-20 w-full">
         <button 
           onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
           className="text-gray-600 hover:text-blue-600 p-2 rounded-full hover:bg-gray-300 transition-colors"
@@ -706,103 +936,92 @@ case 'email-form':
         </button>
         <div className="flex-1 text-center">
         </div>
-        <div className="w-8"></div> {/* Spacer to balance the flex layout */}
+        <div className="w-8"></div>
       </div>
 
-{/* Sidebar - Desktop & Mobile View */}
-<aside
-  className={`md:block fixed inset-0 z-30 md:flex-shrink-0 
-  w-[280px] bg-white p-6 shadow-xl md:rounded-r-3xl h-screen 
-  flex flex-col justify-between 
-  ${isSidebarOpen ? "block" : "hidden"}`}
->
-  {/* Top Section */}
-  <div>
-    <div className="flex items-center space-x-2 mb-8">
-      <LayoutDashboard className="text-blue-600" size={32} />
-      <span className="text-2xl font-extrabold text-blue-600 ">
-        Admin Portal
-      </span>
-      <button
-        onClick={() => setIsSidebarOpen(false)}
-        className="md:hidden text-gray-500 hover:text-gray-900 ml-auto transition-colors p-2 rounded-full hover:bg-gray-100"
+      {/* Sidebar - Desktop & Mobile View */}
+      <aside
+        className={`md:block fixed inset-0 z-30 md:flex-shrink-0 
+        w-[280px] bg-white p-6 shadow-xl md:rounded-r-3xl h-screen 
+        flex flex-col justify-between 
+        ${isSidebarOpen ? "block" : "hidden"}`}
       >
-        <XCircle size={24} />
-      </button>
-    </div>
-
-    {/* Navigation */}
-    <nav>
-      <ul className="space-y-2">
-        {navigationItems.map((item) => (
-          <li key={item.id}>
-            <a
-              href="#"
-              onClick={() => {
-                setView(item.id);
-                setIsSidebarOpen(false);
-              }}
-              className={`flex items-center p-3 rounded-xl font-semibold transition-colors
-                ${
-                  view === item.id
-                    ? "text-white bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
+        <div>
+          <div className="flex items-center space-x-2 mb-8">
+            <LayoutDashboard className="text-blue-600" size={32} />
+            <span className="text-2xl font-extrabold text-blue-600">
+              Admin Portal
+            </span>
+            <button
+              onClick={() => setIsSidebarOpen(false)}
+              className="md:hidden text-gray-500 hover:text-gray-900 ml-auto transition-colors p-2 rounded-full hover:bg-gray-100"
             >
-              <item.icon className="mr-3" size={20} />
-              {item.label}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </nav>
-  </div>
+              <XCircle size={24} />
+            </button>
+          </div>
 
-  {/* Bottom Section - Admin Portal Info */}
-      {/* Footer */}
-      <div className="md:hidden mt-10 pt-6 border-t border-gray-700">
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-400">© 2025 admin dashboard</span>
+          <nav>
+            <ul className="space-y-2">
+              {navigationItems.map((item) => (
+                <li key={item.id}>
+                  <a
+                    href="#"
+                    onClick={() => {
+                      setView(item.id);
+                      setIsSidebarOpen(false);
+                    }}
+                    className={`flex items-center p-3 rounded-xl font-semibold transition-colors
+                      ${
+                        view === item.id
+                          ? "text-white bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg"
+                          : "text-gray-600 hover:bg-gray-100"
+                      }`}
+                  >
+                    <item.icon className="mr-3" size={20} />
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
-      </div>
-</aside>
 
+        <div className="md:hidden mt-10 pt-6 border-t border-gray-700">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-400">© 2025 admin dashboard</span>
+          </div>
+        </div>
+      </aside>
 
+      {/* Main Content Area */}
+      <main className="flex-1 p-4 md:p-8 md:ml-[280px] bg-gradient-to-br from-gray-50 via-white to-gray-100">
+        <header className="flex justify-end items-center mb-8 fixed right-0 top-0 z-10">
+          <div className="flex items-center space-x-5 bg-white/70 backdrop-blur-xl px-6 py-3 rounded-2xl shadow-lg border border-gray-200 transition-all duration-300 hover:shadow-md">
+            
+            <button
+              onClick={() => signOut({ callbackUrl: '/adminlogin' })}
+              className="flex items-center px-4 py-2 text-sm cursor-pointer font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-xl shadow-sm transition-all duration-200"
+            >
+              <LogOut size={18} className="mr-2" /> Logout
+            </button>
 
-{/* Main Content Area */}
-<main className="flex-1 p-4 md:p-8 md:ml-[280px] bg-gradient-to-br from-gray-50 via-white to-gray-100">
-  <header className="flex justify-end items-center mb-8 fixed right-0 top-0 z-100">
-    <div className="flex items-center space-x-5 bg-white/70 backdrop-blur-xl px-6 py-3 rounded-2xl shadow-lg border border-gray-200 transition-all duration-300 hover:shadow-md">
-      
-      {/* Logout button */}
-      <button
-        onClick={() => signOut({ callbackUrl: '/adminlogin' })} // Redirects to the admin login page
-        className="flex items-center px-4 py-2 text-sm cursor-pointer font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-xl shadow-sm transition-all duration-200"
-      >
-        <LogOut size={18} className="mr-2" /> Logout
-      </button>
+            <div className="flex items-center space-x-2">
+              <div className="w-11 h-11 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+                {session?.user?.name ? 
+                  session.user.name.split(' ').map(n => n[0]).join('')
+                  : 'AD'}
+              </div>
+              <span className="font-semibold text-sm hidden md:block text-gray-800 tracking-wide">
+                {session?.user?.name || "Admin User"}
+              </span>
+            </div>
+          </div>
+        </header>
 
-      {/* Profile Avatar */}
-    {/* Profile Avatar */}
-    <div className="flex items-center space-x-2">
-      <div className="w-11 h-11 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
-        {session?.user?.name ? 
-          session.user.name.split(' ').map(n => n[0]).join('')
-          : 'AD'}
-      </div>
-      <span className="font-semibold text-sm hidden md:block text-gray-800 tracking-wide">
-        {session?.user?.name || "Admin User"}
-      </span>
-    </div>
-  </div>
-</header>
-
-  {/* Main content wrapper */}
-  <div className="max-w-7xl mx-auto transition-all duration-300">
-    {renderContent()}
-  </div>
-</main>
-
+        <div className="max-w-7xl mx-auto transition-all duration-300 mt-16">
+          {renderContent()}
+        </div>
+      </main>
     </div>
   );
 }

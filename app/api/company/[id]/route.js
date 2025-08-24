@@ -43,8 +43,17 @@ export async function PUT(request, { params }) {
       return new Response(JSON.stringify({ success: false, message: 'Company ID is required' }), { status: 400 });
     }
 
-    // Remove fields that cannot be updated
-    const { id: _, user, createdAt, updatedAt, employeeId, ...updateData } = body;
+    // Remove fields that cannot be updated or don't exist in the schema
+    const { 
+      id: _, 
+      userId, 
+      user, 
+      createdAt, 
+      updatedAt, 
+      employeeId, 
+      lastUpdated, // Remove this field as it doesn't exist in the schema
+      ...updateData 
+    } = body;
 
     const dataToUpdate = {
       ...updateData,
@@ -78,7 +87,7 @@ export async function PUT(request, { params }) {
 // =============================
 export async function DELETE(request, { params }) {
   try {
-    const { id } =await  params;
+    const { id } = await params;
 
     if (!id) {
       return new Response(JSON.stringify({ success: false, message: 'Company ID is required' }), { status: 400 });

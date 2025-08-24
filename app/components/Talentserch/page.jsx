@@ -73,13 +73,11 @@ const getEducationLevel = (educationArray) => {
   return levels[0] || 'Not specified';
 };
 
-// Helper function to calculate GPA from education data (mock implementation)
-const calculateGPA = (educationArray) => {
-  // This is a mock implementation since GPA isn't in the API data
-  return (3.5 + Math.random() * 0.5).toFixed(1);
-};
 
-// Transform API data to match the expected format
+// Remove this function
+
+
+// Remove GPA from transformApiData
 const transformApiData = (apiData) => {
   return apiData.map(student => ({
     id: student.id,
@@ -90,20 +88,19 @@ const transformApiData = (apiData) => {
     university: student.education && student.education.length > 0 
       ? student.education[0].school 
       : "Not specified",
-    status: student.education && student.education.some(edu => edu.isCurrent) 
+    status: student.studentStatus || (student.education && student.education.some(edu => edu.isCurrent) 
       ? "Student" 
-      : "Alumni",
-    experienceInYears: formatExperience(student.experience),
-    educationLevel: getEducationLevel(student.education),
-    gpa: calculateGPA(student.education),
-    bio: student.bio || "No bio available",
+      : "Alumni"),
+    experienceInYears: student.experienceRange || formatExperience(student.experience),
+    educationLevel: student.educationLevel || getEducationLevel(student.education),
+    jobType: student.jobType || "Not specified", // Add job type
+    bio: student.summary || "No summary available", // Use summary instead of bio
     skills: student.skills || [],
     resumeUrl: student.resumePath || "#",
-    email: student.email || "no-email@example.com", // Assuming email might be available in real API
+    email: student.email || "no-email@example.com",
     initials: getInitials(student.name)
   }));
 };
-
 const educationLevels = ["All", "Certificate", "Diploma", "Bachelor's", "Master's", "PhD"];
 const experienceRanges = ["All", "Less than 1 year", "1-2 years", "3-5 years", "5+ years"];
 
@@ -165,7 +162,6 @@ const StudentProfile = ({ student, onClose }) => {
   if (!student) return null;
 
   const handleResumeDownload = () => {
-    // In a real app, this would be the actual resume URL from the API
     const link = document.createElement('a');
     link.href = student.resumeUrl;
     link.download = `${student.name.replace(/\s+/g, '_')}_Resume.pdf`;
@@ -174,36 +170,8 @@ const StudentProfile = ({ student, onClose }) => {
     document.body.removeChild(link);
   };
 
-// Dynamic function to fetch email by user/company ID
-// Function to fetch email dynamically
-  const [email, setEmail] = useState("");
-async function fetchEmail(userId) {
-  try {
-    const res = await fetch(`http://localhost:3000/api/student/${userId}`);
-    const data = await res.json();
-
-    if (data.success && data.student) {
-      console.log("Email:", data.student.email);
-    } else {
-      console.log("No student/email found");
-    }
-  } catch (error) {
-    console.error("Error fetching student:", error);
-  }
-}
-
-
-
-
-
-
-   const handleEmailClick = async () => {
-    if (!email) {
-      await fetchEmail(); // fetch first if not already available
-    }
-    if (email) {
-      window.location.href = `mailto:${email}?subject=Interest in Your Profile`;
-    }
+  const handleEmailClick = () => {
+    window.location.href = `mailto:${student.email}?subject=Interest in Your Profile`;
   };
 
   return (
@@ -218,7 +186,14 @@ async function fetchEmail(userId) {
           </div>
           <h2 className="text-3xl font-bold text-gray-900">{student.name}</h2>
           <p className="text-md text-blue-600 font-semibold">{student.specialization}</p>
-          {console.log(student.userId)}
+          
+          {/* Job Type Badge */}
+          <div className="mt-2">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+              <Briefcase size={14} className="mr-1" />
+              Looking for: {student.jobType}
+            </span>
+          </div>
         </div>
         <div className="mt-8 space-y-6">
           <div className="bg-gray-50 p-6 rounded-2xl shadow-inner">
@@ -228,15 +203,24 @@ async function fetchEmail(userId) {
             </div>
             <p className="text-gray-600">{student.university}</p>
             <p className="text-sm font-medium text-gray-500 mt-1">Level: <span className="text-gray-700 font-bold">{student.educationLevel}</span></p>
-            <p className="text-sm font-medium text-gray-500 mt-1">GPA: <span className="text-gray-700 font-bold">{student.gpa}</span></p>
           </div>
+          
+          <div className="bg-gray-50 p-6 rounded-2xl shadow-inner">
+            <div className="flex items-center gap-3 text-gray-700 mb-2">
+              <Briefcase size={20} />
+              <p className="text-lg font-semibold">Experience</p>
+            </div>
+            <p className="text-gray-600 font-medium">{student.experienceInYears}</p>
+          </div>
+          
           <div className="bg-gray-50 p-6 rounded-2xl shadow-inner">
             <h3 className="flex items-center gap-3 text-gray-700 mb-2">
               <Briefcase size={20} />
-              <p className="text-lg font-semibold">About Me</p>
+              <p className="text-lg font-semibold">Professional Summary</p>
             </h3>
             <p className="text-gray-600 leading-relaxed">{student.bio}</p>
           </div>
+          
           <div className="bg-gray-50 p-6 rounded-2xl shadow-inner">
             <h3 className="text-lg font-semibold text-gray-700 mb-3">Skills</h3>
             <div className="flex flex-wrap gap-2">
@@ -267,6 +251,10 @@ async function fetchEmail(userId) {
   );
 };
 
+// Add job types array
+const jobTypes = ["All", "Internship", "Full-time", "Part-time", "Contract"];
+
+// Update the FilterBar component to include job type filter
 const FilterBar = ({ 
   searchQuery, 
   setSearchQuery, 
@@ -277,7 +265,9 @@ const FilterBar = ({
   specializationFilter, 
   setSpecializationFilter, 
   educationLevelFilter, 
-  setEducationLevelFilter, 
+  setEducationLevelFilter,
+  jobTypeFilter, // Add job type filter
+  setJobTypeFilter, // Add job type filter
   specializations, 
   handleClearFilters,
   isFilterOpen,
@@ -310,36 +300,36 @@ const FilterBar = ({
         <Search className="h-6 w-6 absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
       </div>
 
-      {/* Filter Section - Always visible on desktop, collapsible on mobile */}
+      {/* Filter Section */}
       <div className={`${isFilterOpen ? 'block' : 'hidden'} lg:block mb-8`}>
-        <div className="flex flex-col lg:flex-row gap-4 mb-4">
-          {/* Status Filter (Student/Alumni) */}
-          <div className="flex-1">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+          {/* Status Filter */}
+          <div>
             <label className="block text-sm font-semibold text-gray-600 mb-2">Status</label>
             <div className="flex gap-2 bg-gray-100 p-2 rounded-full">
               <button
                 onClick={() => setStatusFilter("All")}
-                className={`flex-1 py-2 px-4 rounded-full font-semibold transition-all flex items-center justify-center gap-2 ${statusFilter === "All" ? 'bg-blue-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-blue-100'}`}
+                className={`flex-1 py-2 px-4 rounded-full font-semibold transition-all ${statusFilter === "All" ? 'bg-blue-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-blue-100'}`}
               >
                 All
               </button>
               <button
                 onClick={() => setStatusFilter("Student")}
-                className={`flex-1 py-2 px-4 rounded-full font-semibold transition-all flex items-center justify-center gap-2 ${statusFilter === "Student" ? 'bg-blue-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-blue-100'}`}
+                className={`flex-1 py-2 px-4 rounded-full font-semibold transition-all ${statusFilter === "Student" ? 'bg-blue-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-blue-100'}`}
               >
-                <GraduationCap size={18} /> Students
+                Students
               </button>
               <button
                 onClick={() => setStatusFilter("Alumni")}
-                className={`flex-1 py-2 px-4 rounded-full font-semibold transition-all flex items-center justify-center gap-2 ${statusFilter === "Alumni" ? 'bg-blue-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-blue-100'}`}
+                className={`flex-1 py-2 px-4 rounded-full font-semibold transition-all ${statusFilter === "Alumni" ? 'bg-blue-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-blue-100'}`}
               >
-                <Building2 size={18} /> Alumni
+                Alumni
               </button>
             </div>
           </div>
 
-          {/* Experience in Years Filter */}
-          <div className="flex-1">
+          {/* Experience Filter */}
+          <div>
             <label className="block text-sm font-semibold text-gray-600 mb-2">Experience</label>
             <select
               value={experienceFilter}
@@ -351,11 +341,23 @@ const FilterBar = ({
               ))}
             </select>
           </div>
-        </div>
 
-        <div className="flex flex-col lg:flex-row gap-4 mb-4">
+          {/* Job Type Filter */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-600 mb-2">Job Type</label>
+            <select
+              value={jobTypeFilter}
+              onChange={(e) => setJobTypeFilter(e.target.value)}
+              className="w-full py-3 px-4 rounded-full font-semibold transition-all bg-white text-gray-700 border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {jobTypes.map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+
           {/* Specialization Filter */}
-          <div className="flex-1">
+          <div>
             <label className="block text-sm font-semibold text-gray-600 mb-2">Specialization</label>
             <select
               value={specializationFilter}
@@ -370,7 +372,7 @@ const FilterBar = ({
           </div>
 
           {/* Education Level Filter */}
-          <div className="flex-1">
+          <div>
             <label className="block text-sm font-semibold text-gray-600 mb-2">Education Level</label>
             <select
               value={educationLevelFilter}
@@ -409,6 +411,15 @@ const StudentCard = ({ student, setSelectedStudent }) => {
       </div>
       <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">{student.name}</h3>
       <p className="text-sm text-gray-500 mb-2">{student.specialization} at {student.university}</p>
+      
+      {/* Job Type Badge */}
+      <div className="mb-3">
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+          <Briefcase size={12} className="mr-1" />
+          {student.jobType}
+        </span>
+      </div>
+      
       <p className="text-xs text-gray-400 mb-4 line-clamp-2">{student.bio}</p>
       <div className="mt-4 flex flex-wrap justify-center gap-2">
         {student.skills.slice(0, 4).map(skill => (
@@ -423,7 +434,9 @@ const StudentCard = ({ student, setSelectedStudent }) => {
         )}
       </div>
       <div className="mt-4 text-sm text-gray-600 font-medium">
-        <span className="text-blue-600 font-bold">Status:</span> {student.status} • <span className="text-blue-600 font-bold">Experience:</span> {student.experienceInYears} • <span className="text-blue-600 font-bold">GPA:</span> {student.gpa}
+        <span className="text-blue-600 font-bold">Status:</span> {student.status} • 
+        <span className="text-blue-600 font-bold"> Experience:</span> {student.experienceInYears} • 
+        <span className="text-blue-600 font-bold"> Education:</span> {student.educationLevel}
       </div>
     </div>
   );
@@ -437,6 +450,7 @@ export default function TalentSearchApp() {
   const [experienceFilter, setExperienceFilter] = useState('All');
   const [specializationFilter, setSpecializationFilter] = useState('All');
   const [educationLevelFilter, setEducationLevelFilter] = useState('All');
+  const [jobTypeFilter, setJobTypeFilter] = useState('All'); // Add job type filter
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -468,6 +482,12 @@ export default function TalentSearchApp() {
     fetchStudents();
   }, []);
 
+
+
+
+
+
+
   const specializations = [...new Set(students.map(student => student.specialization))].sort();
 
   const handleClearFilters = () => {
@@ -475,6 +495,7 @@ export default function TalentSearchApp() {
     setStatusFilter('All');
     setExperienceFilter('All');
     setSpecializationFilter('All');
+      setJobTypeFilter('All');
     setEducationLevelFilter('All');
   };
 
@@ -499,7 +520,12 @@ export default function TalentSearchApp() {
       educationLevelFilter === 'All' ||
       student.educationLevel.toLowerCase() === educationLevelFilter.toLowerCase();
 
-    return matchesSearch && matchesStatus && matchesExperienceRange && matchesSpecialization && matchesEducationLevel;
+      const matchesJobType =
+      jobTypeFilter === 'All' ||
+      student.jobType.toLowerCase() === jobTypeFilter.toLowerCase();
+
+    return matchesSearch && matchesStatus && matchesExperienceRange && 
+           matchesSpecialization && matchesEducationLevel && matchesJobType;
   });
 
   const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
@@ -527,6 +553,8 @@ export default function TalentSearchApp() {
             educationLevelFilter={educationLevelFilter}
             setEducationLevelFilter={setEducationLevelFilter}
             specializations={specializations}
+            jobTypeFilter={jobTypeFilter} // Add job type filter
+            setJobTypeFilter={setJobTypeFilter} // Add job type filter
             handleClearFilters={handleClearFilters}
             isFilterOpen={isFilterOpen}
             setIsFilterOpen={setIsFilterOpen}

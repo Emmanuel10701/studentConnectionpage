@@ -1,16 +1,16 @@
-import prisma from "../../../../libs/prisma";
+import { prisma } from "../../../../libs/prisma";
 import { NextResponse } from "next/server";
 
 // ---------- GET single application ----------
 export async function GET(req, { params }) {
   try {
-    const { id } = await params; // ✅ must await
+    const { id } = await params;
 
     const application = await prisma.jobApplication.findUnique({
       where: { id },
       include: {
         job: true,
-        student: true, // optional relation
+        student: true,
       },
     });
 
@@ -27,7 +27,7 @@ export async function GET(req, { params }) {
 // ---------- PUT: update status ----------
 export async function PUT(req, { params }) {
   try {
-    const { id } = await params; // ✅ must await
+    const { id } = await params;
     const { status } = await req.json();
 
     if (!status) {
@@ -49,7 +49,7 @@ export async function PUT(req, { params }) {
 // ---------- DELETE application ----------
 export async function DELETE(req, { params }) {
   try {
-    const { id } = await params; // ✅ must await
+    const { id } = await params;
 
     const deleted = await prisma.jobApplication.delete({
       where: { id },

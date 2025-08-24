@@ -125,31 +125,35 @@ model StudentProfile {
 
 // file: /prisma/schema.prisma
 
-
 model StudentEntireProfile {
-  id                 String          @id @default(auto()) @map("_id") @db.ObjectId
-  userId             String          @unique @db.ObjectId // Foreign key to User
-  user               User            @relation(fields: [userId], references: [id])
-  email              String?
-  name               String
-  bio                String?
-  summary            String?
-  resumePath         String?
-  createdAt          DateTime        @default(now())
-  updatedAt          DateTime        @updatedAt
-  skills             String[]        // <-- Add this line for skills array
-
+  id               String          @id @default(auto()) @map("_id") @db.ObjectId
+  userId           String          @unique @db.ObjectId // Foreign key to User
+  user             User            @relation(fields: [userId], references: [id])
+  email            String?
+  name             String
+  summary          String?
+  resumePath       String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  skills           String[] // Added as requested
 
   // One-to-one relationship with Address
-  address            Address?        @relation(fields: [addressId], references: [id])
-  addressId          String?         @unique @db.ObjectId
+  address          Address?        @relation(fields: [addressId], references: [id])
+  addressId        String?         @unique @db.ObjectId
 
   // One-to-many relationships (multiple items in an array)
-  education          Education[]
-  experience         Experience[]
-  achievements       Achievement[]
-  certifications     Certification[]
-  jobs               JobApplication[] // <-- Add this line for job applications
+  education        Education[]
+  experience       Experience[]
+
+  achievements     Achievement[]
+  certifications   Certification[]
+  jobs             JobApplication[] // Added as requested
+
+  // New fields for student profile and job search preferences
+  educationLevel   String?   // Bachelor's, Master's, etc.
+  experienceRange  String?   // Less than 1 year, 1-2 years, 3-5 years, 5+ years
+  studentStatus    String?   // Student or Alumni
+  jobType          String?   // Internship, Full-time, Contract, Part-time
 }
 
 model Address {
@@ -319,10 +323,21 @@ model JobApplication {
   id          String               @id @default(auto()) @map("_id") @db.ObjectId
   jobId       String               @db.ObjectId
   job         Job                  @relation(fields: [jobId], references: [id])
-  studentId   String?              @db.ObjectId  // <-- optional
-  student     StudentEntireProfile? @relation(fields: [studentId], references: [id])
+  studentId   String               @db.ObjectId  // <-- Remove the ? to make it required
+  student     StudentEntireProfile @relation(fields: [studentId], references: [id])
   coverLetter String?
   status      String               @default("APPLIED")
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
+}
+
+// In your schema.prisma file
+model JobAlert {
+  id          String               @id @default(auto()) @map("_id") @db.ObjectId
+  email       String   @unique
+  subscribedAt DateTime @default(now())
+  isActive    Boolean  @default(true)
+  preferences Json?    // Optional: you can add preferences later
+
+  @@map("job_alerts")
 }

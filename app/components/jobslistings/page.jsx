@@ -43,6 +43,101 @@ import { createPortal } from 'react-dom';
 import { useSession } from 'next-auth/react';
 
 // --- COMPONENTS ---
+const ApplicantDetailsModal = ({ applicant, onClose, onEmail }) => {
+  if (!applicant) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md overflow-y-auto">
+      <div className="relative bg-white rounded-2xl p-6 max-w-4xl w-full mx-auto my-8 shadow-2xl max-h-[90vh] overflow-y-auto">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 p-2 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
+        >
+          <X size={24} />
+        </button>
+
+        <div className="flex flex-col gap-6">
+          {/* Applicant Header */}
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
+              <UserCheck className="w-10 h-10 text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">{applicant.student.name}</h2>
+              <p className="text-gray-600">{applicant.student.email}</p>
+             <span className="inline-block mt-2 px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+  <span className="font-bold">Address:</span>
+  <span className="text-blue-800">
+    details
+  </span>
+  <span className="italic  text-gray-700">
+    {`, ${applicant.student.address.ward}, ${applicant.student.address.subCounty}, ${applicant.student.address.county}`}
+  </span>
+</span>
+            </div>
+            <button
+              onClick={() => onEmail(applicant.student.email)}
+              className="ml-auto p-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors"
+            >
+              <Mail size={20} />
+            </button>
+          </div>
+
+          {/* Cover Letter */}
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 mb-3">Cover Letter</h3>
+            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+              <p className="text-gray-700">{applicant.coverLetter}</p>
+            </div>
+          </div>
+
+          {/* Student Details */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Personal Information</h3>
+              <div className="space-y-2">
+                <p><span className="font-medium">Bio:</span> {applicant.student.bio || 'Not provided'}</p>
+                <p><span className="font-medium">Summary:</span> {applicant.student.summary || 'Not provided'}</p>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Skills</h3>
+              <div className="flex flex-wrap gap-2">
+                {applicant.student.skills && applicant.student.skills.map((skill, index) => (
+                  <span key={index} className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Resume */}
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 mb-3">Resume</h3>
+            <a 
+              href={`http://localhost:3000${applicant.student.resumePath}`} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              <Paperclip size={16} />
+              View Resume
+            </a>
+          </div>
+
+          {/* Application Date */}
+          <div className="text-sm text-gray-500">
+            Applied on {new Date(applicant.createdAt).toLocaleDateString()}
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+};
+
 
 // NEW COMPONENT FOR JOB DETAILS
 // Add this line inside the JobPostings component
@@ -148,20 +243,18 @@ const DeleteConfirmationModal = ({ onConfirm, onCancel, title, message }) => {
   );
 };
 
-const ApplicantsModal = ({ job, applicants, allStudents, onClose }) => {
+const ApplicantsModal = ({ job, onClose }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedApplicant, setSelectedApplicant] = useState(null);
-  const [activeTab, setActiveTab] = useState('profile');
 
-  const jobApplicants = applicants.map(applicantId =>
-    allStudents.find(student => student.id === applicantId)
-  ).filter(Boolean);
-
-  const filteredApplicants = jobApplicants.filter(student =>
-    student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.specialization.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.university.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredApplicants = job.applicants.filter(applicant =>
+    applicant.student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    applicant.student.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleEmail = (email) => {
+    window.location.href = `mailto:${email}`;
+  };
 
   if (!job) return null;
 
@@ -195,35 +288,50 @@ const ApplicantsModal = ({ job, applicants, allStudents, onClose }) => {
             </div>
 
             {filteredApplicants.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto pr-2">
-                {filteredApplicants.map(student => (
+              <div className="grid grid-cols-1 gap-4 overflow-y-auto pr-2">
+                {filteredApplicants.map(applicant => (
                   <div
-                    key={student.id}
-                    onClick={() => setSelectedApplicant(student)}
+                    key={applicant.id}
+                    onClick={() => setSelectedApplicant(applicant)}
                     className="bg-gradient-to-br from-white to-gray-50 p-6 rounded-xl border border-gray-200 hover:border-blue-300 cursor-pointer transition-all duration-200 hover:shadow-lg group"
                   >
                     <div className="flex items-center gap-4 mb-4">
-                      <img src={student.imageUrl} alt={student.name} className="w-16 h-16 rounded-full border-2 border-white shadow-md group-hover:border-blue-200 transition-colors" />
-                      <div>
-                        <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">{student.name}</h3>
-                        <p className="text-sm text-gray-600">{student.specialization}</p>
-                        <p className="text-xs text-gray-400">{student.university}</p>
+                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <UserCheck className="w-6 h-6 text-blue-600" />
                       </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                          {applicant.student.name}
+                        </h3>
+                        <p className="text-sm text-gray-600">{applicant.student.email}</p>
+                        <p className="text-xs text-gray-400">
+                          Applied {new Date(applicant.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                   <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                      Applied
+                   </span>
                     </div>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {student.skills.slice(0, 3).map(skill => (
-                        <span key={skill} className="px-2.5 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
-                          {skill}
-                        </span>
-                      ))}
+                    <div className="text-sm text-gray-700 mb-4">
+                      <p className="line-clamp-2">{applicant.coverLetter}</p>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                        student.status === 'Student' ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700'
-                      }`}>
-                        {student.status}
-                      </span>
-                      <span className="text-sm text-gray-500">GPA: {student.gpa}</span>
+                      <div className="flex flex-wrap gap-2">
+                        {applicant.student.skills && applicant.student.skills.slice(0, 3).map((skill, index) => (
+                          <span key={index} className="px-2.5 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEmail(applicant.student.email);
+                        }}
+                        className="p-2 text-gray-400 hover:text-blue-600 rounded-lg transition-colors"
+                      >
+                        <Mail size={16} />
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -236,90 +344,11 @@ const ApplicantsModal = ({ job, applicants, allStudents, onClose }) => {
             )}
           </div>
         ) : (
-          <div className="h-full flex flex-col">
-            <div className="flex items-center gap-4 mb-6">
-              <button
-                onClick={() => setSelectedApplicant(null)}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <ChevronLeft size={20} />
-              </button>
-              <h2 className="text-2xl font-bold text-gray-900">Applicant Profile</h2>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-y-auto">
-              {/* Profile Sidebar */}
-              <div className="lg:col-span-1 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-100">
-                <div className="text-center">
-                  <img src={selectedApplicant.imageUrl} alt={selectedApplicant.name} className="w-24 h-24 rounded-full border-4 border-white shadow-md mx-auto mb-4" />
-                  <h3 className="text-xl font-bold text-gray-900">{selectedApplicant.name}</h3>
-                  <p className="text-blue-600 font-medium">{selectedApplicant.specialization}</p>
-                  <p className="text-sm text-gray-500 mt-1">{selectedApplicant.university}</p>
-                  
-                  <div className="mt-4 p-3 bg-white rounded-lg border border-gray-200">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-gray-600">Status</span>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        selectedApplicant.status === 'Student' ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700'
-                      }`}>
-                        {selectedApplicant.status}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">GPA</span>
-                      <span className="text-sm font-medium text-gray-900">{selectedApplicant.gpa}</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 flex gap-2">
-                    <a href={selectedApplicant.resumeUrl} className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                      <Download size={16} /> Resume
-                    </a>
-                    <a href={`mailto:${selectedApplicant.email}`} className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
-                      <Mail size={16} /> Contact
-                    </a>
-                  </div>
-                </div>
-              </div>
-
-              {/* Main Content */}
-              <div className="lg:col-span-2 space-y-6">
-                <div className="bg-white p-6 rounded-xl border border-gray-200">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-4">About</h4>
-                  <p className="text-gray-700 leading-relaxed">{selectedApplicant.bio}</p>
-                </div>
-
-                <div className="bg-white p-6 rounded-xl border border-gray-200">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Skills & Expertise</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedApplicant.skills.map(skill => (
-                      <span key={skill} className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-white p-4 rounded-xl border border-gray-200">
-                    <h4 className="font-semibold text-gray-900 mb-2">Contact Information</h4>
-                    <div className="space-y-1 text-sm">
-                      <p className="text-gray-600">{selectedApplicant.email}</p>
-                      <p className="text-gray-600">{selectedApplicant.phone}</p>
-                      <p className="text-gray-600">{selectedApplicant.location}</p>
-                    </div>
-                  </div>
-                  <div className="bg-white p-4 rounded-xl border border-gray-200">
-                    <h4 className="font-semibold text-gray-900 mb-2">Education</h4>
-                    <div className="space-y-1 text-sm">
-                      <p className="text-gray-900 font-medium">{selectedApplicant.university}</p>
-                      <p className="text-gray-600">{selectedApplicant.specialization}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <ApplicantDetailsModal 
+            applicant={selectedApplicant} 
+            onClose={() => setSelectedApplicant(null)}
+            onEmail={handleEmail}
+          />
         )}
       </div>
     </div>,
@@ -448,7 +477,7 @@ const JobPostings = ({
 
   return (
     <>
-      <div className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-200 p-6">
+      <div className="sticky top-0  bg-white/90 backdrop-blur-md border-b border-gray-200 p-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div>
@@ -866,6 +895,25 @@ const JobBoard = () => {
       if (jobsRes.ok) {
         const data = await jobsRes.json();
         setJobs(data);
+
+         // 4️⃣ For each job, fetch its applicants
+      const jobsWithApplicants = await Promise.all(
+        data.map(async (job) => {
+          try {
+            const applicantsRes = await fetch(`/api/getapplicants/${job.id}`);
+            if (applicantsRes.ok) {
+              const applicantsData = await applicantsRes.json();
+              return { ...job, applicants: applicantsData };
+            }
+          } catch (error) {
+            console.error(`Error fetching applicants for job ${job.id}:`, error);
+          }
+          return { ...job, applicants: [] };
+        })
+      );
+      
+      setJobs(jobsWithApplicants);
+      
       } else {
         console.error("Failed to fetch jobs");
       }
@@ -876,47 +924,122 @@ const JobBoard = () => {
     }
   };
 
-  const handleSaveJob = async (jobData, jobId = null) => {
-    try {
-      const url = jobId ? `/api/jobs/${jobId}` : '/api/jobs';
-      const method = jobId ? 'PUT' : 'POST';
+const handleSaveJob = async (jobData, jobId = null) => {
+  try {
+    const url = jobId ? `/api/jobs/${jobId}` : '/api/jobs';
+    const method = jobId ? 'PUT' : 'POST';
 
-      const formattedJobData = {
-        ...jobData,
-        skills: Array.isArray(jobData.skills) ? jobData.skills.join(', ') : jobData.skills,
-      };
+    const formattedJobData = {
+      ...jobData,
+      skills: Array.isArray(jobData.skills) ? jobData.skills.join(', ') : jobData.skills,
+    };
 
-      // ✅ Use company ID from state when creating a new job
-      if (!jobId) {
-        if (!companyData?.id) {
-          console.error("Cannot save job: company not found");
-          alert("Cannot save job: company not found.");
-          return;
-        }
-        formattedJobData.companyId = companyData.id;
+    // ✅ Use company ID from state when creating a new job
+    if (!jobId) {
+      if (!companyData?.id) {
+        console.error("Cannot save job: company not found");
+        alert("Cannot save job: company not found.");
+        return;
       }
-
-      console.log("Sending job data:", formattedJobData);
-
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formattedJobData),
-      });
-
-      if (response.ok) {
-        await fetchCompanyJobs(); // Refresh jobs
-        alert(jobId ? "Job updated successfully!" : "Job created successfully!");
-      } else {
-        const errorData = await response.json();
-        console.error("Failed to save job:", errorData.message);
-        alert(`Failed to save job: ${errorData.message}`);
-      }
-    } catch (error) {
-      console.error("Error saving job:", error);
-      alert("Error saving job: " + error.message);
+      formattedJobData.companyId = companyData.id;
     }
-  };
+
+    console.log("Sending job data:", formattedJobData);
+
+    const response = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formattedJobData),
+    });
+
+    if (response.ok) {
+      const savedJob = await response.json();
+      
+      // If it's a NEW job posting (not an edit), send email notifications to students
+      if (!jobId) {
+        // Run this in the background without blocking the UI
+        sendJobNotificationEmails(savedJob).catch(error => {
+          console.error('Email notification error:', error);
+          // Don't show error to user since this is a background task
+        });
+      }
+      
+      await fetchCompanyJobs(); // Refresh jobs
+      alert(jobId ? "Job updated successfully!" : "Job created successfully!");
+    } else {
+      const errorData = await response.json();
+      console.error("Failed to save job:", errorData.message);
+      alert(`Failed to save job: ${errorData.message}`);
+    }
+  } catch (error) {
+    console.error("Error saving job:", error);
+    alert("Error saving job: " + error.message);
+  }
+};
+
+// NEW FUNCTION: Send email notifications to students
+// NEW FUNCTION: Send email notifications to students in the required format
+const sendJobNotificationEmails = async (newJob) => {
+  try {
+    console.log('Starting email notification process for new job:', newJob.id);
+    
+    // 1. Fetch all students
+    const studentsResponse = await fetch('/api/student');
+    
+    if (!studentsResponse.ok) {
+      throw new Error('Failed to fetch students');
+    }
+    
+    const studentsData = await studentsResponse.json();
+    const students = studentsData.students || studentsData || [];
+    
+    if (students.length === 0) {
+      console.log('No students found to notify');
+      return;
+    }
+    
+    // 2. Format the data exactly as required
+    const notificationData = {
+      newJob: {
+        id: newJob.id,
+        title: newJob.title,
+        companyName: companyData?.name || 'Not Available',
+        location: newJob.location,
+        jobType: newJob.type,
+        salaryRange: newJob.salaryRange
+      },
+      students: students.map(student => ({
+        name: student.name,
+        email: student.email,
+        educationLevel: student.educationLevel || 'Not specified',
+        experienceRange: student.experience || 'Not specified',
+        skills: student.skills || []
+      }))
+    };
+    
+    console.log('Sending notification data:', notificationData);
+    
+    // 3. Send the formatted data to the notification endpoint
+    const emailResponse = await fetch('/api/notifyjobseekers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(notificationData),
+    });
+    
+    if (emailResponse.ok) {
+      console.log(`Successfully sent job notifications to ${students.length} students`);
+    } else {
+      const errorData = await emailResponse.json();
+      throw new Error(errorData.message || 'Failed to send email notifications');
+    }
+    
+  } catch (error) {
+    console.error('Error in sending job notifications:', error);
+    // Don't re-throw - this is a background task
+  }
+};
+
+
 
   const handleDeleteJob = async (jobId) => {
     try {

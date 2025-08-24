@@ -1,61 +1,99 @@
-import prisma from "../../../libs/prisma";
 import { NextResponse } from "next/server";
 
-// ---------- GET all job applications safely ----------
+// Import the prisma instance correctly
+import prisma from "../../../libs/prisma"; // Adjust path as needed
 
-
+// GET: Get all applications
 export async function GET() {
   try {
     const applications = await prisma.jobApplication.findMany({
       orderBy: { createdAt: "desc" },
+      include: {
+        job: {
+          include: {
+            company: true
+          }
+        },
+        student: {
+          include: {
+            user: {
+              select: {
+                name: true,
+                email: true
+              }
+            }
+          }
+        }
+      }
     });
 
     return NextResponse.json(applications);
   } catch (err) {
+    console.error("GET applications error:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
-// ---------- POST: student applies to a job ----------
+
+// POST: Submit a job application
 export async function POST(req) {
   try {
-    const { studenteireprofileid, jobId, coverLetter } = await req.json();
+    const { jobId, studentId, coverLetter } = await req.json();
 
-    if (!studenteireprofileid || !jobId) {
+    if (!jobId || !studentId) {
       return NextResponse.json(
-        { error: "studenteireprofileid and jobId are required" },
+        { error: "jobId and studentId are required" },
         { status: 400 }
       );
     }
 
-    const studentProfile = await prisma.studentEntireProfile.findUnique({
-      where: { id: studenteireprofileid },
+    // Check if already applied
+    const existingApplication = await prisma.jobApplication.findFirst({
+      where: {
+        jobId: jobId,
+        studentId: studentId,
+      },
     });
-    if (!studentProfile) {
+
+    if (existingApplication) {
       return NextResponse.json(
-        { error: "StudentEntireProfile not found" },
-        { status: 404 }
+        { error: "You have already applied to this job" },
+        { status: 409 }
       );
     }
 
-    const job = await prisma.job.findUnique({ where: { id: jobId } });
-    if (!job) {
-      return NextResponse.json({ error: "Job not found" }, { status: 404 });
-    }
-
+    // Create the application
     const application = await prisma.jobApplication.create({
       data: {
-        job: { connect: { id: jobId } },
-        student: { connect: { id: studenteireprofileid } },
-        coverLetter,
+        jobId: jobId,
+        studentId: studentId,
+        coverLetter: coverLetter || "",
+        status: "PENDING",
       },
       include: {
-        job: true,
-        student: true,
+        job: {
+          include: {
+            company: true
+          }
+        },
+        student: {
+          include: {
+            user: {
+              select: {
+                name: true,
+                email: true
+              }
+            }
+          }
+        }
       },
     });
 
     return NextResponse.json(application, { status: 201 });
   } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error("Application submission error:", err);
+    return NextResponse.json(
+      { error: err.message || "Internal server error" }, 
+      { status: 500 }
+    );
   }
 }

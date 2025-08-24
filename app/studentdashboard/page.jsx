@@ -19,12 +19,14 @@ import {
   HeartHandshake,
   Star,
   Calendar,
+  Bell,
   PlusCircle,
   ArrowRight
 } from 'lucide-react';
 import Profile from "../components/studentprofile/page.jsx";
 import Jobistings from "../components/studentjobs/page.jsx";
 import EventsandNews from "../components/EventsandNews/page.jsx";
+import toast from 'react-hot-toast';
 
 // Modern Loading Components
 const CircularLoader = () => (
@@ -316,8 +318,112 @@ const EmptyDashboard = ({ onCreateProfile }) => (
   </div>
 );
 
+
+
+
+
+
 // Modern Home Dashboard Component
-const HomeDashboard = ({ studentProfile, basicProfile, setPage, loadingProfile, onCreateProfile }) => {
+const HomeDashboard = ({ studentProfile, basicProfile, setPage, loadingProfile, onCreateProfile, userId }) => {
+
+
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isSubscribing, setIsSubscribing] = useState(false);
+
+
+// In your HomeDashboard component, update the useEffect for checking subscription:
+useEffect(() => {
+  const checkSubscriptionStatus = async () => {
+    try {
+      const email = basicProfile?.email;
+      if (!email) return;
+      
+      // Encode the email for the URL
+      const encodedEmail = encodeURIComponent(email);
+      const response = await fetch(`/api/jobalerts?email=${encodedEmail}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        setIsSubscribed(data.isSubscribed);
+      }
+    } catch (error) {
+      console.error('Error checking subscription status:', error);
+    }
+  };
+
+  if (basicProfile?.email) {
+    checkSubscriptionStatus();
+  }
+}, [basicProfile?.email]);
+
+// Update the subscription handlers:
+const handleSubscribeToAlerts = async () => {
+  try {
+    setIsSubscribing(true);
+    const email = basicProfile?.email;
+    
+    if (!email) {
+      toast.error('Email address is required');
+      return;
+    }
+
+    const response = await fetch('/api/jobalerts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email })
+    });
+
+    const responseData = await response.json();
+
+    if (response.ok) {
+      setIsSubscribed(responseData.isSubscribed);
+      toast.success(responseData.message || 'Subscribed to job alerts!');
+    } else {
+      toast.error(responseData.message || 'Failed to subscribe to alerts');
+    }
+  } catch (error) {
+    console.error('Error subscribing to alerts:', error);
+    toast.error('Error subscribing to alerts');
+  } finally {
+    setIsSubscribing(false);
+  }
+};
+
+const handleUnsubscribeFromAlerts = async () => {
+  try {
+    const email = basicProfile?.email;
+    
+    if (!email) {
+      toast.error('Email address is required');
+      return;
+    }
+
+    const response = await fetch('/api/jobalerts', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email })
+    });
+
+    const responseData = await response.json();
+
+    if (response.ok) {
+      setIsSubscribed(false);
+      toast.success(responseData.message || 'Unsubscribed from job alerts');
+    } else {
+      toast.error(responseData.message || 'Failed to unsubscribe');
+    }
+  } catch (error) {
+    console.error('Error unsubscribing from alerts:', error);
+    toast.error('Error unsubscribing from alerts');
+  }
+};
+
+
+
   const stats = [
     {
       title: 'Achievements',
@@ -389,32 +495,44 @@ const HomeDashboard = ({ studentProfile, basicProfile, setPage, loadingProfile, 
         {/* Left Column */}
         <div className="lg:col-span-2 space-y-6">
           {/* Personal Information */}
-          <InfoCard title="Personal Information" icon={User} action>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-1">
-                <p className="text-sm text-gray-500 font-medium">Full Name</p>
-                <p className="font-semibold text-gray-800">{basicProfile?.name || 'Not provided'}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm text-gray-500 font-medium">Email</p>
-                <p className="font-semibold text-gray-800">{basicProfile?.email || 'Not provided'}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm text-gray-500 font-medium">Bio</p>
-                <p className="font-semibold text-gray-800">{studentProfile?.bio || 'Not provided'}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm text-gray-500 font-medium">Location</p>
-                <p className="font-semibold text-gray-800">
-                  {studentProfile?.address ? (
-                    `${studentProfile.address.details || ''}, ${studentProfile.address.ward || ''}`
-                  ) : (
-                    'Not provided'
-                  )}
-                </p>
-              </div>
-            </div>
-          </InfoCard>
+<InfoCard title="Professional Details" icon={User} action>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="space-y-1">
+      <p className="text-sm text-gray-500 font-medium">Full Name</p>
+      <p className="font-semibold text-gray-800">{basicProfile?.name || 'Not provided'}</p>
+    </div>
+    <div className="space-y-1">
+      <p className="text-sm text-gray-500 font-medium">Email</p>
+      <p className="font-semibold text-gray-800">{basicProfile?.email || 'Not provided'}</p>
+    </div>
+    <div className="space-y-1">
+      <p className="text-sm text-gray-500 font-medium">Education Level</p>
+      <p className="font-semibold text-gray-800">{studentProfile?.educationLevel || 'Not specified'}</p>
+    </div>
+    <div className="space-y-1">
+      <p className="text-sm text-gray-500 font-medium">Experience</p>
+      <p className="font-semibold text-gray-800">{studentProfile?.experienceRange || 'Not specified'}</p>
+    </div>
+    <div className="space-y-1">
+      <p className="text-sm text-gray-500 font-medium">Status</p>
+      <p className="font-semibold text-gray-800">{studentProfile?.studentStatus || 'Not specified'}</p>
+    </div>
+    <div className="space-y-1">
+      <p className="text-sm text-gray-500 font-medium">Job Preference</p>
+      <p className="font-semibold text-gray-800">{studentProfile?.jobType || 'Not specified'}</p>
+    </div>
+    <div className="space-y-1">
+      <p className="text-sm text-gray-500 font-medium">Location</p>
+      <p className="font-semibold text-gray-800">
+        {studentProfile?.address ? (
+          `${studentProfile.address.details || ''}, ${studentProfile.address.ward || ''}`
+        ) : (
+          'Not provided'
+        )}
+      </p>
+    </div>
+  </div>
+</InfoCard>
 
           {/* Education & Experience */}
           <InfoCard title="Education & Experience" icon={GraduationCap} action>
@@ -452,7 +570,13 @@ const HomeDashboard = ({ studentProfile, basicProfile, setPage, loadingProfile, 
           </InfoCard>
         </div>
 
-        {/* Right Column */}
+
+
+
+
+
+        
+          {/* Right Column */}
         <div className="space-y-6">
           {/* Quick Actions */}
           <InfoCard title="Quick Actions" icon={Zap}>
@@ -495,51 +619,75 @@ const HomeDashboard = ({ studentProfile, basicProfile, setPage, loadingProfile, 
               </button>
             </div>
           </InfoCard>
+{/* Job Alerts Subscription */}
 
-          {/* Community Connect */}
-          <div className="p-6 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-2xl shadow-xl shadow-green-200">
-            <div className="flex items-center mb-4">
-              <HeartHandshake size={24} className="mr-3" />
-              <h3 className="font-semibold">Student Community</h3>
-            </div>
-            <p className="text-green-100 mb-4 text-sm">
-              Join 2,500+ students networking and sharing opportunities
-            </p>
-            <a
-              href="https://chat.whatsapp.com/your-group-link"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full flex items-center justify-center py-3 bg-white text-green-600 rounded-xl font-semibold hover:bg-gray-50 transition-all shadow-lg"
-            >
-              <MessageCircle size={18} className="mr-2" />
-              Join Community
-            </a>
-          </div>
-
-          {/* Recent Activity */}
-          <InfoCard title="Recent Activity" icon={Star}>
-            <div className="space-y-3">
-              <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-xl shadow-sm">
-                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                  <CheckCircle size={16} className="text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-800">Profile updated</p>
-                  <p className="text-xs text-gray-500">2 hours ago</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-xl shadow-sm">
-                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                  <Briefcase size={16} className="text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-800">New job matches</p>
-                  <p className="text-xs text-gray-500">5 hours ago</p>
-                </div>
-              </div>
-            </div>
-          </InfoCard>
+{/* Job Alerts Commitment Card */}
+<InfoCard title="Our Commitment" icon={Bell}>
+  <div className="space-y-4">
+    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-100">
+      <div className="flex items-start space-x-4">
+        <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
+          <Rocket size={24} className="text-white" />
         </div>
+        <div>
+          <h4 className="font-semibold text-gray-800 mb-3">Dedicated to Your Career Success</h4>
+          <p className="text-sm text-gray-600 leading-relaxed">
+            We are committed to bringing you the latest job notifications and opportunities. 
+            Our mission is to ensure you never miss out on perfect career matches that align 
+            with your skills and aspirations.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    {/* Features List */}
+    <div className="grid grid-cols-1 gap-2">
+      <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+        <CheckCircle size={16} className="text-green-500 flex-shrink-0" />
+        <span className="text-sm text-gray-700">Instant job opportunity notifications</span>
+      </div>
+      <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+        <CheckCircle size={16} className="text-green-500 flex-shrink-0" />
+        <span className="text-sm text-gray-700">Personalized career matches</span>
+      </div>
+      <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+        <CheckCircle size={16} className="text-green-500 flex-shrink-0" />
+        <span className="text-sm text-gray-700">Early access to new positions</span>
+      </div>
+    </div>
+  </div>
+</InfoCard>
+
+
+
+        
+{/* Community & Activity Cards - Beneath Education & Experience */}
+<div className="flex flex-col lg:flex-row gap-6 flex-wrap">
+  {/* Community Connect */}
+  <div className="flex-1 min-w-[300px]">
+    <div className="p-6 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-2xl shadow-xl shadow-green-200 h-full">
+      <div className="flex items-center mb-4">
+        <HeartHandshake size={24} className="mr-3" />
+        <h3 className="font-semibold">Student Community</h3>
+      </div>
+      <p className="text-green-100 mb-4 text-sm">
+        Join 2,500+ students networking and sharing opportunities
+      </p>
+      <a
+        href="https://chat.whatsapp.com/your-group-link"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-full flex items-center justify-center py-3 bg-white text-green-600 rounded-xl font-semibold hover:bg-gray-50 transition-all shadow-lg"
+      >
+        <MessageCircle size={18} className="mr-2" />
+        Join Community
+      </a>
+    </div>
+  </div>
+
+</div>
+</div>
+
       </div>
     </div>
   );

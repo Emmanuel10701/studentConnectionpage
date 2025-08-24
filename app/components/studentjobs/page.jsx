@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Briefcase, Search, Mail, X, CheckCircle, ArrowLeft, Code, DollarSign, Megaphone, Leaf, HeartPulse, ListChecks, Calendar, Building2, MapPin, NotebookPen, CircleDollarSign, Fingerprint, LucideBriefcase, User, Users, ClipboardList, CheckSquare, FileText } from 'lucide-react';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
+import { useSession } from 'next-auth/react';
 
 // Utility function to format the time since a job was posted
 const formatTimeAgo = (date) => {
@@ -363,7 +364,7 @@ const JobPostings = ({ onApply, activeTab, setActiveTab, appliedJobIds, jobs, is
 };
 
 // Component that displays the detailed view of a single job
-const JobDetails = ({ job, profile, onGoBack, onJobApplied, studentProfile }) => {
+const JobDetails = ({ job, studentProfile, onGoBack, onJobApplied }) => {
   const [isApplying, setIsApplying] = useState(false);
   const [message, setMessage] = useState(null);
   const [applicantCount, setApplicantCount] = useState(0);
@@ -374,26 +375,26 @@ const JobDetails = ({ job, profile, onGoBack, onJobApplied, studentProfile }) =>
   // Check if user has a resume
   const hasResume = studentProfile?.resumePath;
 
-  useEffect(() => {
-    const fetchApplicantCount = async () => {
-      if (!job || !job.id) return;
-      setApplicantsLoading(true);
-      try {
-        const response = await fetch(`http://localhost:3000/api/applied?jobId=${job.id}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch applicant count');
-        }
-        const data = await response.json();
-        setApplicantCount(data.length);
-      } catch (err) {
-        console.error('Error fetching applicant count:', err);
-        setApplicantCount(0); // Default to 0 on error
-      } finally {
-        setApplicantsLoading(false);
+ useEffect(() => {
+  const fetchApplicantCount = async () => {
+    if (!job || !job.id) return;
+    setApplicantsLoading(true);
+    try {
+      const response = await fetch(`http://localhost:3000/api/applied?jobId=${job.id}`); // Changed from /api/applied to /api/applicantsapi
+      if (!response.ok) {
+        throw new Error('Failed to fetch applicant count');
       }
-    };
-    fetchApplicantCount();
-  }, [job]);
+      const data = await response.json();
+      setApplicantCount(data.length);
+    } catch (err) {
+      console.error('Error fetching applicant count:', err);
+      setApplicantCount(0);
+    } finally {
+      setApplicantsLoading(false);
+    }
+  };
+  fetchApplicantCount();
+}, [job]);
 
   const handleApplyClick = () => {
     if (!hasResume) {
@@ -403,37 +404,38 @@ const JobDetails = ({ job, profile, onGoBack, onJobApplied, studentProfile }) =>
     setShowCoverLetterModal(true);
   };
 
-  const handleFinalApplication = async (coverLetter) => {
-    setIsApplying(true);
-    setShowCoverLetterModal(false);
+const handleFinalApplication = async (coverLetter) => {
+  setIsApplying(true);
+  setShowCoverLetterModal(false);
 
-    try {
-      const response = await fetch(`http://localhost:3000/api/applicantsapi`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          jobId: job.id,
-          applicantName: profile.name,
-          email: profile.email,
-          coverLetter: coverLetter,
-          resumePath: studentProfile.resumePath // Include resume path
-        }),
-      });
+  try {
+    const response = await fetch(`http://localhost:3000/api/applicantsapi`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        jobId: job.id,
+        studentId: studentProfile.id, // Changed from applicantName to studentId
+        coverLetter: coverLetter,
+        // Removed resumePath as it should be retrieved from the student profile in the backend
+      }),
+    });
 
-      if (!response.ok) {
-        throw new Error('Failed to submit application');
-      }
+    const data = await response.json();
 
-      setMessage({ type: 'success', text: 'Application submitted successfully!' });
-      onJobApplied(job.id);
-    } catch (err) {
-      setMessage({ type: 'error', text: 'Error submitting application. Please try again.' });
-    } finally {
-      setIsApplying(false);
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to submit application');
     }
-  };
+
+    setMessage({ type: 'success', text: 'Application submitted successfully!' });
+    onJobApplied(job.id);
+  } catch (err) {
+    setMessage({ type: 'error', text: err.message || 'Error submitting application. Please try again.' });
+  } finally {
+    setIsApplying(false);
+  }
+};
 
   const IconComponent = IndustryIconMap[job.industry] || Briefcase;
 
@@ -509,8 +511,8 @@ const JobDetails = ({ job, profile, onGoBack, onJobApplied, studentProfile }) =>
         </div>
         <div>
           <h4 className="text-lg font-semibold text-purple-800">Your Profile</h4>
-          <p className="text-purple-700">Name: <span className="font-medium">{profile.name}</span></p>
-          <p className="text-purple-700">Institution: <span className="font-medium">{profile.institution}</span></p>
+          <p className="text-purple-700">Name: <span className="font-medium">{studentProfile?.name || 'Not available'}</span></p>
+          <p className="text-purple-700">Email: <span className="font-medium">{studentProfile?.email || 'Not available'}</span></p>
           <p className="text-purple-700 flex items-center gap-2">
             Resume: 
             {hasResume ? (
@@ -561,7 +563,7 @@ const JobDetails = ({ job, profile, onGoBack, onJobApplied, studentProfile }) =>
 
       {showCoverLetterModal && (
         <CoverLetterModal
-          profile={profile}
+          studentProfile={studentProfile}
           job={job}
           onClose={() => setShowCoverLetterModal(false)}
           onApply={handleFinalApplication}
@@ -642,7 +644,7 @@ const CompleteProfileModal = ({ onClose }) => {
 };
 
 // Component for the cover letter modal
-const CoverLetterModal = ({ profile, job, onClose, onApply }) => {
+const CoverLetterModal = ({ studentProfile, job, onClose, onApply }) => {
   const [coverLetter, setCoverLetter] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -676,9 +678,8 @@ const CoverLetterModal = ({ profile, job, onClose, onApply }) => {
           <div className="mb-4">
             <label className="block text-gray-700 font-semibold mb-2">Your Information</label>
             <div className="p-4 bg-gray-100 rounded-xl space-y-2">
-              <p className="text-gray-800 flex items-center gap-2"><User size={16} /> Name: {profile.name}</p>
-              <p className="text-gray-800 flex items-center gap-2"><Mail size={16} /> Email: {profile.email}</p>
-              <p className="text-gray-800 flex items-center gap-2"><Building2 size={16} /> Institution: {profile.institution}</p>
+              <p className="text-gray-800 flex items-center gap-2"><User size={16} /> Name: {studentProfile?.name || 'Not available'}</p>
+              <p className="text-gray-800 flex items-center gap-2"><Mail size={16} /> Email: {studentProfile?.email || 'Not available'}</p>
             </div>
           </div>
           <div className="mb-6">
@@ -728,17 +729,41 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('jobs');
   const [selectedJob, setSelectedJob] = useState(null);
   const [appliedJobIds, setAppliedJobIds] = useState([]);
-  const [profile] = useState({
-    name: 'Jane Doe',
-    email: 'jane.doe@example.edu',
-    institution: 'University of Nairobi',
-  });
-
   const [apiJobs, setApiJobs] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [studentProfile, setStudentProfile] = useState(null);
   const [profileLoading, setProfileLoading] = useState(true);
+
+  // Get user session
+  const { data: session, status } = useSession();
+
+  // Fetch student profile when user is authenticated
+  useEffect(() => {
+    const fetchStudentProfile = async () => {
+      if (status !== 'authenticated' || !session?.user?.id) {
+        setProfileLoading(false);
+        return;
+      }
+      
+      setProfileLoading(true);
+      try {
+        const response = await fetch(`/api/studententireprofile/${session.user.id}`);
+        if (response.ok) {
+          const profileData = await response.json();
+          setStudentProfile(profileData);
+        } else if (response.status === 404) {
+          setStudentProfile(null);
+        }
+      } catch (err) {
+        console.error('Error fetching student profile:', err);
+      } finally {
+        setProfileLoading(false);
+      }
+    };
+    
+    fetchStudentProfile();
+  }, [session?.user?.id, status]);
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -774,30 +799,6 @@ export default function App() {
     fetchJobs();
   }, []);
 
-  // Fetch student profile to check for resume
-  useEffect(() => {
-    const fetchStudentProfile = async () => {
-      setProfileLoading(true);
-      try {
-        // Replace with actual user ID from your authentication system
-        const userId = 'current-user-id'; 
-        const response = await fetch(`/api/studententireprofile/${userId}`);
-        if (response.ok) {
-          const profileData = await response.json();
-          setStudentProfile(profileData);
-        } else if (response.status === 404) {
-          // Profile doesn't exist yet, that's okay
-          setStudentProfile(null);
-        }
-      } catch (err) {
-        console.error('Error fetching student profile:', err);
-      } finally {
-        setProfileLoading(false);
-      }
-    };
-    fetchStudentProfile();
-  }, []);
-
   const handleApplyClick = (job) => {
     setSelectedJob(job);
     setCurrentPage('job-details');
@@ -807,6 +808,7 @@ export default function App() {
     setAppliedJobIds(prevIds => [...prevIds, jobId]);
     setCurrentPage('job-postings');
   };
+
 
   return (
     <div className="min-h-screen w-full bg-gray-100 p-4 md:p-8 font-sans antialiased text-gray-800">
@@ -822,15 +824,14 @@ export default function App() {
             error={error}
           />
         )}
-        {currentPage === 'job-details' && selectedJob && (
-          <JobDetails
-            job={selectedJob}
-            profile={profile}
-            onGoBack={() => setCurrentPage('job-postings')}
-            onJobApplied={handleJobApplied}
-            studentProfile={studentProfile}
-          />
-        )}
+     {currentPage === 'job-details' && selectedJob && (
+        <JobDetails
+          job={selectedJob}
+          onGoBack={() => setCurrentPage('job-postings')}
+          onJobApplied={handleJobApplied}
+          studentProfile={studentProfile}
+        />
+)}
       </div>
     </div>
   );

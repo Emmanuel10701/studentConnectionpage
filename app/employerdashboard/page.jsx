@@ -457,7 +457,7 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans text-gray-900 flex">
+    <div className="min-h-screen z-100 bg-gray-50 font-sans text-gray-900 flex">
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}

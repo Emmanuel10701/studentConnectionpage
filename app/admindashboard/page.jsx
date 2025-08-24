@@ -65,7 +65,6 @@ const createEvent = async (eventData) => {
     throw error;
   }
 };
-
 const createNews = async (newsData) => {
   try {
     const response = await fetch('/api/new', {
@@ -73,15 +72,25 @@ const createNews = async (newsData) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(newsData),
+      body: JSON.stringify({
+        title: newsData.title,
+        description: newsData.description || '', // Ensure it's never undefined
+        // Don't send date - let the API handle it
+      }),
     });
-    if (!response.ok) throw new Error('Failed to create news');
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`Failed to create news: ${errorData.error || response.status}`);
+    }
+    
     return await response.json();
   } catch (error) {
     console.error('Error creating news:', error);
     throw error;
   }
 };
+
 
 const createVideo = async (videoData) => {
   try {
@@ -179,8 +188,10 @@ const Modal = ({ isOpen, onClose, title, children }) => {
 // --- New Components ---
 const AddEventForm = ({ onAdd, onClose }) => {
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onSubmit = async (data) => {
+    setIsSubmitting(true);
     try {
       const newEvent = await createEvent(data);
       onAdd(newEvent);
@@ -188,6 +199,8 @@ const AddEventForm = ({ onAdd, onClose }) => {
       onClose();
     } catch (error) {
       alert('Failed to create event: ' + error.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -280,9 +293,18 @@ const AddEventForm = ({ onAdd, onClose }) => {
 
       <button 
         type="submit" 
-        className="w-full bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+        disabled={isSubmitting}
+        className="w-full bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-70"
       >
-        <Plus size={18} /> Publish Event
+        {isSubmitting ? (
+          <>
+            <Loader size={18} className="animate-spin" /> Publishing...
+          </>
+        ) : (
+          <>
+            <Plus size={18} /> Publish Event
+          </>
+        )}
       </button>
     </form>
   );
@@ -298,7 +320,7 @@ const EventsCalendar = ({ events, setEvents }) => {
     setIsLoading(true);
     try {
       const createdEvent = await createEvent(newEvent);
-      setEvents([createdEvent, ...safeEvents]);
+      setEvents(prevEvents => [createdEvent, ...prevEvents]);
     } catch (error) {
       alert('Failed to add event: ' + error.message);
     } finally {
@@ -311,7 +333,7 @@ const EventsCalendar = ({ events, setEvents }) => {
       setIsLoading(true);
       try {
         await deleteEvent(id);
-        setEvents(safeEvents.filter(event => event.id !== id));
+        setEvents(prevEvents => prevEvents.filter(event => event.id !== id));
       } catch (error) {
         alert('Failed to delete event: ' + error.message);
       } finally {
@@ -400,9 +422,11 @@ const EventsCalendar = ({ events, setEvents }) => {
 
 const AddContentForm = ({ onAdd, onClose }) => {
   const [contentType, setContentType] = useState('news');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
 
   const onSubmit = async (data) => {
+    setIsSubmitting(true);
     try {
       let newItem;
       if (contentType === 'news') {
@@ -430,6 +454,8 @@ const AddContentForm = ({ onAdd, onClose }) => {
       onClose();
     } catch (error) {
       alert('Failed to create content: ' + error.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -518,9 +544,18 @@ const AddContentForm = ({ onAdd, onClose }) => {
       )}
       <button 
         type="submit" 
-        className="w-[20%] bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+        disabled={isSubmitting}
+        className="w-full bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-70"
       >
-        <Plus size={18} /> Publish Content
+        {isSubmitting ? (
+          <>
+            <Loader size={18} className="animate-spin" /> Publishing...
+          </>
+        ) : (
+          <>
+            <Plus size={18} /> Publish Content
+          </>
+        )}
       </button>
     </form>
   );
@@ -541,7 +576,7 @@ const NewsAndContentManagement = ({ newsItems, setNewsItems }) => {
         } else {
           await deleteVideo(id);
         }
-        setNewsItems(safeNewsItems.filter(item => item.id !== id));
+        setNewsItems(prevItems => prevItems.filter(item => item.id !== id));
       } catch (error) {
         alert('Failed to delete item: ' + error.message);
       } finally {
@@ -551,7 +586,7 @@ const NewsAndContentManagement = ({ newsItems, setNewsItems }) => {
   };
   
   const handleAddItem = (newItem) => {
-    setNewsItems([newItem, ...safeNewsItems]);
+    setNewsItems(prevItems => [newItem, ...prevItems]);
   };
 
   return (
@@ -714,7 +749,7 @@ export default function CareerConnectApp() {
           subscribers,
           news,
           videos,
-          events
+          eventsData
         ] = await Promise.all([
           fetchStudents(),
           fetchStudentProfiles(),
@@ -741,7 +776,7 @@ export default function CareerConnectApp() {
         }).length;
         
         const articlesPublished = combinedNews.length;
-        const eventsThisMonth = events.filter(e => {
+        const eventsThisMonth = eventsData.filter(e => {
           const eventDate = new Date(e.date);
           const now = new Date();
           return eventDate.getMonth() === now.getMonth() && 
@@ -765,7 +800,7 @@ export default function CareerConnectApp() {
             text: `New ${item.type} published: ${item.title}`,
             time: item.createdAt || new Date().toISOString(),
           })),
-          ...events.slice(0, 3).map((event, index) => ({
+          ...eventsData.slice(0, 3).map((event, index) => ({
             id: `event-${index}`,
             text: `New event created: ${event.title}`,
             time: event.createdAt || new Date().toISOString(),
@@ -810,7 +845,7 @@ export default function CareerConnectApp() {
         // Update state
         setRecentActivities(allActivities.slice(0, 10));
         setNewsItems(combinedNews);
-        setEvents(events);
+        setEvents(eventsData);
         setUsers([...students, ...employers]);
         
       } catch (error) {

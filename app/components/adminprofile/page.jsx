@@ -73,29 +73,38 @@ const ProfileSettings = () => {
   const [isPasswordSectionOpen, setIsPasswordSectionOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
- const fetchAdminData = async () => {
-  if (session?.user?.id) {
-    try {
-      setIsLoading(true);
-      const response = await fetch(`/api/admins/${session.user.id}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch admin data');
+// Fetch admin data when session is available
+useEffect(() => {
+  const fetchAdminData = async () => {
+    if (session?.user?.id) {
+      try {
+        setIsLoading(true);
+        console.log('Fetching admin data for ID:', session.user.id);
+        
+        const response = await fetch(`/api/admins/${session.user.id}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch admin data');
+        }
+        
+        const admin = await response.json();
+        console.log('Admin data received:', admin);
+        
+        setAdminData(admin);
+        setAdminId(admin.id);
+      } catch (error) {
+        console.error('Error fetching admin data:', error);
+        setErrorMessage('Failed to load admin profile data');
+      } finally {
+        setIsLoading(false);
       }
-      
-      const admin = await response.json();
-      console.log(admin.id);
-      setAdminData(admin);
-      setAdminId(admin.id); // Store the admin ID
-    } catch (error) {
-      console.error('Error fetching admin data:', error);
-      setErrorMessage('Failed to load admin profile data');
-    } finally {
-      setIsLoading(false);
     }
-  }
-};
+  };
 
+  if (status === 'authenticated') {
+    fetchAdminData();
+  }
+}, [session, status]); // Added status as dependency
   // Form for general profile information
   const { 
     register, 
@@ -214,27 +223,11 @@ const handlePasswordSave = async (data) => {
   }
 
   try {
-    // Get current form values
-    const formValues = getValues();
-    
-    // Send password update with all required fields
-    const response = await fetch(`/api/adminregister/${adminId}`, {
+    const response = await fetch(`/api/admins/${adminId}/password`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
         password: data.newPassword,
-        // Include all other fields to prevent validation errors
-        name: formValues.fullName,
-        email: formValues.email,
-        phoneNumber: formValues.phoneNumber,
-        department: formValues.department,
-        title: formValues.title,
-        street: formValues.street,
-        city: formValues.city,
-        postalCode: formValues.postalCode,
-        country: formValues.country,
-        role: formValues.role || adminData.role,
-        accessLevel: formValues.accessLevel || adminData.accessLevel,
       }),
     });
     
@@ -248,9 +241,10 @@ const handlePasswordSave = async (data) => {
     setIsPasswordSectionOpen(false);
   } catch (error) {
     console.error("Error updating password:", error);
-    setErrorMessage(error.message);
+    setErrorMessage(error.message || 'Failed to update password');
   }
 };
+
 
   const handleCancel = () => {
     reset({
@@ -273,16 +267,38 @@ const handlePasswordSave = async (data) => {
     resetPassword();
   };
   
-  if (status === "loading" || isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <Loader size={32} className="animate-spin mx-auto text-blue-600" />
-          <p className="mt-4 text-gray-500 font-medium">Loading profile...</p>
-        </div>
+// Add loading state for session
+if (status === "loading") {
+  return (
+    <div className="flex items-center justify-center h-64">
+      <div className="text-center">
+        <Loader size={32} className="animate-spin mx-auto text-blue-600" />
+        <p className="mt-4 text-gray-500 font-medium">Loading session...</p>
       </div>
-    );
-  }
+    </div>
+  );
+}
+
+if (status === "unauthenticated") {
+  return (
+    <div className="text-center p-10 bg-white rounded-3xl shadow-lg">
+      <AlertCircle size={48} className="mx-auto text-red-500 mb-4" />
+      <h2 className="text-xl font-bold text-gray-800 mb-2">Access Denied</h2>
+      <p className="text-gray-600">Please log in to access your profile.</p>
+    </div>
+  );
+}
+
+if (isLoading) {
+  return (
+    <div className="flex items-center justify-center h-64">
+      <div className="text-center">
+        <Loader size={32} className="animate-spin mx-auto text-blue-600" />
+        <p className="mt-4 text-gray-500 font-medium">Loading profile...</p>
+      </div>
+    </div>
+  );
+}
   
   if (!adminData) {
     return (

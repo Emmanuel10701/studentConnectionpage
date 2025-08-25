@@ -278,7 +278,6 @@ const ApplicantDetailsModal = ({ applicant, onClose, onEmail }) => {
               
               <span className="inline-block mt-2 px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                 <span className="font-bold">Address:</span>
-                <span className="text-blue-800">details</span>
                 <span className="italic text-gray-700">
                   {`, ${applicant.student.address.ward}, ${applicant.student.address.subCounty}, ${applicant.student.address.county}`}
                 </span>
@@ -305,7 +304,6 @@ const ApplicantDetailsModal = ({ applicant, onClose, onEmail }) => {
             <div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Personal Information</h3>
               <div className="space-y-2">
-                <p><span className="font-medium">Bio:</span> {applicant.student.bio || 'Not provided'}</p>
                 <p><span className="font-medium">Summary:</span> {applicant.student.summary || 'Not provided'}</p>
                 <p><span className="font-medium">Education Level:</span> {applicant.student.educationLevel || 'Not specified'}</p>
                 <p><span className="font-medium">Status:</span> {applicant.student.studentStatus || 'Not specified'}</p>
@@ -553,7 +551,7 @@ const ApplicantsModal = ({ job, onClose }) => {
       <div className="relative bg-white rounded-2xl p-6 max-w-6xl w-full mx-auto my-8 shadow-2xl max-h-[90vh] overflow-hidden">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 p-2 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
+          className="absolute top-1 right-1 z-10 p-2 text-gray-400 hover:text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
         >
           <X size={24} />
         </button>
@@ -583,7 +581,7 @@ const ApplicantsModal = ({ job, onClose }) => {
                 
                 <button
                   onClick={() => setShowFilters(true)}
-                  className="relative p-2.5 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors"
+                  className="relative p-2.5 mt-4 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors"
                 >
                   <Filter size={18} />
                   {getActiveFilterCount() > 0 && (

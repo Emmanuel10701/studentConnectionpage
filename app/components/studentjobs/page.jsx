@@ -126,9 +126,9 @@ const AppliedJobs = ({ appliedJobs }) => {
           );
         })
       ) : (
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-gray-500 col-span-full text-center py-8">
-          You haven't applied for any jobs yet.
-        </motion.p>
+     <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-gray-700 text-lg font-semibold col-span-full text-center py-8 px-4">
+  Ready to find your next great role? We encourage you to start applying! Every application brings you closer to your perfect career. Don't stop—your future is bright, and you're already on the path to success.
+</motion.p>
       )}
     </motion.div>
   );

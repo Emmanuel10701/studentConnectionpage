@@ -108,7 +108,7 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="fixed top-0 w-full z-50 bg-[#1e2a3b] bg-opacity-80 backdrop-filter backdrop-blur-lg text-white shadow-xl">
+    <nav className="fixed top-0 w-full z-50 bg-blue-400 bg-opacity-80 backdrop-filter backdrop-blur-lg text-white shadow-xl">
       <div className="container mx-auto flex justify-between items-center px-4 py-3">
         <a href="/" className="flex items-center space-x-2">
           <Image

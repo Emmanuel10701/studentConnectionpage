@@ -677,26 +677,28 @@ const DashboardOverview = ({ newsItems, metrics, recentActivities }) => {
         ))}
       </section>
       
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+     <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 transition-shadow hover:shadow-xl">
-          <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-            <Newspaper size={24} /> Latest News & Videos
-          </h3>
-          <ul className="space-y-4">
-            {safeNewsItems.slice(0, 3).map(item => (
-              <li key={item.id} className="flex items-start gap-4">
-                <div className={`flex-shrink-0 p-2 rounded-full ${item.type === 'news' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'}`}>
-                  {item.type === 'news' ? <Newspaper size={20} /> : <Video size={20} />}
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900">{item.title}</h4>
-                  <p className="text-sm text-gray-600 line-clamp-2">{item.description || item.content}</p>
-                  <p className="text-xs text-gray-400 mt-1">Published: {item.date || item.createdAt}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
+    <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+      <Newspaper size={24} /> Latest News & Videos
+    </h3>
+    <ul className="space-y-4">
+      {safeNewsItems.slice(0, 7).map(item => (
+        <li key={item.id} className="flex items-start gap-4">
+          <div className={`flex-shrink-0 p-2 rounded-full ${item.type === 'news' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'}`}>
+            {item.type === 'news' ? <Newspaper size={20} /> : <Video size={20} />}
+          </div>
+          <div>
+            <h4 className="font-semibold text-gray-900">{item.title}</h4>
+            {/* Use item.description since we normalized it */}
+            <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
+            {/* Use item.date since we normalized it */}
+            <p className="text-xs text-gray-400 mt-1">Published: {item.date}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
         <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 h-full">
           <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-6">Recent Activity</h3>
           <ul className="space-y-4">
@@ -762,10 +764,26 @@ export default function CareerConnectApp() {
         ]);
 
         // Safely combine news and videos
-        const combinedNews = [
-          ...(Array.isArray(news) ? news.map(item => ({ ...item, type: 'news' })) : []),
-          ...(Array.isArray(videos) ? videos.map(item => ({ ...item, type: 'video' })) : [])
-        ];
+     console.log('News from API:', news);
+    console.log('Videos from API:', videos);
+
+    // Safely combine news and videos with normalized field names
+    const combinedNews = [
+      ...(Array.isArray(news) ? news.map(item => ({ 
+        ...item, 
+        type: 'news',
+        description: item.description || '',
+        date: item.date || item.createdAt
+      })) : []),
+      ...(Array.isArray(videos) ? videos.map(item => ({ 
+        ...item, 
+        type: 'video',
+        description: item.description || '',
+        date: item.createdAt
+      })) : [])
+    ];
+
+    console.log('Combined news items:', combinedNews);
 
         // Calculate metrics based on the fetched data
         const totalUsers = students.length + employers.length;

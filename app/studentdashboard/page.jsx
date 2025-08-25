@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react'; // Add signOut to the import
 import { useRouter } from 'next/navigation';
 import {
   Home,
@@ -21,6 +21,7 @@ import {
   Calendar,
   Bell,
   PlusCircle,
+  LogOut,
   ArrowRight
 } from 'lucide-react';
 import Profile from "../components/studentprofile/page.jsx";
@@ -94,6 +95,15 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, setPage, session, activePage, h
     setPage(id);
     toggleSidebar(); // Close sidebar on click
   };
+
+  const router = useRouter();
+  
+  // ADD THIS FUNCTION
+  const handleLogout = async () => {
+    await signOut({ redirect: false });
+    router.push('/studentlogin'); // Redirect to login page after logout
+  };
+
 
   return (
     <>
@@ -181,12 +191,20 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, setPage, session, activePage, h
           })}
         </nav>
 
-        {/* Footer */}
-        <div className="mt-auto pt-6 border-t border-gray-700/50">
-          <div className="text-center">
-            <span className="text-xs text-gray-500">CareerHub v2.0</span>
-          </div>
-        </div>
+      {/* Footer with Logout Button */}
+<div className="mt-auto pt-6 border-t border-gray-700/50">
+  <button
+    onClick={handleLogout}
+    className="w-full flex items-center p-4 text-gray-300 hover:bg-red-500/10 hover:text-red-300 rounded-xl transition-all duration-200 group"
+  >
+    <LogOut size={22} className="text-red-400 mr-4 group-hover:text-red-300" />
+    <span className="font-medium">Logout</span>
+  </button>
+  
+  <div className="text-center mt-4">
+    <span className="text-xs text-gray-500">CareerHub v2.0</span>
+  </div>
+</div>
       </div>
     </>
   );

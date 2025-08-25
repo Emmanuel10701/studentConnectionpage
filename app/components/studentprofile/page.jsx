@@ -2,8 +2,12 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
-import { Loader2, User, FileText, Upload, ChevronLeft, CheckCircle, PlusCircle, MinusCircle, Briefcase, GraduationCap, Trophy, MapPin, ChevronDown, Edit, Mail, Calendar, Award, BookOpen, Map, X } from 'lucide-react';
+import { Loader2, User, FileText, Upload, ChevronLeft, CheckCircle, PlusCircle, MinusCircle, Briefcase, GraduationCap, Trophy, MapPin, ChevronDown, Edit, Mail, Calendar, Award, BookOpen, Map, X,RefreshCw } from 'lucide-react';
 import { useSession } from 'next-auth/react';
+
+import { useRouter } from 'next/navigation';
+
+// Inside your component function:
 
 // Helper Functions
 const getInitials = (name) => {
@@ -242,6 +246,7 @@ useEffect(() => {
 
 // StudentProfileContent Component
 const StudentProfileContent = ({ profile, isEditing, setIsEditing, hasProfile, onSaveProfile, setHasProfile, session }) => {
+const router = useRouter();
 
  const [formData, setFormData] = useState({
   userId: session?.user?.id,
@@ -1242,6 +1247,15 @@ const handleAddDynamicField = (sectionName) => {
                   hasProfile ? "Save Changes" : "Create Profile"
                 )}
               </components.Button>
+                  {/* ADD REFRESH BUTTON HERE */}
+            <components.Button
+              type="button"
+              variant="outline"
+              onClick={() => router.refresh()}
+              className="min-w-[140px]"
+            >
+              <RefreshCw className="mr-2 h-4 w-4" /> Refresh Page
+            </components.Button>
             </div>
           )}
         </form>

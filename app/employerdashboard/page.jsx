@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession,signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import {
   Briefcase,
@@ -165,6 +165,16 @@ const App = () => {
       fetchData();
     }
   }, [status, router, session]);
+
+
+
+    
+    // ADD THIS FUNCTION
+    const handleLogout = async () => {
+      await signOut({ redirect: false });
+      router.push('/Employerlogin'); // Redirect to login page after logout
+    };
+  
 
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
@@ -514,10 +524,13 @@ const App = () => {
             <Settings size={20} className="text-gray-500" />
             <span className="font-medium">Settings</span>
           </a>
-          <a className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-gray-100 text-red-600 transition-all duration-200">
-            <LogOut size={20} className="text-red-500" />
-            <span className="font-medium">Log Out</span>
-          </a>
+      <a 
+  className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-gray-100 text-red-600 transition-all duration-200"
+  onClick={handleLogout}
+>
+  <LogOut size={20} className="text-red-500" />
+  <span className="font-medium">Log Out</span>
+</a>
         </div>
       </aside>
 

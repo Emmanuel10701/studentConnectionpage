@@ -435,16 +435,31 @@ const JobDetailsModal = ({ job, onClose }) => {
               <p className="text-gray-700 leading-relaxed">{job.qualifications}</p>
             </div>
             
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Skills & Requirements</h3>
-              <div className="flex flex-wrap gap-2">
-                {Array.isArray(job.skills) && job.skills.map(skill => (
-                  <span key={skill} className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
+           <div>
+  <h3 className="text-xl font-bold text-gray-900 mb-3">Skills & Requirements</h3>
+  <div className="flex flex-wrap gap-2">
+    {job.skills && (
+      Array.isArray(job.skills) ? (
+        // If skills is already an array
+        job.skills.map(skill => (
+          <span key={skill} className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+            {skill}
+          </span>
+        ))
+      ) : typeof job.skills === 'string' ? (
+        // If skills is a comma-separated string
+        job.skills.split(',').map(skill => (
+          <span key={skill.trim()} className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+            {skill.trim()}
+          </span>
+        ))
+      ) : (
+        // Fallback if skills is in unexpected format
+        <span className="text-gray-500">No skills specified</span>
+      )
+    )}
+  </div>
+</div>
 
             {job.benefits && (
               <div>
@@ -1075,7 +1090,7 @@ const JobPostings = ({
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600">Match Rate</p>
-                    <p className="text-2xl font-bold text-gray-900">87%</p>
+                    <p className="text-2xl font-bold text-gray-900">Perfect</p>
                   </div>
                   <div className="p-3 bg-orange-100 rounded-lg">
                     <Target className="w-6 h-6 text-orange-600" />
